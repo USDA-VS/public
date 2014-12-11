@@ -1244,7 +1244,7 @@ awk -v OFS="\t" '$1=$1' orginizedTable8.txt > orginizedTable9.txt
 awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' orginizedTable9.txt | awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' > orginizedTable10.txt
 
 #Transpose back
-awk -f /home/tstuber/workspace/scripts/awk_scripts/transpose.awk orginizedTable10.txt > orginizedTable11.txt
+awk -f /home/tstuber/workspace/stuber/awk_scripts/transpose.awk orginizedTable10.txt > orginizedTable11.txt
 
 c=`basename $PWD`
 #Convert spaces to tabs
