@@ -209,7 +209,7 @@ elif [[ $1 == bovis ]]; then
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/Filtered_Regions.xlsx
     # Excel tab label "New groupings"
-    python -u /home/tstuber/workspace/scripts/python_scripts/inputXLS.py | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
+    python -u /home/tstuber/workspace/stuber/python_scripts/inputXLS.py | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
     FilterFileCreations.sh
 
 else
