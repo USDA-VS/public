@@ -59,7 +59,7 @@ elif [[ $1 == suis1 ]]; then
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/_Brucella/Suis1/script_dependents/Suis1_Defining_SNPs.txt"
     coverageFiles="/bioinfo11/TStuber/Results/_Brucella/coverageFiles"
-    FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
+    FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
     FilterDirectory="/bioinfo11/TStuber/Results/_Brucella/Suis1/script_dependents/FilterFiles" #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucella/Suis1/script_dependents/RemoveFromAnalysis.txt"
@@ -209,7 +209,7 @@ elif [[ $1 == bovis ]]; then
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/Filtered_Regions.xlsx
     # Excel tab label "New groupings"
-    python -u /home/tstuber/workspace/scripts/python_scripts/inputXLS.py | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
+    python -u /home/tstuber/workspace/stuber/python_scripts/inputXLS.py | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
     FilterFileCreations.sh
 
 else
@@ -1244,7 +1244,7 @@ awk -v OFS="\t" '$1=$1' orginizedTable8.txt > orginizedTable9.txt
 awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' orginizedTable9.txt | awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' > orginizedTable10.txt
 
 #Transpose back
-awk -f /home/tstuber/workspace/scripts/awk_scripts/transpose.awk orginizedTable10.txt > orginizedTable11.txt
+awk -f /home/tstuber/workspace/stuber/awk_scripts/transpose.awk orginizedTable10.txt > orginizedTable11.txt
 
 c=`basename $PWD`
 #Convert spaces to tabs

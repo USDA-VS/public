@@ -50,7 +50,7 @@ if [ $1 == ab1 ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/scripts/play_ground/bin/Bruc_MLST.sh &
+    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -65,7 +65,7 @@ elif [ $1 == mel ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/scripts/play_ground/bin/Bruc_MLST.sh &
+    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -80,7 +80,7 @@ elif [ $1 == suis1 ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/scripts/play_ground/bin/Bruc_MLST.sh &
+    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -95,7 +95,7 @@ elif [ $1 == suis2 ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/scripts/play_ground/bin/Bruc_MLST.sh &
+    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -110,7 +110,7 @@ elif [ $1 == suis3 ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/scripts/play_ground/bin/Bruc_MLST.sh &
+    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -125,7 +125,7 @@ elif [ $1 == suis4 ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/scripts/play_ground/bin/Bruc_MLST.sh &
+    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -140,7 +140,7 @@ elif [ $1 == canis ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/scripts/play_ground/bin/Bruc_MLST.sh &
+    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -155,7 +155,7 @@ elif [ $1 == ceti1 ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/scripts/play_ground/bin/Bruc_MLST.sh &
+    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -170,7 +170,7 @@ elif [ $1 == ceti2 ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/scripts/play_ground/bin/Bruc_MLST.sh &
+    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -185,7 +185,7 @@ elif [ $1 == ovis ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/scripts/play_ground/bin/Bruc_MLST.sh &
+    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -206,7 +206,7 @@ elif [ $1 == bovis ]; then
 
     # Run spoligoSpacerFinder.sh
     echo "Starting spoligoSpacerFinder.sh"
-    /home/tstuber/workspace/scripts/SNP_analysis/bin/spoligoSpacerFinder.sh &
+    /home/tstuber/workspace/stuber/public/SNP_analysis/bin/spoligoSpacerFinder.sh &
     echo "Moving forward from spoligoSpacerFinder.sh"
 
     ###################################################################
