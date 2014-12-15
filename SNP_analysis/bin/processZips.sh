@@ -206,7 +206,7 @@ elif [ $1 == bovis ]; then
 
     # Run spoligoSpacerFinder.sh
     echo "Starting spoligoSpacerFinder.sh"
-    /home/tstuber/workspace/stuber/public/SNP_analysis/bin/spoligoSpacerFinder.sh &
+    /home/tstuber/workspace/public/SNP_analysis/bin/spoligoSpacerFinder.sh &
     echo "Moving forward from spoligoSpacerFinder.sh"
 
     ###################################################################

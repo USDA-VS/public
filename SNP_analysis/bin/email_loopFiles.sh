@@ -5,7 +5,7 @@
 echo "Start Time: `date`" > /scratch/report/dailyTime
 starttime=`date +%s`
 
-`/home/tstuber/workspace/stuber/public/SNP_analysis/bin/loopFiles.sh` &&
+`/home/tstuber/workspace/public/SNP_analysis/bin/loopFiles.sh` &&
 
 echo "" >> /scratch/report/dailyTime
 echo "End Time: `date`" >> /scratch/report/dailyTime
