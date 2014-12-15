@@ -561,22 +561,22 @@ rm $root/list.txt
 #rm finalGenomesToDownload.txt 
 
 #Prepare mergefile to feed to R script to generate R graph
-#cd $root/alignments
-#for i in `find . -name "*-coveragefile"`; do 
-#    echo "$i"
-#    cat $i >> $root/${sampleName}-mergefile;
-#done
-#highnumber=`awk 'BEGIN {max = 0} {if ($3>max) max=$3} END {print max}' $root/${sampleName}-mergefile`
-#if [[ highnumber -gt 5000 ]]; then
-#    highnumber=5000
-#fi
-#echo "Highnumber for the y axis is: $highnumber"
-#coveragebyr.r $root/${sampleName}-mergefile $sampleName $highnumber
-#mv myplot.pdf ${sampleName}.Rgraph.pdf
-#mv ${sampleName}.Rgraph.pdf $root/${sampleName}.CoverageProfile.pdf
+cd $root/alignments
+for i in `find . -name "*-coveragefile"`; do 
+    echo "$i"
+    cat $i >> $root/${sampleName}-mergefile;
+done
+highnumber=`awk 'BEGIN {max = 0} {if ($3>max) max=$3} END {print max}' $root/${sampleName}-mergefile`
+if [[ highnumber -gt 5000 ]]; then
+    highnumber=5000
+fi
+echo "Highnumber for the y axis is: $highnumber"
+coveragebyr.r $root/${sampleName}-mergefile $sampleName $highnumber
+mv myplot.pdf ${sampleName}.Rgraph.pdf
+mv ${sampleName}.Rgraph.pdf $root/${sampleName}.CoverageProfile.pdf
 
 #Finish moving files to uploadFolder
-#mv $root/${sampleName}.CoverageProfile.pdf $root/$uploadFolder
+mv $root/${sampleName}.CoverageProfile.pdf $root/$uploadFolder
 mv $summaryFile $root/$uploadFolder
 #Copy everything in upload folder to submissions if an secd sample
 if [ $organism == 'secd' ]; then
