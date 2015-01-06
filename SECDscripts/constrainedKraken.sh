@@ -307,7 +307,7 @@ for f in *; do
     readsFound=`cat *.fastq | grep -c "^+$"`
     echo "Reads found: `printf "%'.0f\n" ${readsFound}`" >> $virusSummary
     #Run Abyss
-    abyss_run.sh
+    abyss_run_kraken.sh
     cd *_abyss
     
     #Output assembly stats.
@@ -321,14 +321,14 @@ for f in *; do
 
     #BLAST contigs if abyss worked
     if [ -s ./*-8.fa ]; then
-	blast-contigs.sh ./*-8.fa
+	blast-contigs-kraken.sh ./*-8.fa
 	mv *-8.fa ${f}-contigs-8.fa
 	cp ${f}-contigs-8.fa $root/$uploadFolder
         # if no 8.fa file, blast the 3.fa file
     elif [ -s ./*-3.fa ]; then
 	numContigs=`cat *-3.fa | grep -c ">"`
 	echo "Number of contigs assembled is: $numContigs" >> $virusSummary
-	blast-contigs.sh ./*-3.fa
+	blast-contigs-kraken.sh ./*-3.fa
 	mv *-3.fa ${f}-contigs-3.fa
 	cp ${f}-contigs-3.fa $root/$uploadFolder
     else
@@ -408,7 +408,7 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 	    cp ${mydb}/$p .
 	else
 	    echo "Downloading from NCBI"
-	    fetch-genomes-fasta.py $acc
+	    fetch-genomes-fasta-kraken.py $acc
 	    accFasta="${acc}.fasta"
 	    if [ -s $accFasta ]; then
 		echo "Downloaded from NCBI, good to continue."
@@ -416,7 +416,7 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 	    else
 		echo "Try downloading again"
 		sleep 20
-		fetch-genomes-fasta.py $acc
+		fetch-genomes-fasta-kraken.py $acc
 		sleep 5
 		if [ -s $accFasta ]; then
 		    echo "Downloaded from NCBI, good to continue."
@@ -424,7 +424,7 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 		else
 		    echo "Try downloading again"
 		    sleep 120
-		    fetch-genomes-fasta.py $acc
+		    fetch-genomes-fasta-kraken.py $acc
 		    sleep 5
 		    if [ -s $accFasta ]; then
 			echo "Downloaded from NCBI, good to continue."
@@ -432,7 +432,7 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 		    else
 			echo "Try downloading again"
 			sleep 320
-			fetch-genomes-fasta.py $acc
+			fetch-genomes-fasta-kraken.py $acc
 			sleep 5
 			if [ -s $accFasta ]; then
 			    echo "Downloaded from NCBI, good to continue."
