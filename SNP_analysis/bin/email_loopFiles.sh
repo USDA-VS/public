@@ -36,7 +36,7 @@ email_list="tod.p.stuber@aphis.usda.gov patrick.m.camp@aphis.usda.gov David.T.Fa
 
 cat /scratch/report/email_processZips2.txt | mutt -s "WGS results" -- $email_list
 
-mail -s "WGS results" tod.p.stuber@aphis.usda.gov < /scratch/report/email_processZips2.txt
+#mail -s "WGS results" tod.p.stuber@aphis.usda.gov < /scratch/report/email_processZips2.txt
 
 date >> /scratch/report/mlstCheck_all.txt
 cat /scratch/report/mlstCheck.txt >> /scratch/report/mlstCheck_all.txt
