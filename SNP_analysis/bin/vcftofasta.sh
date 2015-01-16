@@ -622,9 +622,9 @@ wait
                 wait
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
         #Make a reference fasta sequence
-        awk '{print $2}' clean_total_pos > reference_seq
-        cat reference_seq | tr -cd "[:print:]" | sed "s/^/>reference_seq;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > reference_seq.fas
-	echo "" >> reference_seq.fas
+        awk '{print $2}' clean_total_pos > root
+        cat root | tr -cd "[:print:]" | sed "s/^/>root;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > root.fas
+	echo "" >> root.fas
 
 	totalSNPs=`grep -c ".*" total_pos`
 	echo "$d informative SNPs: $totalSNPs" >> ../../section4
@@ -647,7 +647,7 @@ echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
         mv *.fas ./fasta
         rm total_pos
         rm select
-        rm reference_seq
+        rm root
         echo "***Done"
     cd ..
     done
@@ -1075,9 +1075,9 @@ for i in *.filledcut; do
 
 echo "grepping filledcut files is finished"
 #Make a reference fasta sequence
-awk '{print $2}' total_pos > reference_seq
-cat reference_seq | tr -cd "[:print:]" | sed "s/^/>reference_seq;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > reference_seq.fas
-echo "" >> reference_seq.fas
+awk '{print $2}' total_pos > root
+cat root | tr -cd "[:print:]" | sed "s/^/>root;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > root.fas
+echo "" >> root.fas
 
 totalSNPs=`grep -c ".*" total_pos`
 echo "Total informative SNPs: $totalSNPs" >> ../section4
@@ -1104,7 +1104,7 @@ rm *.tod
 mkdir fasta
 mv *.fas ./fasta
 #rm total_pos
-rm reference_seq
+rm root
 echo "***Done"
 echo "Full Directory: ${fulDir}"
 
