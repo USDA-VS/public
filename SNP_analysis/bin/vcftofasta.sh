@@ -1144,8 +1144,8 @@ function alignTable () {
 echo "$d *********"
 pwd
 
-cat *.fas | sed '/reference/{N;d;}' >> fastaGroup.txt
-#cat *.fas >> ${d}-fastaGroup.txt
+#cat *.fas | sed '/reference/{N;d;}' >> fastaGroup.txt
+cat *.fas >> fastaGroup.txt
 
 clustalw2 -OUTFILE=alignment.txt -RANGE=1,2 -OUTPUT=FASTA -INFILE=fastaGroup.txt & 
 /usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s fastaGroup.txt -n ${d} -m GTRCAT -p 12345 && nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' RAxML_bestTree.${d} > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf &
