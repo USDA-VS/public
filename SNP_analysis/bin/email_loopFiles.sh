@@ -5,6 +5,7 @@
 echo "Start Time: `date`" > /scratch/report/dailyTime
 starttime=`date +%s`
 
+echo "Please wait.  Searching for TB complex and Brucella oligos and then starting appropriate processZips.sh argument"
 `/home/tstuber/workspace/public/SNP_analysis/bin/loopFiles.sh` &&
 
 echo "" >> /scratch/report/dailyTime
@@ -31,8 +32,8 @@ echo "" >> /scratch/report/email_processZips.txt
 
 grep -v '*' /scratch/report/email_processZips.txt | grep -v "Stats for BAM file" | sed 's/ADD_MARKER/******************************************/g' > /scratch/report/email_processZips2.txt
 
-email_list="tod.p.stuber@aphis.usda.gov"
-#email_list="tod.p.stuber@aphis.usda.gov patrick.m.camp@aphis.usda.gov David.T.Farrell@aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+#email_list="tod.p.stuber@aphis.usda.gov"
+email_list="tod.p.stuber@aphis.usda.gov patrick.m.camp@aphis.usda.gov David.T.Farrell@aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
 
 cat /scratch/report/email_processZips2.txt | mutt -s "WGS results" -- $email_list
 
