@@ -1014,7 +1014,9 @@ echo "***Creating normalized vcf using AC2, QUAL > 150"
 for i in *.vcf; do
 # Turned on 2014-07-29
 #(
-m=`basename "$i"`; n=`echo $m | sed $dropEXT`; echo "$n"
+#m=`basename "$i"`; n=`echo $m | sed $dropEXT`; echo "$n"
+n=${i%.vcf}
+echo $n
 #egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{if ($1 ~ /chrom1/) print "chrom1-" $2, $5; else if ($1 ~ /chrom2/) print "chrom2-" $2, $5; else print "awk script can not determine VCF input"}' > $n.cut
 egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{print $1 "-" $2, $5}' > $n.cut
 
@@ -1088,8 +1090,10 @@ echo "Total informative SNPs: $totalSNPs" >> ../section4
         # Make a file containing all fasta files.
         cat *.fas > all_alignment.fasta
 # Turned off because RAxML does not have to be ran for the allVCF file all the time.  Just when needed.
-#/usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s all_alignment.fasta -n all_alignment -m GTRCAT -p 12345 &
-#for i in RAxML*Tree*; do mv $i ${i}.nex; done
+#/usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s all_alignment.fasta -n all_alignment -m GTRCAT -p 12345 && nw_reroot RAxML_bestTree.all_alignment root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ./all_alignment-tree.svg && inkscape -f ./all_alignment-tree.svg -A ./all_alignment-tree.pdf &
+wait
+#rm RAxML_parsimonyTree* 
+#for i in RAxML*Tree*; do mv $i ${i}.tre; done
 
 #Clean-up
 mkdir starting_files
@@ -1144,8 +1148,8 @@ function alignTable () {
 echo "$d *********"
 pwd
 
-#cat *.fas | sed '/reference/{N;d;}' >> fastaGroup.txt
-cat *.fas >> fastaGroup.txt
+cat *.fas | sed '/root/{N;d;}' >> fastaGroup.txt
+#cat *.fas >> fastaGroup.txt
 
 clustalw2 -OUTFILE=alignment.txt -RANGE=1,2 -OUTPUT=FASTA -INFILE=fastaGroup.txt & 
 /usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s fastaGroup.txt -n ${d} -m GTRCAT -p 12345 && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf &
