@@ -707,7 +707,6 @@ else
     done
 fi
 
-read -p "$LINENO Enter"
 rm elite
 ############################### Rename files ###############################
 
@@ -1102,13 +1101,11 @@ echo "Total informative SNPs: $totalSNPs" >> ../section4
 #echo "***The clean_total_pos $d" >> ../section4
 #grep -c ".*" total_pos >> ../section4
 
-        # Make a file containing all fasta files.
-        cat *.fas > all_alignment.fasta
-# Turned off because RAxML does not have to be ran for the allVCF file all the time.  Just when needed.
-#/usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s all_alignment.fasta -n all_alignment -m GTRCAT -p 12345 && nw_reroot RAxML_bestTree.all_alignment root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ./all_alignment-tree.svg && inkscape -f ./all_alignment-tree.svg -A ./all_alignment-tree.pdf &
-wait
-#rm RAxML_parsimonyTree* 
-#for i in RAxML*Tree*; do mv $i ${i}.tre; done
+if [[ $2 == all ]]; then
+    echo "Tree not made when all samples are ran"
+else
+	alignTable &
+fi
 
 #Clean-up
 mkdir starting_files
