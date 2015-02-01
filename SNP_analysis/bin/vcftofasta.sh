@@ -670,9 +670,11 @@ cat ${genotypingcodes} | tr '\r' '\n' | awk -F '\t' 'BEGIN{OFS="\t";} {gsub("\""
 #clean_tag.sh $genotypingcodes
 ####################
 # Clean the genotyping codes used for naming output
-sed 's/\*//g' < preparedTags.txt | sed 's/(/_/g' | sed 's/)/_/g' | sed 's/ /_/g' | sed 's/-_/_/g' | sed 's/\?//g' | sed 's/_-/_/g' | sed 's/,/_/g' | sed 's#/#_#g' | sed 's#\\#_#g' | sed 's/__/_/g' | sed 's/__/_/g' | sed 's/__/_/g' | sed 's/-$//g' | sed 's/_$//g' |awk 'BEGIN {OFS="\t"}{gsub("_$","",$1)}1' > outfile.txt
+sed 's/\*//g' < preparedTags.txt | sed 's/(/_/g' | sed 's/)/_/g' | sed 's/ /_/g' | sed 's/-_/_/g' | sed 's/\?//g' | sed 's/_-/_/g' | sed 's/,/_/g' | sed 's#/#_#g' | sed 's#\\#_#g' | sed 's/__/_/g' | sed 's/__/_/g' | sed 's/__/_/g' | sed 's/-$//g' | sed 's/_$//g' |awk 'BEGIN {OFS="\t"}{gsub("_$","",$1)}1' > outfile
 rm preparedTags.txt
-mv outfile.txt $genotypingcodes
+
+cat ${genotypingcodes} | tr '\r' '\n' | grep "Yes" | sed 's/_.*//' >> elite
+
 ####################
 
 # Test for duplicate VCFs
@@ -687,13 +689,26 @@ filterFilespreparation
 #copy the original vcfs to /starting_files
 mkdir starting_files
 for i in *.*; do
-    cp $i ./starting_files
+    mv $i ./starting_files
 done
 
 # Remove selected isolates from comparison
 # This is optional, and should be turned on or off based on laboratories preference
 removeIsolates
 
+if [[ $2 == all ]]; then
+    echo "all samples will be ran"
+    cp ./starting_files/* ./
+else
+    echo "Only analyzing elite files"
+    for i in `cat elite`; do
+        name=`ls starting_files | grep $i`
+        cp ./starting_files/$name ./
+    done
+fi
+
+read -p "$LINENO Enter"
+rm elite
 ############################### Rename files ###############################
 
 for i in *.txt; do
@@ -707,7 +722,7 @@ for i in *.vcf; do
     echo "searchName: $searchName"
     # Direct script to text file containing a list of the correct labels to use.
     # The file must be a txt file.
-    p=`grep "$searchName" "$genotypingcodes"`
+    p=`grep "$searchName" "outfile"`
     echo "This is what was found in tag file: $p"
     newName=`echo $p | awk '{print $1}' | tr -d "[:space:]"` # Captured the new name
     n=`echo $base | sed $tbNumberV | sed $tbNumberW`
@@ -743,7 +758,7 @@ for i in *.vcf; do
         fi
     fi
 done
-
+rm outfile
 ##################### Start: Make Files Unix Compatiable #####################
 
 #Fix validated (VAL) vcf files.  This is used in vcftofasta scripts to prepare validated vcf files opened and saved in Excel.
@@ -1441,7 +1456,7 @@ fileName=`basename $0`
 
 # As attachment
 
-if [[ $2 == me ]]; then
+if [[ $3 == me ]]; then
 	echo "Only Tod received this e-mail! $fileName $@ completed, See attachment"| mutt -s "$fileName $@ completed" -a email_log.html -- tod.p.stuber@aphis.usda.gov
 	else
 #email_list="tod.p.stuber@aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
