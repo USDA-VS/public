@@ -74,8 +74,8 @@ find . -name "*KronaGraphic.html" >> list
 cat /scratch/report/dailyTime > /scratch/report/kraken/email-report.txt
 cat $currentdir/sampleSummary.txt >> /scratch/report/kraken/email-report.txt
 
-#email_list="kaitlin.e.brien@aphis.usda.gov tod.p.stuber@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
-email_list="kaitlin.e.brien@aphis.usda.gov"
+email_list="kaitlin.e.brien@aphis.usda.gov tod.p.stuber@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+#email_list="kaitlin.e.brien@aphis.usda.gov"
 #email_list="kaitlin.e.brien@aphis.usda.gov tod.p.stuber@aphis.usda.gov"
 
 cat /scratch/report/kraken/email-report.txt | mutt -s "Sequence submission results" -a `cat list` -- $email_list
