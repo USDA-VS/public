@@ -11,7 +11,7 @@ names(data) <- c("species", "position", "coverage")
 
 pdf("myplot.pdf", width=20, height=4)
 
-ggplot(data, aes(x=position, y=coverage, colour=species, group=species)) + geom_line() + ggtitle(arg[2])
+ggplot(data, aes(x=position, y=coverage, colour=species, group=species)) + geom_line() + ggtitle(arg[2])# + ylim(-10, 100)
 
 data2 <- ddply(data, .(species), summarise, med = median(coverage))
 ggplot(data, aes(x = species, y = coverage)) + geom_boxplot() + geom_text(data = data2, aes(x = species, y = med, label = med), size =3, vjust = -1.0)

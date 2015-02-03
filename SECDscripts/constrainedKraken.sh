@@ -15,14 +15,29 @@ NR_CPUS=60 # Computer cores to use when analyzing
 #unzip files if needed
 find . -name "*gz" -type f -print0 | xargs -0 -n 1 -P $NR_CPUS gunzip
 
-#sample name is the name of the fastq files minus any identifying information from the sequencer
+#Set sample name- sample name is the name of the fastq files minus any identifying information from the sequencer
 sampleName=`ls *_R1* | sed 's/_.*//' | sed 's/\..*//'`
+
+#Establish Read Files
+if [ -f *R2* ]; then
+    echo "R2 paired end read file present"
+    sampleType="paired"
+    forReads=`ls | grep _R1`
+    echo "Forward Reads:  $forReads"
+    revReads=`ls | grep _R2`
+    echo "Reverse Reads:  $revReads"
+else
+    echo "Just a single read present"
+    sampleType="single"
+    forReads=`ls | grep *fastq`
+    echo "Forward Reads:  $forReads"
+fi
 
 #make a folder to put important files in that will be uploaded back to submitter
 mkdir ${sampleName}_upload
 uploadFolder=${sampleName}_upload
 
-###########################################
+##########################################################################################################################
 #Environment Controls:  Set these to tailor script towards analyzing certain groups of organisms
 
 if [[ $1 == all ]]; then   #All viruses
@@ -54,14 +69,43 @@ else
     exit 1
 fi
 
-#########################################
+###########################################################################################################################
+
+# Function to run ABySS to assemble contigs from reads
+function abyssRun () {
+
+if [[ $sampleType == "paired" ]]; then
+    abyss-pe name=${n}_abyss k=64 in="$forReads $revReads"
+else
+    abyss-pe name=${n}_abyss k=64 in="$forReads"
+fi
+mkdir ../${n}_abyss
+mv ${n}_abyss* ../${n}_abyss
+mv ${n}_abyss* ../${n}_abyss
+mv coverage.hist ../${n}_abyss
+}
+
+###########################################################################################################################
+
+# Function to BLAST assembled contigs
+
+
+
+
+###########################################################################################################################
 
 echo "Kraken database selected is: $krakenDatabase"
 echo "Organism chosen is: $organism"
 echo "Search terms are: `cat $searchTerms`"
 
+#Run Kraken
+if [[ $sampleType == "paired" ]]; then
+    kraken --db ${krakenDatabase} --threads ${NR_CPUS} --paired *fastq* > $sampleName-output.txt && kraken-report --db ${krakenDatabase} $sampleName-output.txt > $sampleName-kraken_report.txt
+else
+    kraken --db ${krakenDatabase} --threads ${NR_CPUS}  $forReads > $sampleName-output.txt && kraken-report --db ${krakenDatabase} $sampleName-output.txt > $sampleName-kraken_report.txt
+
 # Run Kraken
-kraken --db ${krakenDatabase} --threads ${NR_CPUS} --paired *fastq* > $sampleName-output.txt && kraken-report --db ${krakenDatabase} $sampleName-output.txt > $sampleName-kraken_report.txt
+#kraken --db ${krakenDatabase} --threads ${NR_CPUS} --paired *fastq* > $sampleName-output.txt && kraken-report --db ${krakenDatabase} $sampleName-output.txt > $sampleName-kraken_report.txt
 
 # Run Krona
 cut -f2,3 $sampleName-output.txt > $sampleName-kronaInput.txt; 
@@ -307,7 +351,7 @@ for f in *; do
     readsFound=`cat *.fastq | grep -c "^+$"`
     echo "Reads found: `printf "%'.0f\n" ${readsFound}`" >> $virusSummary
     #Run Abyss
-    abyss_run.sh
+    abyssRun
     cd *_abyss
     
     #Output assembly stats.
