@@ -665,20 +665,24 @@ pwd
 cat *.fas | sed '/root/{N;d;}' >> fastaGroup.txt
 cat *.fas >> RAxMLfastaGroup.txt
 
-clustalw2 -OUTFILE=alignment.txt -RANGE=1,2 -OUTPUT=FASTA -INFILE=fastaGroup.txt & 
+#clustalw2 -OUTFILE=alignment.txt -RANGE=1,2 -OUTPUT=FASTA -INFILE=fastaGroup.txt & 
 /usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} -m GTRCAT -p 12345 && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf &
 wait
 rm RAxML_parsimonyTree*
 for i in RAxML*Tree*; do mv $i ../${i}.tree; done
-grep ">" alignment.txt | sed 's/>//g' > cleanedAlignment.txt
+#grep ">" alignment.txt | sed 's/>//g' > cleanedAlignment.txt
+
+pwd
+inputfile=`ls RAxML_result*`
+tr ":" "\n" < ${inputfile} | tr "," "\n" | sed 's/(//g' | sed 's/)//g' | grep -v "\.[0-9]*" | grep -v "root" > cleanedAlignment.txt
 
 awk 'NR==FNR{o[FNR]=$1; next} {t[$1]=$0} END{for(x=1; x<=FNR; x++){y=o[x]; print t[y]}}' cleanedAlignment.txt ../$d.table.txt > joined.txt
 grep "reference" ../$d.table.txt > references.txt
 cat references.txt joined.txt >> joined2.txt
 mv joined2.txt ../$d.sortedTable.txt
 
-rm alignment.txt
-rm cleanedAlignment.txt
+#rm alignment.txt
+#rm cleanedAlignment.txt
 #rm *.dnd
 #rm fastaGroup.txt
 rm joined.txt
@@ -1213,8 +1217,8 @@ wait
 sleep 2
 
 # Begin the table
-awk '{print $1}' total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> All_vcf.table.txt
-awk '{print $2}' total_pos | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> All_vcf.table.txt
+awk '{print $1}' total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> All_vcfs.table.txt
+awk '{print $2}' total_pos | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> All_vcfs.table.txt
 echo "***grepping the .filledcut files"
 # Make the fasta files:  Fill in positions with REF if not present in .clean file
 
@@ -1229,7 +1233,7 @@ for i in *.filledcut; do
     # With All_vcfs this grep doesn't eliminate many snps.
     sed 's/chrom[0-9-]*//g' $i | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
     # Add each isolate to the table
-    awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> All_vcf.table.txt
+    awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> All_vcfs.table.txt
     done
     wait
 
@@ -1245,12 +1249,6 @@ echo "Total informative SNPs: $totalSNPs" >> ../section4
 #echo "***The clean_total_pos $d" >> ../section4
 #grep -c ".*" total_pos >> ../section4
 
-if [[ $2 == all ]]; then
-    echo "Tree not made when all samples are ran"
-else
-	alignTable
-fi
-
 #Clean-up
 mkdir starting_files
 echo "***Cleaning folder"
@@ -1265,6 +1263,15 @@ mkdir fasta
 mv *.fas ./fasta
 #rm total_pos
 rm root
+
+if [[ $2 == all ]]; then
+    echo "Tree not made when all samples are ran"
+else
+	d="All_vcfs"
+	cd ./fasta
+        alignTable
+fi
+
 echo "***Done"
 echo "Full Directory: ${fulDir}"
 
@@ -1313,7 +1320,7 @@ for d in $directories; do
     echo "****************************************************"
     echo "************* Orginizing Table: $d *****************"
     echo "****************************************************"
-    alignTable &
+	alignTable & 
 
     pwd
 done
