@@ -424,11 +424,11 @@ for f in *; do
     readsFound=`cat *.fastq | grep -c "^+$"`
     echo "Reads found: `printf "%'.0f\n" ${readsFound}`" >> $virusSummary
     #Run Abyss
-<<<<<<< HEAD
-    abyss_run_kraken.sh
-=======
+#<<<<<<< HEAD
+#    abyss_run_kraken.sh
+#=======
     abyssRun $f
->>>>>>> dev
+#>>>>>>> dev
     cd *_abyss
     
     #Output assembly stats.
@@ -442,22 +442,22 @@ for f in *; do
 
     #BLAST contigs if abyss worked
     if [ -s ./*-8.fa ]; then
-<<<<<<< HEAD
-	blast-contigs-kraken.sh ./*-8.fa
-=======
+#<<<<<<< HEAD
+#	blast-contigs-kraken.sh ./*-8.fa
+#=======
 	blastContigs $f ./*-8.fa
->>>>>>> dev
+#>>>>>>> dev
 	mv *-8.fa ${f}-contigs-8.fa
 	cp ${f}-contigs-8.fa $root/$uploadFolder
         # if no 8.fa file, blast the 3.fa file
     elif [ -s ./*-3.fa ]; then
 	numContigs=`cat *-3.fa | grep -c ">"`
 	echo "Number of contigs assembled is: $numContigs" >> $virusSummary
-<<<<<<< HEAD
-	blast-contigs-kraken.sh ./*-3.fa
-=======
+#<<<<<<< HEAD
+#	blast-contigs-kraken.sh ./*-3.fa
+#=======
 	blastContigs $f ./*-3.fa
->>>>>>> dev
+#>>>>>>> dev
 	mv *-3.fa ${f}-contigs-3.fa
 	cp ${f}-contigs-3.fa $root/$uploadFolder
     else
