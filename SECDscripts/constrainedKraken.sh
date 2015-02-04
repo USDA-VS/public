@@ -10,19 +10,38 @@
 	#krakenProcessing.py
 	#fetch-genomes-fasta.py
 	#coveragebyr.r
-
+echo "Running dev. branch version"
 NR_CPUS=60 # Computer cores to use when analyzing
 #unzip files if needed
 find . -name "*gz" -type f -print0 | xargs -0 -n 1 -P $NR_CPUS gunzip
 
-#sample name is the name of the fastq files minus any identifying information from the sequencer
+#Set sample name- sample name is the name of the fastq files minus any identifying information from the sequencer
 sampleName=`ls *_R1* | sed 's/_.*//' | sed 's/\..*//'`
+#Directory where script is called
+root=`pwd`
+#Establish Read Files
+if [ -f *R2* ]; then
+    echo "R2 paired end read file present"
+    sampleType="paired"
+    forFile=`ls | grep _R1`
+    forReads=$root/$forFile
+    echo "Forward Reads:  $forReads"
+    revFile=`ls | grep _R2`
+    revReads=$root/$revFile
+    echo "Reverse Reads:  $revReads"
+else
+    echo "Just a single read present"
+    sampleType="single"
+    forFile=`ls | grep *fastq`
+    forReads=$root/$forFile
+    echo "Forward Reads:  $forReads"
+fi
 
 #make a folder to put important files in that will be uploaded back to submitter
 mkdir ${sampleName}_upload
 uploadFolder=${sampleName}_upload
 
-###########################################
+##########################################################################################################################
 #Environment Controls:  Set these to tailor script towards analyzing certain groups of organisms
 
 if [[ $1 == all ]]; then   #All viruses
@@ -54,14 +73,104 @@ else
     exit 1
 fi
 
-#########################################
+###########################################################################################################################
+#|||||||||||||||||||||||||||||||||||||||||| Function to run ABySS to assemble contigs |||||||||||||||||||||||||||||||||||||
+###########################################################################################################################
 
+function abyssRun () {
+    ##### HOW TO HANDLE SAMPLE NAME? --> Species, not name of seq. sample --> supply argument with function?
+    echo "#######################Running ABySS Function"
+    n=`echo $1`
+    base=`pwd`
+    mkdir ./Zips
+    mv *fastq* ./Zips
+    cd ./Zips
+    if [ -f *R2* ]; then
+	echo "R2 paired end read file present"
+	readOne=`ls | grep _R1`
+	echo "Read One is $readOne"
+	readTwo=`ls | grep _R2`
+	echo "Read Two is $readTwo"
+    else
+	echo "Just a single read present"
+	readOne=`ls | grep *fastq`
+	echo "Read One is $readOne"
+    fi
+    #forReads and revReads are per virus, not total reads as named above.
+    if [[ $sampleType == "paired" ]]; then
+        abyss-pe name=${n}_abyss k=64 in="$readOne $readTwo"
+    else
+        abyss-pe name=${n}_abyss k=64 in="$readOne"
+    fi
+    mkdir ../${n}_abyss
+    mv ${n}_abyss* ../${n}_abyss
+    #mv ${n}_abyss* ../${n}_abyss
+    mv coverage.hist ../${n}_abyss
+    cd $base
+}
+
+###########################################################################################################################
+#||||||||||||||||||||||||||||||||||||||||||| Function to BLAST assembled contigs ||||||||||||||||||||||||||||||||||||||||||
+########################################################################################################################### 
+
+function blastContigs () {
+    ###### How to handle sample name? --> Species, not name of seq. sample 
+    echo "######################Running BLAST function"
+    NR_CPUS=50
+    n=`echo $1`
+    file=`echo $2`
+    function parseXML () {
+	abyss-parseXML-Blast5.py ${n}_contig-blastResults-5.xml | sed 's/\[.*\]//g' | sort -k1,1 -k2,2 | awk '{print $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14}' | awk '{k=$1; a[k]++; b[k]=$0}; END{for (k in a) print a[k], b[k]}' | sort -rnk1,1 | awk 'BEGIN{print "n", "acc", "length", "score", "e-value", "ID"} {print $0}' | column -t > BLAST-summary-${n}-contigIDs.txt
+
+	abyss-parseXML-Blast5.py ${n}_contig-blastResults-5.xml | sed 's/\[.*\]//g' | sort -k1,1 -k2,2 | column -t > BLAST-all-${n}-contigIDs.txt
+
+    }
+
+    #m=`basename $1`; n=`echo $m | sed 's/_.*//' | sed 's/\..*//'`
+    #echo "***Sample naming convention:  ${n}"
+
+    cp $file ${n}-contigsoriginal.fa
+
+
+    # Remove everything behond the space.  Meant for ">name otherinfo" to just ">name"
+    sed 's/ .*$//' ${n}-contigsoriginal.fa > ${n}-contigs.fa
+
+    # Cut down contigs and this also should put all fasta contigs onto a single line.
+    sed -e 's/$/=/g' ${n}-contigs.fa | tr -d "\n" | tr "=" "\n" | grep -v "^$" | awk '{ if ($0 ~ /^>/ ) { print $0 } else if (length($O) > 600 ) {print substr($0, 50, 500) } else {print $0}}' > ${n}-contigs3.fa
+    echo "##### Blasting contig file #####"
+    echo "Start Time: `date`"
+
+    cat ${n}-contigs3.fa > ${n}-contigs2.fa
+    blastContigs=`grep -c ">" ${n}-contigs2.fa`
+    echo "$blastContigs BLASTed contigs"
+
+    blastn -query ${n}-contigs2.fa -db /usr/local/bin/ncbi-blast-2.2.29+/db/nt -task blastn -num_threads ${NR_CPUS} -outfmt 5 -out ${n}_contig-blastResults-5.xml -max_target_seqs 1
+
+    parseXML
+    wait
+    rm ${n}-contigsoriginal.fa
+    mv ${n}-contigs2.fa BLAST-${n}-INFILE.fasta
+    rm ${n}-contigs3.fa
+    rm ${n}-contigs.fa
+
+    # From xml get individual read headers with identification
+    egrep "<Iteration_query-def>|<Hit_accession>|<Hit_def>" ${n}_contig-blastResults-5.xml | sed 's/<Iteration_query-def>//g' | sed 's:</Iteration_query-def>:TABPLACEMENT:g' | sed 's/<Hit_def>//g' | sed 's:</Hit_def>:TABPLACEMENT:g' | sed 's:<Hit_accession>::g' | sed 's:</Hit_accession>:NEWLINEPLACEMENT:g' | tr -d "\n" | sed -e 's:NEWLINEPLACEMENT:\n:g' | sed -e 's:TABPLACEMENT:\t:g' > BLAST-headersall-${n}-contigIDs.txt
+
+}
+###########################################################################################################################
+###########################################################################################################################
 echo "Kraken database selected is: $krakenDatabase"
 echo "Organism chosen is: $organism"
 echo "Search terms are: `cat $searchTerms`"
 
+#Run Kraken
+if [[ $sampleType == "paired" ]]; then
+    kraken --db ${krakenDatabase} --threads ${NR_CPUS} --paired *fastq* > $sampleName-output.txt && kraken-report --db ${krakenDatabase} $sampleName-output.txt > $sampleName-kraken_report.txt
+else
+    kraken --db ${krakenDatabase} --threads ${NR_CPUS}  $forReads > $sampleName-output.txt && kraken-report --db ${krakenDatabase} $sampleName-output.txt > $sampleName-kraken_report.txt
+fi
 # Run Kraken
-kraken --db ${krakenDatabase} --threads ${NR_CPUS} --paired *fastq* > $sampleName-output.txt && kraken-report --db ${krakenDatabase} $sampleName-output.txt > $sampleName-kraken_report.txt
+#kraken --db ${krakenDatabase} --threads ${NR_CPUS} --paired *fastq* > $sampleName-output.txt && kraken-report --db ${krakenDatabase} $sampleName-output.txt > $sampleName-kraken_report.txt
 
 # Run Krona
 cut -f2,3 $sampleName-output.txt > $sampleName-kronaInput.txt; 
@@ -85,18 +194,26 @@ revReads=`echo *_R2*`
 summaryFile=$root/${sampleName}-resultsSummary.txt
 #Calculate files sizes
 forFileSize=`ls -lh $forReads | awk '{print $5}'`
-revFileSize=`ls -lh $revReads | awk '{print $5}'`
+if [[ $sampleType == "paired" ]]; then
+    revFileSize=`ls -lh $revReads | awk '{print $5}'`
+fi
 #Calculate count of reads in each file
 forCount=`grep -c "^+$" $forReads`
-revCount=`grep -c "^+$" $revReads`
+if [[ $sampleType == "paired" ]]; then
+    revCount=`grep -c "^+$" $revReads`
+fi
 
 echo "#################### Sample: $sampleName ####################" >> $summaryFile
 echo "" >> $summaryFile
 printf "%s, %s file size, %'.0f reads\n" ${forReads} ${forFileSize} ${forCount} >> $summaryFile
-printf "%s, %s file size, %'.0f reads\n" ${revReads} ${revFileSize} ${revCount} >> $summaryFile
+if [[ $sampleType == "paired" ]]; then
+    printf "%s, %s file size, %'.0f reads\n" ${revReads} ${revFileSize} ${revCount} >> $summaryFile
+fi
 echo "" >> $summaryFile
 declare -i x=${forCount}
-declare -i y=${revCount}
+#if [[ $sampleType == "paired" ]]; then
+    declare -i y=${revCount}
+#fi
 echo "" | awk -v x=$x -v y=$y '{printf "Total single end read count: %'\''d\n", x+y}' >> $summaryFile
 echo "" >> $summaryFile
 
@@ -307,7 +424,11 @@ for f in *; do
     readsFound=`cat *.fastq | grep -c "^+$"`
     echo "Reads found: `printf "%'.0f\n" ${readsFound}`" >> $virusSummary
     #Run Abyss
+<<<<<<< HEAD
     abyss_run_kraken.sh
+=======
+    abyssRun $f
+>>>>>>> dev
     cd *_abyss
     
     #Output assembly stats.
@@ -321,14 +442,22 @@ for f in *; do
 
     #BLAST contigs if abyss worked
     if [ -s ./*-8.fa ]; then
+<<<<<<< HEAD
 	blast-contigs-kraken.sh ./*-8.fa
+=======
+	blastContigs $f ./*-8.fa
+>>>>>>> dev
 	mv *-8.fa ${f}-contigs-8.fa
 	cp ${f}-contigs-8.fa $root/$uploadFolder
         # if no 8.fa file, blast the 3.fa file
     elif [ -s ./*-3.fa ]; then
 	numContigs=`cat *-3.fa | grep -c ">"`
 	echo "Number of contigs assembled is: $numContigs" >> $virusSummary
+<<<<<<< HEAD
 	blast-contigs-kraken.sh ./*-3.fa
+=======
+	blastContigs $f ./*-3.fa
+>>>>>>> dev
 	mv *-3.fa ${f}-contigs-3.fa
 	cp ${f}-contigs-3.fa $root/$uploadFolder
     else
@@ -448,7 +577,7 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 	fi
     done
 #read -p "$LINENO Enter"
-#    # for each genome, make a folder and put the fasta file in the folder
+    # for each genome, make a folder and put the fasta file in the folder
     #for h in *; do
      #   genomeName=`echo $h | sed 's/\..*//'`
      #   mkdir $genomeName
@@ -456,13 +585,15 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
     #done
 
     #Full, original forward read file
-    readOneFile=`ls ${root}/*_R1*.fastq`
-    echo "Read one file is: $readOneFile"
+    #forReads=`ls ${root}/*_R1*.fastq`
+    echo "Read one file is: $root/$forReads"
     #Full, original reverse read file
-    readTwoFile=`ls ${root}/*_R2*.fastq`
-    echo "Read two file is: $readTwoFile"
-    forCount=`grep -c "^+$" $readOneFile`
-    revCount=`grep -c "^+$" $readTwoFile`
+    #revReads=`ls ${root}/*_R2*.fastq`
+    #echo "Read two file is: $revReads"
+    forCount=`grep -c "^+$" $root/$forReads`
+    if [[ $sampleType == "paired" ]]; then
+        revCount=`grep -c "^+$" $root/$revReads`
+    fi
 
     #Start file to capture alignment summaries
     alignmentSummary=$root/alignmentSummary.txt
@@ -487,8 +618,24 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
             bwa index $ref
             samtools faidx $ref
             java -Xmx4g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${g}.dict
-            bwa mem -M -B 1 -t 10 -T 20 -P -a -R @RG"\t"ID:"$g""\t"PL:ILLUMINA"\t"PU:"$g"_RG1_UNIT1"\t"LB:"$g"_LIB1"\t"SM:"$g" $ref $readOneFile $readTwoFile > ${g}.sam
-            samtools view -bh -T $ref ${g}.sam > ${g}.raw.bam
+	    if [ -s ${ref}.fai ] && [ -s ${r}.dict ]; then
+    		echo "Index and dict are present, continue script"
+    	    else
+    	        sleep 5
+    	        echo "Either index or dict for reference is missing, try making again"
+    	    	samtools faidx $ref
+    		java -Xmx4g -jar ${picardPath}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${g}.dict
+        	if [ -s ${ref}.fai ] && [ -s ${r}.dict ]; then
+        	    read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
+        	fi
+	    fi
+	    
+	    if [[ $sampleType == "paired" ]]; then
+                bwa mem -M -B 1 -t 10 -T 20 -P -a -R @RG"\t"ID:"$g""\t"PL:ILLUMINA"\t"PU:"$g"_RG1_UNIT1"\t"LB:"$g"_LIB1"\t"SM:"$g" $ref $root/$forReads $root/$revReads > ${g}.sam
+	    else
+		bwa mem -M -B 1 -t 10 -T 20 -P -a -R @RG"\t"ID:"$g""\t"PL:ILLUMINA"\t"PU:"$g"_RG1_UNIT1"\t"LB:"$g"_LIB1"\t"SM:"$g" $ref $root/$forReads > ${g}.sam            
+	    fi
+	    samtools view -bh -T $ref ${g}.sam > ${g}.raw.bam
             echo "Sorting Bam"
             samtools sort ${g}.raw.bam ${g}.sorted
             echo "****Indexing Bam"
@@ -496,8 +643,10 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
             rm ${g}.sam
 	    rm ${g}.raw.bam
 	    samtools view -h -b -F4 ${g}.sorted.bam > ./$g.mappedReads.bam
-            if [ -e $readTwoFile ]; then
+            if [ $sampleType == "paired" ]; then
                 java -Xmx2g -jar ${picardPath}/SamToFastq.jar INPUT=./$g.mappedReads.bam FASTQ=./${g}-mapped_R1.fastq SECOND_END_FASTQ=./${g}-mapped_R2.fastq
+	    else
+		java -Xmx2g -jar ${picardPath}/SamToFastq.jar INPUT=./$g.mappedReads.bam FASTQ=./${g}-mapped_R1.fastq
 	    fi
    	    java -Xmx4g -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I ${g}.sorted.bam -o ${g}.UG.vcf -nct 8
 	    # Number of reads mapped to reference
