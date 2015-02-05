@@ -278,12 +278,14 @@ echo "" >> $summaryFile
 
 # Run krakenProcessing.py to get hierarchical taxonID lists 
 krakenProcessing.py $report $organism
-echo "krakenProcessing is done"
+echo "################# krakenProcessing is done. Clusters of related taxonomy IDs are in folder hierarchicalClustering"
+
 
 # Output of krakenProcessing.py is a series of folders, representing the increasing specificity of kraken classifications
 # Example: column5= Viruses, cellular organisms, etc.
 #          column10= Virus strain a
-
+echo "################# Clusters to investigate further are moved to folder toInvestigateFurther"
+echo "################# Reads for each taxonomy ID are isolated. New fastq files for each cluster are made."
 cd $root/hierarchicalClustering
 hc=`pwd`
 mkdir $root/toInvestigateFurther
