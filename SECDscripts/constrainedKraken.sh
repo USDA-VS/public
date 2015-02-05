@@ -110,6 +110,45 @@ function abyssRun () {
 }
 
 ###########################################################################################################################
+#||||||||||||||||||||||||||||||||||||||||||| Function to parse BLAST output |||||||||||||||||||||||||||||||||||||||||||||||
+###########################################################################################################################
+function parseBlast () {
+cat > ./parstBlast.py << EOL
+#!/usr/bin/env python
+
+import xml.etree.ElementTree as ET
+from sys import argv
+
+script, input = argv
+
+mytree = ET.parse(input)
+myroot = mytree.getroot()
+
+for Blast_iteration in myroot.findall('BlastOutput_iterations'):
+    for Iteration in Blast_iteration.findall('Iteration'):
+        queryID = Iteration.find('Iteration_query-def').text.split("_")
+        #length = queryID[-3]
+        #coverage = queryID[-1]
+        #totalseq = int(length) * float(coverage)
+        for Iteration_hits in Iteration.findall('Iteration_hits'):
+            for Hit in Iteration_hits.findall('Hit'):
+                Hit_def = Hit.find('Hit_def').text
+                Hit_def_remove = Hit_def.replace("PREDICTED: ", "")
+                Hit_def_split = Hit_def_remove.split(' ')
+                Hit_accession = Hit.find('Hit_accession').text
+                Hit_len = Hit.find('Hit_len').text
+                for Hit_hsps in Hit.findall('Hit_hsps'):
+                    for Hsp in Hit_hsps.findall('Hsp'):
+                        Hsp_bitscore = Hsp.find('Hsp_bit-score').text
+                        Hsp_evalue = Hsp.find('Hsp_evalue').text
+                print queryID, Hit_def_split[0], Hit_def_split[1], Hit_accession, Hit_len, Hsp_bitscore, Hsp_evalue, Hit_def
+EOL
+chmod 755 parseBlast.py
+./parseBlast.py $1
+rm ./parseBlast.py
+}
+
+###########################################################################################################################
 #||||||||||||||||||||||||||||||||||||||||||| Function to BLAST assembled contigs ||||||||||||||||||||||||||||||||||||||||||
 ########################################################################################################################### 
 
@@ -159,6 +198,178 @@ function blastContigs () {
 }
 ###########################################################################################################################
 ###########################################################################################################################
+#||||||||||||||||||||||||||||||||||||||||||||| Function to Download Accessions from NCBI ||||||||||||||||||||||||||||||||||
+###########################################################################################################################
+
+function fetchGenomes () {
+# Create "here-document" to prevent a dependent file.
+cat > ./fetchGenomeFasta.py << EOL
+#!/usr/bin/python
+
+import urllib2
+import os
+import sys
+import time
+
+if len(sys.argv) != 2:
+    #print "USAGE: fetch_genome.py <accession>"
+    print "ERROR: in function to download accession. Must provide accession number"
+    sys.exit(1)
+
+url_template = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide&id=%s&rettype=fasta&retmode=text"
+
+#os.mkdir(sys.argv[2])
+
+id = sys.argv[1]
+#for id in open(sys.argv[1]):
+id = id.strip()
+#if id == "":
+#    continue
+
+sys.stdout.write("Fetching %s..." % id)
+sys.stdout.flush()
+gbk_out_file = id + ".fasta"
+#if os.path.exists(gbk_out_file):
+#    print "already fetched"
+
+open(gbk_out_file, "w").write(urllib2.urlopen(url_template % id).read())
+print "Done"
+time.sleep(1.0/3)
+
+EOL
+chmod 755 ./fetchGenomeFasta.py
+./fetchGenomeFasta.py $1
+rm ./fetchGenomeFasta.py
+}
+
+###########################################################################################################################
+###########################################################################################################################
+#||||||||||||||||||||||||||||||||||||||||| Function to sort Kraken output into hierarchical taxonomy clusters |||||||||||||
+###########################################################################################################################
+function processKrakenOutput () {
+cat > ./organizeKraken.py << EOL
+#! /usr/bin/env python
+
+# Finalized by Kaity Brien on 2014/11/06
+# Python script to format kraken report and get hierarchical list of TaxIDs
+
+from sys import argv
+import re
+import os
+from operator import eq
+
+root= os.getcwd()
+
+# Format kraken report to get rid of spaces
+# open file
+script, filename = argv
+print("script is " + script)
+print("filename is " + filename)
+file= open(filename)
+#re.sub(patternToSearch, replacementDesired, stringToSearch, optionalCount, optionalFlags)
+fileNameToSave= re.sub(".txt", "", filename)
+
+# open tempfile to save formatted content to
+formattedFileName= fileNameToSave + "FormattedFile.txt"
+formattedFile= open(formattedFileName, "w+")
+
+
+#Format output of kraken-report to prepare for processing
+for line in file:
+    #get rid of spaces at beginning of file
+    replaceFirstSpace= re.sub(" ", "", line, count=1)
+    #get rid of two spaces separating taxonomy categories and replace with tab
+    replaceSpaceWTabs= re.sub("\s\s", "\t", replaceFirstSpace)
+    #get rid of last spaces
+    #replaceLastSpaces= re.sub(" ", "", replaceSpaceWTabs)
+    replaceLastSpaces=re.sub(" ", "_", replaceSpaceWTabs)
+    #replaceLeadingUnderscore=re.sub("\t_", "", replaceLastSpaces)
+    formattedFile.write(replaceLastSpaces)
+formattedFile.close()
+file.close()
+
+#save each line of file as an arrayList
+fileToParse= open(formattedFileName)
+
+# Initialize matrix for storing hierarchy
+hierarchyMatrix= []
+# Add each line in file as a list to the list of matrices (list with each line in file as a list)
+for line in fileToParse:
+    newLine= line.rstrip('\n').split('\t')
+    hierarchyMatrix.append(newLine)
+# Fill in holes (empty strings) in matrix
+previousRow= []
+lengthLongestRow = 0
+for list in hierarchyMatrix:
+    currentRow= list
+    lengthOfCurrentRow= len(currentRow)
+    lengthOfPreviousRow= len(previousRow)
+    if(lengthOfCurrentRow > lengthLongestRow):
+        lengthLongestRow = lengthOfCurrentRow
+    counter=0
+    while((counter < lengthOfCurrentRow) and (counter< lengthOfPreviousRow)):
+        if (previousRow != []):
+            if(previousRow[counter] is not None):  #checks for nullness
+                if(currentRow[counter]==''):
+                    currentRow[counter]=previousRow[counter]
+        counter+=1
+    previousRow = currentRow
+
+# Make folder for files that will be generated
+currentPath= os.getcwd()
+folderName= currentPath + "/hierarchicalClustering"
+os.mkdir(folderName)
+os.chdir(folderName)
+currentPath=os.getcwd()
+
+# Cluster based on different levels of hierarchy
+# Start of column 6 of 1st list
+
+columnCounter= 5
+rowCounter= 0
+thisRow= hierarchyMatrix[rowCounter]
+listOfNames=[]
+# Haven't exhausted columns
+while (columnCounter < lengthLongestRow):
+    # Haven't exhausted the rows
+    columnAsString= str(columnCounter)
+    newDirName= currentPath + "/column" + columnAsString
+    newPath= currentPath + "/column" + columnAsString
+    os.mkdir(newDirName)
+    os.chdir(newPath)
+    if (rowCounter==len(hierarchyMatrix)):
+        rowCounter=0
+    while (rowCounter < len(hierarchyMatrix)):
+        thisRow=hierarchyMatrix[rowCounter]
+        lengthCurrentRow = len(thisRow)
+        # Check if aren't going to reference beyond list index
+        if(columnCounter < lengthCurrentRow):
+            name= thisRow[columnCounter]
+            formattedName= re.sub("/", "-", name)
+            # Can change this conditional to require greater number of reads to be included in taxonIDs to search
+            if (int(thisRow[2]) > 0):  # Number of reads assigned directly to this taxon >0
+                if (formattedName not in listOfNames):
+                    listOfNames.append(formattedName)
+                    nameOfOutfile= formattedName + "ListOfTaxIDs"
+                    outfile= open(nameOfOutfile, "w")
+                    taxidToWrite= hierarchyMatrix[rowCounter][4]
+                    outfile.write(taxidToWrite + '\n')
+                elif (formattedName in listOfNames):
+                    taxidToWrite= hierarchyMatrix[rowCounter][4]
+                    outfile.write(taxidToWrite + '\n')
+        rowCounter+=1
+    outfile.close()
+    columnCounter+=1
+#print("Reached end of this script")         
+
+EOL
+
+chmod 755 ./organizeKraken.py
+./organizeKraken.py $1
+rm ./organizeKraken.py
+}
+
+
 echo "Kraken database selected is: $krakenDatabase"
 echo "Organism chosen is: $organism"
 echo "Search terms are: `cat $searchTerms`"
@@ -276,8 +487,8 @@ echo "" >> $summaryFile
 echo "See attached HTML report for a representation of classified reads" >> $summaryFile
 echo "" >> $summaryFile
 
-# Run krakenProcessing.py to get hierarchical taxonID lists 
-krakenProcessing.py $report $organism
+# Run processKrakenOutput function to get hierarchical taxonID lists 
+processKrakenOutput $report 
 echo "################# krakenProcessing is done. Clusters of related taxonomy IDs are in folder hierarchicalClustering"
 
 
@@ -551,7 +762,8 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 	    cp ${mydb}/$p .
 	else
 	    echo "Downloading from NCBI"
-	    fetch-genomes-fasta-kraken.py $acc
+#	    fetch-genomes-fasta-kraken.py $acc
+	    fetchGenomes $acc
 	    accFasta="${acc}.fasta"
 	    if [ -s $accFasta ]; then
 		echo "Downloaded from NCBI, good to continue."
@@ -559,7 +771,8 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 	    else
 		echo "Try downloading again"
 		sleep 20
-		fetch-genomes-fasta-kraken.py $acc
+		#fetch-genomes-fasta-kraken.py $acc
+		fetchGenomes $acc
 		sleep 5
 		if [ -s $accFasta ]; then
 		    echo "Downloaded from NCBI, good to continue."
@@ -567,7 +780,8 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 		else
 		    echo "Try downloading again"
 		    sleep 120
-		    fetch-genomes-fasta-kraken.py $acc
+		    #fetch-genomes-fasta-kraken.py $acc
+		    fetchGenomes $acc
 		    sleep 5
 		    if [ -s $accFasta ]; then
 			echo "Downloaded from NCBI, good to continue."
@@ -575,7 +789,8 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 		    else
 			echo "Try downloading again"
 			sleep 320
-			fetch-genomes-fasta-kraken.py $acc
+			#fetch-genomes-fasta-kraken.py $acc
+			fetchGenomes $acc
 			sleep 5
 			if [ -s $accFasta ]; then
 			    echo "Downloaded from NCBI, good to continue."
