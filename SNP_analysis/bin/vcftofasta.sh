@@ -622,9 +622,9 @@ wait
                 wait
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
         #Make a reference fasta sequence
-        awk '{print $2}' clean_total_pos > reference_seq
-        cat reference_seq | tr -cd "[:print:]" | sed "s/^/>reference_seq;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > reference_seq.fas
-	echo "" >> reference_seq.fas
+        awk '{print $2}' clean_total_pos > root
+        cat root | tr -cd "[:print:]" | sed "s/^/>root;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > root.fas
+	echo "" >> root.fas
 
 	totalSNPs=`grep -c ".*" total_pos`
 	echo "$d informative SNPs: $totalSNPs" >> ../../section4
@@ -647,13 +647,161 @@ echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
         mv *.fas ./fasta
         rm total_pos
         rm select
-        rm reference_seq
+        rm root
         echo "***Done"
     cd ..
     done
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 
 }
+
+#****************************************************************
+function alignTable () {
+
+# Beginning in fasta folder
+echo "$d *********"
+pwd
+
+cat *.fas | sed '/root/{N;d;}' >> fastaGroup.txt
+cat *.fas >> RAxMLfastaGroup.txt
+
+#clustalw2 -OUTFILE=alignment.txt -RANGE=1,2 -OUTPUT=FASTA -INFILE=fastaGroup.txt & 
+/usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} -m GTRCAT -p 12345 && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf &
+wait
+rm RAxML_parsimonyTree*
+for i in RAxML*Tree*; do mv $i ../${i}.tree; done
+#grep ">" alignment.txt | sed 's/>//g' > cleanedAlignment.txt
+
+pwd
+inputfile=`ls RAxML_result*`
+tr ":" "\n" < ${inputfile} | tr "," "\n" | sed 's/(//g' | sed 's/)//g' | grep -v "\.[0-9]*" | grep -v "root" > cleanedAlignment.txt
+
+awk 'NR==FNR{o[FNR]=$1; next} {t[$1]=$0} END{for(x=1; x<=FNR; x++){y=o[x]; print t[y]}}' cleanedAlignment.txt ../$d.table.txt > joined.txt
+grep "reference" ../$d.table.txt > references.txt
+cat references.txt joined.txt >> joined2.txt
+mv joined2.txt ../$d.sortedTable.txt
+
+#rm alignment.txt
+#rm cleanedAlignment.txt
+#rm *.dnd
+#rm fastaGroup.txt
+rm joined.txt
+rm references.txt
+
+echo "**** orgTable.sh Started ****"
+cd ..
+#get the number of columns
+columnCount=`awk '$0 !~ /^$/ {print $0}' *sortedTable.txt | awk '{print NF-1; exit}'`
+echo "Column Count: $columnCount"
+
+#number=`jot - 1 $columnCount`
+number=`seq $columnCount`
+#echo "Numbers in list: $number"
+
+#get the reference row
+cat *sortedTable.txt | sed -n 2p | awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' > referenceRow
+cat referenceRow > out2.txt
+cat *sortedTable.txt | awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' > table
+#remove first column from *sortedTable.txt
+
+echo "countDif" > countOutput.txt
+echo "countFirst" > firstOutput.txt
+
+#iterate numbers up to number of columns
+for n in $number; do
+	#use number to grab character in reference row i.e. C
+	letter=`awk -v x=$n '{print $x}' referenceRow`
+	#echo "Number: $n"
+	#echo "Letter: $letter"
+	awk -v var1="$n" '{print $var1}' table > column
+	grep "$letter" column | wc -l >> countOutput.txt
+	sed '1,2d' column > column2
+	cat column2 | awk -v var2=${letter} ' $0 !~ var2 {print NR; exit}' >> firstOutput.txt
+	
+done
+
+#/var2/ {print NR; exit}' column
+#Clear table2.txt
+echo "" > table2.txt
+#Add a \n to the end of file
+
+cat *sortedTable.txt >> table2.txt
+#sed '$a\' *sortedTable.txt >> table2.txt
+
+#Prepare count line
+cat countOutput.txt | sed 's/ //g' | tr "\n" "\t" > readyline.txt
+#Create readytable.txt with count line.
+cat table2.txt readyline.txt > orginizedTable2.txt
+grep -v "^$" orginizedTable2.txt > orginizedTable3.txt
+
+#Prepare firstOut line
+cat firstOutput.txt | sed 's/ //g' | tr "\n" "\t" > readyFirstOut.txt
+cat orginizedTable3.txt readyFirstOut.txt > orginizedTable4.txt
+
+rm referenceRow
+rm out2.txt
+rm table
+rm countOutput.txt
+rm table2.txt
+rm readyline.txt
+rm orginizedTable2.txt
+
+awk '{a[NR]=$0} END {print a[NR]; for (i=1;i<NR;i++) print a[i]}' orginizedTable4.txt > orginizedTable5.txt
+awk '{a[NR]=$0} END {print a[NR]; for (i=1;i<NR;i++) print a[i]}' orginizedTable5.txt > orginizedTable6.txt
+
+#Transpose
+#awk -f /Users/Shared/_programs/_my_scripts/awk_scripts/transpose.awk orginizedTable6.txt > orginizedTable7.txt
+#awk '{for (i=1; i<=NF; i++)  { a[NR,i] = $i}} NF>p { p = NF } END {for(j=1; j<=p; j++) {str=a[1,j]; for(i=2; i<=NR; i++){ str=str" "a[i,j]} print str}} orginizedTable6.txt > orginizedTable7.txt
+###
+awk '{
+for (i=1; i<=NF; i++)  {
+a[NR,i] = $i
+}
+}
+NF>p { p = NF }
+END {
+for(j=1; j<=p; j++) {
+str=a[1,j]
+for(i=2; i<=NR; i++){
+str=str" "a[i,j];
+}
+print str
+}
+}' orginizedTable6.txt > orginizedTable7.txt
+###
+
+#Orgainize file based on 1st 2 columns
+sort -n -k1 orginizedTable7.txt | sort -n -k2 > orginizedTable8.txt
+
+#Convert spaces to tabs
+awk -v OFS="\t" '$1=$1' orginizedTable8.txt > orginizedTable9.txt
+awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' orginizedTable9.txt | awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' > orginizedTable10.txt
+
+#Transpose back
+awk -f /home/tstuber/workspace/stuber/awk_scripts/transpose.awk orginizedTable10.txt > orginizedTable11.txt
+
+c=`basename $PWD`
+#Convert spaces to tabs
+awk -v OFS="\t" '$1=$1' orginizedTable11.txt > $c.organizedTable.txt
+
+rm orginizedTable3.txt
+rm orginizedTable4.txt
+rm orginizedTable5.txt
+rm orginizedTable6.txt
+rm orginizedTable7.txt
+rm orginizedTable8.txt
+rm orginizedTable9.txt
+rm orginizedTable10.txt
+rm orginizedTable11.txt
+rm column
+rm column2
+rm readyFirstOut.txt
+rm firstOutput.txt
+echo "**** orgTable.sh Finished ****"
+
+}
+#****************************************************************
+
 
 ################################################################################
 #################################################################################
@@ -670,9 +818,11 @@ cat ${genotypingcodes} | tr '\r' '\n' | awk -F '\t' 'BEGIN{OFS="\t";} {gsub("\""
 #clean_tag.sh $genotypingcodes
 ####################
 # Clean the genotyping codes used for naming output
-sed 's/\*//g' < preparedTags.txt | sed 's/(/_/g' | sed 's/)/_/g' | sed 's/ /_/g' | sed 's/-_/_/g' | sed 's/\?//g' | sed 's/_-/_/g' | sed 's/,/_/g' | sed 's#/#_#g' | sed 's#\\#_#g' | sed 's/__/_/g' | sed 's/__/_/g' | sed 's/__/_/g' | sed 's/-$//g' | sed 's/_$//g' |awk 'BEGIN {OFS="\t"}{gsub("_$","",$1)}1' > outfile.txt
+sed 's/\*//g' < preparedTags.txt | sed 's/(/_/g' | sed 's/)/_/g' | sed 's/ /_/g' | sed 's/-_/_/g' | sed 's/\?//g' | sed 's/_-/_/g' | sed 's/,/_/g' | sed 's#/#_#g' | sed 's#\\#_#g' | sed 's/__/_/g' | sed 's/__/_/g' | sed 's/__/_/g' | sed 's/-$//g' | sed 's/_$//g' |awk 'BEGIN {OFS="\t"}{gsub("_$","",$1)}1' > outfile
 rm preparedTags.txt
-mv outfile.txt $genotypingcodes
+
+cat ${genotypingcodes} | tr '\r' '\n' | grep "Yes" | sed 's/_.*//' >> elite
+
 ####################
 
 # Test for duplicate VCFs
@@ -687,13 +837,25 @@ filterFilespreparation
 #copy the original vcfs to /starting_files
 mkdir starting_files
 for i in *.*; do
-    cp $i ./starting_files
+    mv $i ./starting_files
 done
 
 # Remove selected isolates from comparison
 # This is optional, and should be turned on or off based on laboratories preference
 removeIsolates
 
+if [[ $2 == all ]]; then
+    echo "all samples will be ran"
+    cp ./starting_files/* ./
+else
+    echo "Only analyzing elite files"
+    for i in `cat elite`; do
+        name=`ls starting_files | grep $i`
+        cp ./starting_files/$name ./
+    done
+fi
+
+rm elite
 ############################### Rename files ###############################
 
 for i in *.txt; do
@@ -707,7 +869,7 @@ for i in *.vcf; do
     echo "searchName: $searchName"
     # Direct script to text file containing a list of the correct labels to use.
     # The file must be a txt file.
-    p=`grep "$searchName" "$genotypingcodes"`
+    p=`grep "$searchName" "outfile"`
     echo "This is what was found in tag file: $p"
     newName=`echo $p | awk '{print $1}' | tr -d "[:space:]"` # Captured the new name
     n=`echo $base | sed $tbNumberV | sed $tbNumberW`
@@ -743,7 +905,7 @@ for i in *.vcf; do
         fi
     fi
 done
-
+rm outfile
 ##################### Start: Make Files Unix Compatiable #####################
 
 #Fix validated (VAL) vcf files.  This is used in vcftofasta scripts to prepare validated vcf files opened and saved in Excel.
@@ -1014,7 +1176,9 @@ echo "***Creating normalized vcf using AC2, QUAL > 150"
 for i in *.vcf; do
 # Turned on 2014-07-29
 #(
-m=`basename "$i"`; n=`echo $m | sed $dropEXT`; echo "$n"
+#m=`basename "$i"`; n=`echo $m | sed $dropEXT`; echo "$n"
+n=${i%.vcf}
+echo $n
 #egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{if ($1 ~ /chrom1/) print "chrom1-" $2, $5; else if ($1 ~ /chrom2/) print "chrom2-" $2, $5; else print "awk script can not determine VCF input"}' > $n.cut
 egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{print $1 "-" $2, $5}' > $n.cut
 
@@ -1053,8 +1217,8 @@ wait
 sleep 2
 
 # Begin the table
-awk '{print $1}' total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> All_vcf.table.txt
-awk '{print $2}' total_pos | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> All_vcf.table.txt
+awk '{print $1}' total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> All_vcfs.table.txt
+awk '{print $2}' total_pos | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> All_vcfs.table.txt
 echo "***grepping the .filledcut files"
 # Make the fasta files:  Fill in positions with REF if not present in .clean file
 
@@ -1069,27 +1233,21 @@ for i in *.filledcut; do
     # With All_vcfs this grep doesn't eliminate many snps.
     sed 's/chrom[0-9-]*//g' $i | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
     # Add each isolate to the table
-    awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> All_vcf.table.txt
+    awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> All_vcfs.table.txt
     done
     wait
 
 echo "grepping filledcut files is finished"
 #Make a reference fasta sequence
-awk '{print $2}' total_pos > reference_seq
-cat reference_seq | tr -cd "[:print:]" | sed "s/^/>reference_seq;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > reference_seq.fas
-echo "" >> reference_seq.fas
+awk '{print $2}' total_pos > root
+cat root | tr -cd "[:print:]" | sed "s/^/>root;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > root.fas
+echo "" >> root.fas
 
 totalSNPs=`grep -c ".*" total_pos`
 echo "Total informative SNPs: $totalSNPs" >> ../section4
 
 #echo "***The clean_total_pos $d" >> ../section4
 #grep -c ".*" total_pos >> ../section4
-
-        # Make a file containing all fasta files.
-        cat *.fas > all_alignment.fasta
-# Turned off because RAxML does not have to be ran for the allVCF file all the time.  Just when needed.
-#/usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s all_alignment.fasta -n all_alignment -m GTRCAT -p 12345 &
-#for i in RAxML*Tree*; do mv $i ${i}.nex; done
 
 #Clean-up
 mkdir starting_files
@@ -1104,7 +1262,16 @@ rm *.tod
 mkdir fasta
 mv *.fas ./fasta
 #rm total_pos
-rm reference_seq
+rm root
+
+if [[ $2 == all ]]; then
+    echo "Tree not made when all samples are ran"
+else
+	d="All_vcfs"
+	cd ./fasta
+        alignTable
+fi
+
 echo "***Done"
 echo "Full Directory: ${fulDir}"
 
@@ -1137,148 +1304,6 @@ $PWD
 cp ${DefiningSNPs} ./
 cp /home/shared/Table_Template.xlsx ./
 cp "$0" "$PWD"
-#****************************************************************
-function alignTable () {
-
-# Beginning in fasta folder
-echo "$d *********"
-pwd
-
-cat *.fas | sed '/reference/{N;d;}' >> fastaGroup.txt
-#cat *.fas >> ${d}-fastaGroup.txt
-
-clustalw2 -OUTFILE=alignment.txt -RANGE=1,2 -OUTPUT=FASTA -INFILE=fastaGroup.txt & 
-/usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s fastaGroup.txt -n ${d} -m GTRCAT -p 12345 &
-wait
-
-for i in RAxML*Tree*; do mv $i ../${i}.nex; done
-grep ">" alignment.txt | sed 's/>//g' > cleanedAlignment.txt
-
-awk 'NR==FNR{o[FNR]=$1; next} {t[$1]=$0} END{for(x=1; x<=FNR; x++){y=o[x]; print t[y]}}' cleanedAlignment.txt ../$d.table.txt > joined.txt
-grep "reference" ../$d.table.txt > references.txt
-cat references.txt joined.txt >> joined2.txt
-mv joined2.txt ../$d.sortedTable.txt
-
-rm alignment.txt
-rm cleanedAlignment.txt
-#rm *.dnd
-rm fastaGroup.txt
-rm joined.txt
-rm references.txt
-
-echo "**** orgTable.sh Started ****"
-cd ..
-#get the number of columns
-columnCount=`awk '$0 !~ /^$/ {print $0}' *sortedTable.txt | awk '{print NF-1; exit}'`
-echo "Column Count: $columnCount"
-
-#number=`jot - 1 $columnCount`
-number=`seq $columnCount`
-#echo "Numbers in list: $number"
-
-#get the reference row
-cat *sortedTable.txt | sed -n 2p | awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' > referenceRow
-cat referenceRow > out2.txt
-cat *sortedTable.txt | awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' > table
-#remove first column from *sortedTable.txt
-
-echo "countDif" > countOutput.txt
-echo "countFirst" > firstOutput.txt
-
-#iterate numbers up to number of columns
-for n in $number; do
-	#use number to grab character in reference row i.e. C
-	letter=`awk -v x=$n '{print $x}' referenceRow`
-	#echo "Number: $n"
-	#echo "Letter: $letter"
-	awk -v var1="$n" '{print $var1}' table > column
-	grep "$letter" column | wc -l >> countOutput.txt
-	sed '1,2d' column > column2
-	cat column2 | awk -v var2=${letter} ' $0 !~ var2 {print NR; exit}' >> firstOutput.txt
-	
-done
-
-#/var2/ {print NR; exit}' column
-#Clear table2.txt
-echo "" > table2.txt
-#Add a \n to the end of file
-
-cat *sortedTable.txt >> table2.txt
-#sed '$a\' *sortedTable.txt >> table2.txt
-
-#Prepare count line
-cat countOutput.txt | sed 's/ //g' | tr "\n" "\t" > readyline.txt
-#Create readytable.txt with count line.
-cat table2.txt readyline.txt > orginizedTable2.txt
-grep -v "^$" orginizedTable2.txt > orginizedTable3.txt
-
-#Prepare firstOut line
-cat firstOutput.txt | sed 's/ //g' | tr "\n" "\t" > readyFirstOut.txt
-cat orginizedTable3.txt readyFirstOut.txt > orginizedTable4.txt
-
-rm referenceRow
-rm out2.txt
-rm table
-rm countOutput.txt
-rm table2.txt
-rm readyline.txt
-rm orginizedTable2.txt
-
-awk '{a[NR]=$0} END {print a[NR]; for (i=1;i<NR;i++) print a[i]}' orginizedTable4.txt > orginizedTable5.txt
-awk '{a[NR]=$0} END {print a[NR]; for (i=1;i<NR;i++) print a[i]}' orginizedTable5.txt > orginizedTable6.txt
-
-#Transpose
-#awk -f /Users/Shared/_programs/_my_scripts/awk_scripts/transpose.awk orginizedTable6.txt > orginizedTable7.txt
-#awk '{for (i=1; i<=NF; i++)  { a[NR,i] = $i}} NF>p { p = NF } END {for(j=1; j<=p; j++) {str=a[1,j]; for(i=2; i<=NR; i++){ str=str" "a[i,j]} print str}} orginizedTable6.txt > orginizedTable7.txt
-###
-awk '{
-for (i=1; i<=NF; i++)  {
-a[NR,i] = $i
-}
-}
-NF>p { p = NF }
-END {
-for(j=1; j<=p; j++) {
-str=a[1,j]
-for(i=2; i<=NR; i++){
-str=str" "a[i,j];
-}
-print str
-}
-}' orginizedTable6.txt > orginizedTable7.txt
-###
-
-#Orgainize file based on 1st 2 columns
-sort -n -k1 orginizedTable7.txt | sort -n -k2 > orginizedTable8.txt
-
-#Convert spaces to tabs
-awk -v OFS="\t" '$1=$1' orginizedTable8.txt > orginizedTable9.txt
-awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' orginizedTable9.txt | awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' > orginizedTable10.txt
-
-#Transpose back
-awk -f /home/tstuber/workspace/stuber/awk_scripts/transpose.awk orginizedTable10.txt > orginizedTable11.txt
-
-c=`basename $PWD`
-#Convert spaces to tabs
-awk -v OFS="\t" '$1=$1' orginizedTable11.txt > $c.organizedTable.txt
-
-rm orginizedTable3.txt
-rm orginizedTable4.txt
-rm orginizedTable5.txt
-rm orginizedTable6.txt
-rm orginizedTable7.txt
-rm orginizedTable8.txt
-rm orginizedTable9.txt
-rm orginizedTable10.txt
-rm orginizedTable11.txt
-rm column
-rm column2
-rm readyFirstOut.txt
-rm firstOutput.txt
-echo "**** orgTable.sh Finished ****"
-
-}
-#****************************************************************
 
 echo "***************************************************"
 echo "********** STARTING All_Clades Alignment **********"
@@ -1295,7 +1320,7 @@ for d in $directories; do
     echo "****************************************************"
     echo "************* Orginizing Table: $d *****************"
     echo "****************************************************"
-    alignTable &
+	alignTable & 
 
     pwd
 done
@@ -1437,7 +1462,7 @@ fileName=`basename $0`
 
 # As attachment
 
-if [[ $2 == me ]]; then
+if [[ $3 == me ]]; then
 	echo "Only Tod received this e-mail! $fileName $@ completed, See attachment"| mutt -s "$fileName $@ completed" -a email_log.html -- tod.p.stuber@aphis.usda.gov
 	else
 #email_list="tod.p.stuber@aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
