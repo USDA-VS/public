@@ -16,7 +16,7 @@ NR_CPUS=60 # Computer cores to use when analyzing
 find . -name "*gz" -type f -print0 | xargs -0 -n 1 -P $NR_CPUS gunzip
 
 #Set sample name- sample name is the name of the fastq files minus any identifying information from the sequencer
-sampleName=`ls *_R1* | sed 's/_.*//' | sed 's/\..*//'`
+sampleName=`ls *.fastq | head -1 | sed 's/_.*//' | sed 's/\..*//'`
 #Directory where script is called
 root=`pwd`
 #Establish Read Files
@@ -24,10 +24,10 @@ if [ -f *R2* ]; then
     echo "R2 paired end read file present"
     sampleType="paired"
     forFile=`ls | grep _R1`
-    forReads=$root/$forFile
+    forReads="$root/$forFile"
     echo "Forward Reads:  $forReads"
     revFile=`ls | grep _R2`
-    revReads=$root/$revFile
+    revReads="$root/$revFile"
     echo "Reverse Reads:  $revReads"
 else
     echo "Just a single read present"
@@ -188,8 +188,8 @@ cp $report $uploadFolder
 root=`pwd`
 
 #Variable for files containing reads
-forReads=`echo *_R1*`
-revReads=`echo *_R2*`
+#forReads=`echo *_R1*`
+#revReads=`echo *_R2*`
 #Beginning of resultsSumary.txt report
 summaryFile=$root/${sampleName}-resultsSummary.txt
 #Calculate files sizes
@@ -205,9 +205,9 @@ fi
 
 echo "#################### Sample: $sampleName ####################" >> $summaryFile
 echo "" >> $summaryFile
-printf "%s, %s file size, %'.0f reads\n" ${forReads} ${forFileSize} ${forCount} >> $summaryFile
+printf "%s, %s file size, %'.0f reads\n" ${forFile} ${forFileSize} ${forCount} >> $summaryFile
 if [[ $sampleType == "paired" ]]; then
-    printf "%s, %s file size, %'.0f reads\n" ${revReads} ${revFileSize} ${revCount} >> $summaryFile
+    printf "%s, %s file size, %'.0f reads\n" ${revFile} ${revFileSize} ${revCount} >> $summaryFile
 fi
 echo "" >> $summaryFile
 declare -i x=${forCount}
@@ -348,10 +348,14 @@ for id in `cat $isolatedReads/finalUniqueTaxIDs.txt`; do
 	readsfound=`grep -c ".*" ./${idname}/${idname}.reads`
 	echo "Number of reads to be found: $readsfound"
 	cd ${idname}
-        grep -F -A3 -h -f ./${idname}.reads ../../*.fastq >> ${sampleName}.${idname}.fastq
-	egrep -A3 "1:N:" ${sampleName}.${idname}.fastq | grep -v '^--$' > ${sampleName}.${idname}_R1.fastq
-	egrep -A3 "2:N:" ${sampleName}.${idname}.fastq | grep -v '^--$' > ${sampleName}.${idname}_R2.fastq
-	rm ${sampleName}.${idname}.fastq
+        grep -F -A3 -h -f ./${idname}.reads ../../*.fastq >> ${sampleName}.${idname}.temp.fastq
+	if [[ $sampleType == "paired" ]]; then
+	    egrep -A3 "1:N:" ${sampleName}.${idname}.temp.fastq | grep -v '^--$' > ${sampleName}.${idname}_R1.fastq
+	    egrep -A3 "2:N:" ${sampleName}.${idname}.temp.fastq | grep -v '^--$' > ${sampleName}.${idname}_R2.fastq
+	else
+	    grep -v '^--$' ${sampleName}.${idname}.temp.fastq > ${sampleName}.${idname}.fastq    
+	fi
+	rm ${sampleName}.${idname}.temp.fastq
 done
 cd $root
 
@@ -381,8 +385,12 @@ done
 for folder in *; do
     cd $TIF
     cd ./$folder
-    touch ${folder}_R1.fastq
-    touch ${folder}_R2.fastq
+    if [[ $sampleType == "paired" ]]; then
+        touch ${folder}_R1.fastq
+        touch ${folder}_R2.fastq
+    else
+	touch ${folder}.fastq
+    fi
     #n is taxID
     file="${folder}ListOfTaxIDs"
 	#echo "At $LINENO this is output from file variable"
@@ -391,9 +399,13 @@ for folder in *; do
 	for n in `cat ./$file`; do        
 		cd $isolatedReads
         	cd ./$n
-        	cat *_R1.fastq >> $TIF/$folder/${folder}_R1.fastq
-        	cat *_R2.fastq >> $TIF/$folder/${folder}_R2.fastq
-    		#grep "^@[AM][0-9]" *_R1.fastq >> $TIF/$folder/${folder}_header1.txt
+		if [[ $sampleType == "paired" ]]; then
+        	    cat *_R1.fastq >> $TIF/$folder/${folder}_R1.fastq
+        	    cat *_R2.fastq >> $TIF/$folder/${folder}_R2.fastq
+    		else
+		    cat *.fastq >> $TIF/$folder/${folder}.fastq
+		fi
+		#grep "^@[AM][0-9]" *_R1.fastq >> $TIF/$folder/${folder}_header1.txt
 		#grep "^@[AM][0-9]" *_R2.fastq >> $TIF/$folder/${folder}_header2.txt
 
 	done
@@ -576,13 +588,13 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 
     #Full, original forward read file
     #forReads=`ls ${root}/*_R1*.fastq`
-    echo "Read one file is: $root/$forReads"
+    echo "Read one file is: $forReads"
     #Full, original reverse read file
     #revReads=`ls ${root}/*_R2*.fastq`
     #echo "Read two file is: $revReads"
-    forCount=`grep -c "^+$" $root/$forReads`
+    forCount=`grep -c "^+$" $forReads`
     if [[ $sampleType == "paired" ]]; then
-        revCount=`grep -c "^+$" $root/$revReads`
+        revCount=`grep -c "^+$" $revReads`
     fi
 
     #Start file to capture alignment summaries
@@ -621,9 +633,9 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 	    fi
 	    
 	    if [[ $sampleType == "paired" ]]; then
-                bwa mem -M -B 1 -t 10 -T 20 -P -a -R @RG"\t"ID:"$g""\t"PL:ILLUMINA"\t"PU:"$g"_RG1_UNIT1"\t"LB:"$g"_LIB1"\t"SM:"$g" $ref $root/$forReads $root/$revReads > ${g}.sam
+                bwa mem -M -B 1 -t 10 -T 20 -P -a -R @RG"\t"ID:"$g""\t"PL:ILLUMINA"\t"PU:"$g"_RG1_UNIT1"\t"LB:"$g"_LIB1"\t"SM:"$g" $ref $forReads $revReads > ${g}.sam
 	    else
-		bwa mem -M -B 1 -t 10 -T 20 -P -a -R @RG"\t"ID:"$g""\t"PL:ILLUMINA"\t"PU:"$g"_RG1_UNIT1"\t"LB:"$g"_LIB1"\t"SM:"$g" $ref $root/$forReads > ${g}.sam            
+		bwa mem -M -B 1 -t 10 -T 20 -P -a -R @RG"\t"ID:"$g""\t"PL:ILLUMINA"\t"PU:"$g"_RG1_UNIT1"\t"LB:"$g"_LIB1"\t"SM:"$g" $ref $forReads > ${g}.sam            
 	    fi
 	    samtools view -bh -T $ref ${g}.sam > ${g}.raw.bam
             echo "Sorting Bam"
