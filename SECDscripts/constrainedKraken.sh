@@ -159,6 +159,52 @@ function blastContigs () {
 }
 ###########################################################################################################################
 ###########################################################################################################################
+#||||||||||||||||||||||||||||||||||||||||||||| Function to Download Accessions from NCBI ||||||||||||||||||||||||||||||||||
+###########################################################################################################################
+
+function fetchGenomes () {
+# Create "here-document" to prevent a dependent file.
+cat > ./fetchGenomeFasta.py << EOL
+#!/usr/bin/python
+
+import urllib2
+import os
+import sys
+import time
+
+if len(sys.argv) != 2:
+    #print "USAGE: fetch_genome.py <accession>"
+    print "ERROR: in function to download accession. Must provide accession number"
+    sys.exit(1)
+
+url_template = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide&id=%s&rettype=fasta&retmode=text"
+
+#os.mkdir(sys.argv[2])
+
+id = sys.argv[1]
+#for id in open(sys.argv[1]):
+id = id.strip()
+#if id == "":
+#    continue
+
+sys.stdout.write("Fetching %s..." % id)
+sys.stdout.flush()
+gbk_out_file = id + ".fasta"
+#if os.path.exists(gbk_out_file):
+#    print "already fetched"
+
+open(gbk_out_file, "w").write(urllib2.urlopen(url_template % id).read())
+print "Done"
+time.sleep(1.0/3)
+
+EOL
+chmod 755 ./fetchGenomeFasta.py
+./fetchGenomeFasta.py $1
+rm ./fetchGenomeFasta.py
+}
+
+###########################################################################################################################
+
 echo "Kraken database selected is: $krakenDatabase"
 echo "Organism chosen is: $organism"
 echo "Search terms are: `cat $searchTerms`"
@@ -539,7 +585,7 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 	    cp ${mydb}/$p .
 	else
 	    echo "Downloading from NCBI"
-	    fetch-genomes-fasta.py $acc
+	    fetchGenomes $acc
 	    accFasta="${acc}.fasta"
 	    if [ -s $accFasta ]; then
 		echo "Downloaded from NCBI, good to continue."
@@ -547,7 +593,7 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 	    else
 		echo "Try downloading again"
 		sleep 20
-		fetch-genomes-fasta.py $acc
+		fetchGenomes $acc
 		sleep 5
 		if [ -s $accFasta ]; then
 		    echo "Downloaded from NCBI, good to continue."
@@ -555,7 +601,7 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 		else
 		    echo "Try downloading again"
 		    sleep 120
-		    fetch-genomes-fasta.py $acc
+		    fetchGenomes $acc
 		    sleep 5
 		    if [ -s $accFasta ]; then
 			echo "Downloaded from NCBI, good to continue."
@@ -563,7 +609,7 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 		    else
 			echo "Try downloading again"
 			sleep 320
-			fetch-genomes-fasta.py $acc
+			fetchGenomes $acc
 			sleep 5
 			if [ -s $accFasta ]; then
 			    echo "Downloaded from NCBI, good to continue."
