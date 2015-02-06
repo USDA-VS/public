@@ -241,6 +241,7 @@ rm ./fetchGenomeFasta.py
 }
 
 ###########################################################################################################################
+
 ###########################################################################################################################
 #||||||||||||||||||||||||||||||||||||||||| Function to sort Kraken output into hierarchical taxonomy clusters |||||||||||||
 ###########################################################################################################################
@@ -367,7 +368,43 @@ chmod 755 ./organizeKraken.py
 rm ./organizeKraken.py
 }
 
+##########################################################################################################
+#||||||||||||||||||||||||||||||| Function to make R graph of coverage ||||||||||||||||||||||||||||||||||||
+##########################################################################################################
+function plotR () {
+cat > ./plotR.r << EOL
+#!/usr/bin/env Rscript
 
+library(ggplot2)
+library(scatterplot3d)
+library(plyr)
+
+arg <- commandArgs(trailingOnly=TRUE)
+
+data <- read.csv(arg[1], header=FALSE, sep="\t")
+names(data) <- c("species", "position", "coverage")
+
+pdf("myplot.pdf", width=20, height=4)
+
+ggplot(data, aes(x=position, y=coverage, colour=species, group=species)) + geom_line() + ggtitle(arg[2])# + ylim(-10, 100)
+
+data2 <- ddply(data, .(species), summarise, med = median(coverage))
+ggplot(data, aes(x = species, y = coverage)) + geom_boxplot() + geom_text(data = data2, aes(x = species, y = med, label = med), size =3, vjust = -1.0)
+
+#ggplot (data, aes(x=species, y=coverage)) + geom_boxplot(outlier.size=0.2) + ggtitle(arg[2])
+ggplot(data, aes(x=position, y=coverage, colour=species, group=species)) + geom_point(size=0.5) + stat_smooth(method="auto", se=FALSE, size=3) + ggtitle(arg[2])
+
+scatterplot3d(data\$species, data\$position, data\$coverage, highlight.3d = TRUE)
+
+dev.off()
+EOL
+
+chmod 755 ./plotR.r
+read -p "$LINENO ENTER"
+./plotR.r $1 $2 $3
+rm ./plotR.r
+}
+###############################################################################################################################
 echo "Kraken database selected is: $krakenDatabase"
 echo "Organism chosen is: $organism"
 echo "Search terms are: `cat $searchTerms`"
@@ -935,7 +972,7 @@ if [[ highnumber -gt 5000 ]]; then
     highnumber=5000
 fi
 echo "Highnumber for the y axis is: $highnumber"
-coveragebyr.r $root/${sampleName}-mergefile $sampleName $highnumber
+plotR $root/${sampleName}-mergefile $sampleName $highnumber
 mv myplot.pdf ${sampleName}.Rgraph.pdf
 mv ${sampleName}.Rgraph.pdf $root/${sampleName}.CoverageProfile.pdf
 
