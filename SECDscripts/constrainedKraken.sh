@@ -4,14 +4,11 @@
 
 # Runs in a folder with only two fastq files
 # Runs Kraken, Krona, organizes taxIDs and generates folders for further analysis. Runs Abyss, BLAST, BWA on those files and generates reports
-# Results are in ${name}-resultsSummary.txt
+# Results are in ${name}_upload/{name}-resultsSummary.txt
 
-# Required scripts:
-	#krakenProcessing.py
-	#fetch-genomes-fasta.py
-	#coveragebyr.r
 echo "Running dev. branch version"
 NR_CPUS=60 # Computer cores to use when analyzing
+cp $0 ./
 #unzip files if needed
 find . -name "*gz" -type f -print0 | xargs -0 -n 1 -P $NR_CPUS gunzip
 
@@ -197,6 +194,7 @@ function blastContigs () {
 
 }
 ###########################################################################################################################
+
 ###########################################################################################################################
 #||||||||||||||||||||||||||||||||||||||||||||| Function to Download Accessions from NCBI ||||||||||||||||||||||||||||||||||
 ###########################################################################################################################
