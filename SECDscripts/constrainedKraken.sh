@@ -113,7 +113,7 @@ function abyssRun () {
 #||||||||||||||||||||||||||||||||||||||||||| Function to parse BLAST output |||||||||||||||||||||||||||||||||||||||||||||||
 ###########################################################################################################################
 function parseBlast () {
-cat > ./parstBlast.py << EOL
+cat > ./parseBlast.py << EOL
 #!/usr/bin/env python
 
 import xml.etree.ElementTree as ET
@@ -143,7 +143,7 @@ for Blast_iteration in myroot.findall('BlastOutput_iterations'):
                         Hsp_evalue = Hsp.find('Hsp_evalue').text
                 print queryID, Hit_def_split[0], Hit_def_split[1], Hit_accession, Hit_len, Hsp_bitscore, Hsp_evalue, Hit_def
 EOL
-chmod 755 parseBlast.py
+chmod 755 ./parseBlast.py
 ./parseBlast.py $1
 rm ./parseBlast.py
 }
@@ -152,16 +152,15 @@ rm ./parseBlast.py
 #||||||||||||||||||||||||||||||||||||||||||| Function to BLAST assembled contigs ||||||||||||||||||||||||||||||||||||||||||
 ########################################################################################################################### 
 
-function blastContigs () {
-    ###### How to handle sample name? --> Species, not name of seq. sample 
+function blastContigs () { 
     echo "######################Running BLAST function"
     NR_CPUS=50
     n=`echo $1`
     file=`echo $2`
     function parseXML () {
-	abyss-parseXML-Blast5.py ${n}_contig-blastResults-5.xml | sed 's/\[.*\]//g' | sort -k1,1 -k2,2 | awk '{print $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14}' | awk '{k=$1; a[k]++; b[k]=$0}; END{for (k in a) print a[k], b[k]}' | sort -rnk1,1 | awk 'BEGIN{print "n", "acc", "length", "score", "e-value", "ID"} {print $0}' | column -t > BLAST-summary-${n}-contigIDs.txt
+	parseBlast ${n}_contig-blastResults-5.xml | sed 's/\[.*\]//g' | sort -k1,1 -k2,2 | awk '{print $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14}' | awk '{k=$1; a[k]++; b[k]=$0}; END{for (k in a) print a[k], b[k]}' | sort -rnk1,1 | awk 'BEGIN{print "n", "acc", "length", "score", "e-value", "ID"} {print $0}' | column -t > BLAST-summary-${n}-contigIDs.txt
 
-	abyss-parseXML-Blast5.py ${n}_contig-blastResults-5.xml | sed 's/\[.*\]//g' | sort -k1,1 -k2,2 | column -t > BLAST-all-${n}-contigIDs.txt
+	parseBlast ${n}_contig-blastResults-5.xml | sed 's/\[.*\]//g' | sort -k1,1 -k2,2 | column -t > BLAST-all-${n}-contigIDs.txt
 
     }
 
