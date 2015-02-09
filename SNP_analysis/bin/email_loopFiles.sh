@@ -32,32 +32,16 @@ echo "" >> /scratch/report/email_processZips.txt
 
 grep -v '*' /scratch/report/email_processZips.txt | grep -v "Stats for BAM file" | sed 's/ADD_MARKER/******************************************/g' > /scratch/report/email_processZips2.txt
 
-#email_list="tod.p.stuber@aphis.usda.gov"
-email_list="tod.p.stuber@aphis.usda.gov patrick.m.camp@aphis.usda.gov David.T.Farrell@aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+if [[ $1 == me ]]; then
+	email_list="tod.p.stuber@aphis.usda.gov"
+	else
+	email_list="tod.p.stuber@aphis.usda.gov patrick.m.camp@aphis.usda.gov David.T.Farrell@aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+fi
 
 cat /scratch/report/email_processZips2.txt | mutt -s "WGS results" -- $email_list
 
-#mail -s "WGS results" tod.p.stuber@aphis.usda.gov < /scratch/report/email_processZips2.txt
-
 date >> /scratch/report/mlstCheck_all.txt
 cat /scratch/report/mlstCheck.txt >> /scratch/report/mlstCheck_all.txt
-
-#echo "<html>" > /scratch/report/assembly_stats.html
-#awk 'BEGIN{print "<Body>"} {print "<p style=\"line-height: 40%;\">" $0 "</p>"} END{print "</Body>"}' /scratch/report/email_processZips2.txt >> /scratch/report/assembly_stats.html
-#echo "</html>" >> /scratch/report/assembly_stats.html
-
-# E-mail results
-#basen=`basename $0`
-# As attachment
-#echo "See attachment"| mutt -s "WGS results" -a /scratch/report/assembly_stats.html -- tod.p.stuber@aphis.usda.gov
-
-#echo "See attachment"| mutt -s "WGS results" -a /scratch/report/assembly_stats.html -- patrick.m.camp@aphis.usda.gov
-
-#echo "See attachment"| mutt -s "WGS results" -a /scratch/report/assembly_stats.html -- suelee.robbe-austerman@aphis.usda.gov
-
-#echo "See attachment"| mutt -s "WGS results" -a /scratch/report/assembly_stats.html -- Christine.R.Quance@aphis.usda.gov
-
-#echo "See attachment"| mutt -s "WGS results" -a /scratch/report/assembly_stats.html -- David.T.Farrell@aphis.usda.gov
 
 
 #
