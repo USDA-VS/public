@@ -7,50 +7,6 @@
 
 echo "**********************START**********************"
 
-spacer01="TGATCCAGAGCCGGCGACCCTCTAT|ATAGAGGGTCGCCGGCTCTGGATCA"
-spacer02="CAAAAGCTGTCGCCCAA|TTGGGCGACAGCTTTTG"
-spacer03="CCGTGCTTCCAGTGATCGCCTTCTA|TAGAAGGCGATCACTGGAAGCACGG"
-spacer04="ACGTCATACGCCGACCAATCATCAG|CTGATGATTGGTCGGCGTATGACGT"
-spacer05="TTTTCTGACCACTTGTGCGGGATTA|TAATCCCGCACAAGTGGTCAGAAAA"
-spacer06="CGTCGTCATTTCCGGCTTCAATTTC|GAAATTGAAGCCGGAAATGACGACG"
-spacer07="GAGGAGAGCGAGTACTCGGGGCTGC|GCAGCCCCGAGTACTCGCTCTCCTC"
-spacer08="CGTGAAACCGCCCCCAGCCTCGCCG|CGGCGAGGCTGGGGGCGGTTTCACG"
-spacer09="ACTCGGAATCCCATGTGCTGACAGC|GCTGTCAGCACATGGGATTCCGAGT"
-spacer10="TCGACACCCGCTCTAGTTGACTTCC|GGAAGTCAACTAGAGCGGGTGTCGA"
-spacer11="GTGAGCAACGGCGGCGGCAACCTGG|CCAGGTTGCCGCCGCCGTTGCTCAC"
-spacer12="ATATCTGCTGCCCGCCCGGGGAGAT|ATCTCCCCGGGCGGGCAGCAGATAT"
-spacer13="GACCATCATTGCCATTCCCTCTCCC|GGGAGAGGGAATGGCAATGATGGTC"
-spacer14="GGTGTGATGCGGATGGTCGGCTCGG|CCGAGCCGACCATCCGCATCACACC"
-spacer15="CTTGAATAACGCGCAGTGAATTTCG|CGAAATTCACTGCGCGTTATTCAAG"
-spacer16="CGAGTTCCCGTCAGCGTCGTAAATC|GATTTACGACGCTGACGGGAACTCG"
-spacer17="GCGCCGGCCCGCGCGGATGACTCCG|CGGAGTCATCCGCGCGGGCCGGCGC"
-spacer18="CATGGACCCGGGCGAGCTGCAGATG|CATCTGCAGCTCGCCCGGGTCCATG"
-spacer19="TAACTGGCTTGGCGCTGATCCTGGT|ACCAGGATCAGCGCCAAGCCAGTTA"
-spacer20="TTGACCTCGCCAGGAGAGAAGATCA|TGATCTTCTCTCCTGGCGAGGTCAA"
-spacer21="TCGATGTCGATGTCCCAATCGTCGA|TCGACGATTGGGACATCGACATCGA"
-spacer22="ACCGCAGACGGCACGATTGAGACAA|TTGTCTCAATCGTGCCGTCTGCGGT"
-spacer23="AGCATCGCTGATGCGGTCCAGCTCG|CGAGCTGGACCGCATCAGCGATGCT"
-spacer24="CCGCCTGCTGGGTGAGACGTGCTCG|CGAGCACGTCTCACCCAGCAGGCGG"
-spacer25="GATCAGCGACCACCGCACCCTGTCA|TGACAGGGTGCGGTGGTCGCTGATC"
-spacer26="CTTCAGCACCACCATCATCCGGCGC|GCGCCGGATGATGGTGGTGCTGAAG"
-spacer27="GGATTCGTGATCTCTTCCCGCGGAT|ATCCGCGGGAAGAGATCACGAATCC"
-spacer28="TGCCCCGGCGTTTAGCGATCACAAC|GTTGTGATCGCTAAACGCCGGGGCA"
-spacer29="AAATACAGGCTCCACGACACGACCA|TGGTCGTGTCGTGGAGCCTGTATTT"
-spacer30="GGTTGCCCCGCGCCCTTTTCCAGCC|GGCTGGAAAAGGGCGCGGGGCAACC"
-spacer31="TCAGACAGGTTCGCGTCGATCAAGT|ACTTGATCGACGCGAACCTGTCTGA"
-spacer32="GACCAAATAGGTATCGGCGTGTTCA|TGAACACGCCGATACCTATTTGGTC"
-spacer33="GACATGACGGCGGTGCCGCACTTGA|TCAAGTGCGGCACCGCCGTCATGTC"
-spacer34="AAGTCACCTCGCCCACACCGTCGAA|TTCGACGGTGTGGGCGAGGTGACTT"
-spacer35="TCCGTACGCTCGAAACGCTTCCAAC|GTTGGAAGCGTTTCGAGCGTACGGA"
-spacer36="CGAAATCCAGCACCACATCCGCAGC|GCTGCGGATGTGGTGCTGGATTTCG"
-spacer37="CGCGAACTCGTCCACAGTCCCCCTT|AAGGGGGACTGTGGACGAGTTCGCG"
-spacer38="CGTGGATGGCGGATGCGTTGTGCGC|GCGCACAACGCATCCGCCATCCACG"
-spacer39="GACGATGGCCAGTAAATCGGCGTGG|CCACGCCGATTTACTGGCCATCGTC"
-spacer40="CGCCATCTGTGCCTCATACAGGTCC|GGACCTGTATGAGGCACAGATGGCG"
-spacer41="GGAGCTTTCCGGCTTCTATCAGGTA|TACCTGATAGAAGCCGGAAAGCTCC"
-spacer42="ATGGTGGGACATGGACGAGCGCGAC|GTCGCGCTCGTCCATGTCCCACCAT"
-spacer43="CGCAGAATCGCACCGGGTGCGGGAG|CTCCCGCACCCGGTGCGATTCTGCG"
-
 # Starting working directory must be BWA-GATK folder with included /Zips file containing 2 zipped fastq files.
 echo "directory"
 pwd
@@ -74,49 +30,283 @@ echo "Reverse Reads:  $revReads"
 
 n=`echo $revReads | sed 's/_.*//' | sed 's/\..*//'` #grab name minus the .vcf
 
-sp01=`egrep $spacer01 $forReads $revReads | wc -l`
-sp02=`egrep $spacer02 $forReads $revReads | wc -l`
-sp03=`egrep $spacer03 $forReads $revReads | wc -l`
-sp04=`egrep $spacer04 $forReads $revReads | wc -l`
-sp05=`egrep $spacer05 $forReads $revReads | wc -l`
-sp06=`egrep $spacer06 $forReads $revReads | wc -l`
-sp07=`egrep $spacer07 $forReads $revReads | wc -l`
-sp08=`egrep $spacer08 $forReads $revReads | wc -l`
-sp09=`egrep $spacer09 $forReads $revReads | wc -l`
-sp10=`egrep $spacer10 $forReads $revReads | wc -l`
-sp11=`egrep $spacer11 $forReads $revReads | wc -l`
-sp12=`egrep $spacer12 $forReads $revReads | wc -l`
-sp13=`egrep $spacer13 $forReads $revReads | wc -l`
-sp14=`egrep $spacer14 $forReads $revReads | wc -l`
-sp15=`egrep $spacer15 $forReads $revReads | wc -l`
-sp16=`egrep $spacer16 $forReads $revReads | wc -l`
-sp17=`egrep $spacer17 $forReads $revReads | wc -l`
-sp18=`egrep $spacer18 $forReads $revReads | wc -l`
-sp19=`egrep $spacer19 $forReads $revReads | wc -l`
-sp20=`egrep $spacer20 $forReads $revReads | wc -l`
-sp21=`egrep $spacer21 $forReads $revReads | wc -l`
-sp22=`egrep $spacer22 $forReads $revReads | wc -l`
-sp23=`egrep $spacer23 $forReads $revReads | wc -l`
-sp24=`egrep $spacer24 $forReads $revReads | wc -l`
-sp25=`egrep $spacer25 $forReads $revReads | wc -l`
-sp26=`egrep $spacer26 $forReads $revReads | wc -l`
-sp27=`egrep $spacer27 $forReads $revReads | wc -l`
-sp28=`egrep $spacer28 $forReads $revReads | wc -l`
-sp29=`egrep $spacer29 $forReads $revReads | wc -l`
-sp30=`egrep $spacer30 $forReads $revReads | wc -l`
-sp31=`egrep $spacer31 $forReads $revReads | wc -l`
-sp32=`egrep $spacer32 $forReads $revReads | wc -l`
-sp33=`egrep $spacer33 $forReads $revReads | wc -l`
-sp34=`egrep $spacer34 $forReads $revReads | wc -l`
-sp35=`egrep $spacer35 $forReads $revReads | wc -l`
-sp36=`egrep $spacer36 $forReads $revReads | wc -l`
-sp37=`egrep $spacer37 $forReads $revReads | wc -l`
-sp38=`egrep $spacer38 $forReads $revReads | wc -l`
-sp39=`egrep $spacer39 $forReads $revReads | wc -l`
-sp40=`egrep $spacer40 $forReads $revReads | wc -l`
-sp41=`egrep $spacer41 $forReads $revReads | wc -l`
-sp42=`egrep $spacer42 $forReads $revReads | wc -l`
-sp43=`egrep $spacer43 $forReads $revReads | wc -l`
+##############
+
+onemismatch () {
+patt=($forward)
+for ((i=0; i<${#patt[0]}; i++)); do
+patt+=( "${patt[0]:0:i}.${patt[0]:i+1}" )
+done
+echo "${patt[*]}" | tr " " "\n" > searchpattern
+
+patt=($reverse)
+for ((i=0; i<${#patt[0]}; i++)); do
+patt+=( "${patt[0]:0:i}.${patt[0]:i+1}" )
+done
+echo "${patt[*]}" | tr " " "\n" >> searchpattern
+}
+
+##############
+
+#Spacer01
+forward="TGATCCAGAGCCGGCGACCCTCTAT"
+reverse="ATAGAGGGTCGCCGGCTCTGGATCA"
+onemismatch
+sp01=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer02
+forward="CAAAAGCTGTCGCCCAAGCATGAGG"
+reverse="CCTCATGCTTGGGCGACAGCTTTTG"
+onemismatch
+sp02=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer03
+forward="CCGTGCTTCCAGTGATCGCCTTCTA"
+reverse="TAGAAGGCGATCACTGGAAGCACGG"
+onemismatch
+sp03=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer05
+forward="ACGTCATACGCCGACCAATCATCAG"
+reverse="CTGATGATTGGTCGGCGTATGACGT"
+onemismatch
+sp04=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer05
+forward="TTTTCTGACCACTTGTGCGGGATTA"
+reverse="TAATCCCGCACAAGTGGTCAGAAAA"
+onemismatch
+sp05=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer06
+forward="CGTCGTCATTTCCGGCTTCAATTTC"
+reverse="GAAATTGAAGCCGGAAATGACGACG"
+onemismatch
+sp06=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer07
+forward="GAGGAGAGCGAGTACTCGGGGCTGC"
+reverse="GCAGCCCCGAGTACTCGCTCTCCTC"
+onemismatch
+sp07=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer08
+forward="CGTGAAACCGCCCCCAGCCTCGCCG"
+reverse="CGGCGAGGCTGGGGGCGGTTTCACG"
+onemismatch
+sp08=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer09
+forward="ACTCGGAATCCCATGTGCTGACAGC"
+reverse="GCTGTCAGCACATGGGATTCCGAGT"
+onemismatch
+sp09=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer10
+forward="TCGACACCCGCTCTAGTTGACTTCC"
+reverse="GGAAGTCAACTAGAGCGGGTGTCGA"
+onemismatch
+sp10=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer11
+forward="GTGAGCAACGGCGGCGGCAACCTGG"
+reverse="CCAGGTTGCCGCCGCCGTTGCTCAC"
+onemismatch
+sp11=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer12
+forward="ATATCTGCTGCCCGCCCGGGGAGAT"
+reverse="ATCTCCCCGGGCGGGCAGCAGATAT"
+onemismatch
+sp12=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer13
+forward="GACCATCATTGCCATTCCCTCTCCC"
+reverse="GGGAGAGGGAATGGCAATGATGGTC"
+onemismatch
+sp13=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer14
+forward="GGTGTGATGCGGATGGTCGGCTCGG"
+reverse="CCGAGCCGACCATCCGCATCACACC"
+onemismatch
+sp14=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer15
+forward="CTTGAATAACGCGCAGTGAATTTCG"
+reverse="CGAAATTCACTGCGCGTTATTCAAG"
+onemismatch
+sp15=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer16
+forward="CGAGTTCCCGTCAGCGTCGTAAATC"
+reverse="GATTTACGACGCTGACGGGAACTCG"
+onemismatch
+sp16=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer17
+forward="GCGCCGGCCCGCGCGGATGACTCCG"
+reverse="CGGAGTCATCCGCGCGGGCCGGCGC"
+onemismatch
+sp17=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer18
+forward="CATGGACCCGGGCGAGCTGCAGATG"
+reverse="CATCTGCAGCTCGCCCGGGTCCATG"
+onemismatch
+sp18=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer19
+forward="TAACTGGCTTGGCGCTGATCCTGGT"
+reverse="ACCAGGATCAGCGCCAAGCCAGTTA"
+onemismatch
+sp19=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer20
+forward="TTGACCTCGCCAGGAGAGAAGATCA"
+reverse="TGATCTTCTCTCCTGGCGAGGTCAA"
+onemismatch
+sp20=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer21
+forward="TCGATGTCGATGTCCCAATCGTCGA"
+reverse="TCGACGATTGGGACATCGACATCGA"
+onemismatch
+sp21=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer22
+forward="ACCGCAGACGGCACGATTGAGACAA"
+reverse="TTGTCTCAATCGTGCCGTCTGCGGT"
+onemismatch
+sp22=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer23
+forward="AGCATCGCTGATGCGGTCCAGCTCG"
+reverse="CGAGCTGGACCGCATCAGCGATGCT"
+onemismatch
+sp23=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer24
+forward="CCGCCTGCTGGGTGAGACGTGCTCG"
+reverse="CGAGCACGTCTCACCCAGCAGGCGG"
+onemismatch
+sp24=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer25
+forward="GATCAGCGACCACCGCACCCTGTCA"
+reverse="TGACAGGGTGCGGTGGTCGCTGATC"
+onemismatch
+sp25=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer26
+forward="CTTCAGCACCACCATCATCCGGCGC"
+reverse="GCGCCGGATGATGGTGGTGCTGAAG"
+onemismatch
+sp26=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer27
+forward="GGATTCGTGATCTCTTCCCGCGGAT"
+reverse="ATCCGCGGGAAGAGATCACGAATCC"
+onemismatch
+sp27=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer28
+forward="TGCCCCGGCGTTTAGCGATCACAAC"
+reverse="GTTGTGATCGCTAAACGCCGGGGCA"
+onemismatch
+sp28=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer29
+forward="AAATACAGGCTCCACGACACGACCA"
+reverse="TGGTCGTGTCGTGGAGCCTGTATTT"
+onemismatch
+sp29=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer30
+forward="GGTTGCCCCGCGCCCTTTTCCAGCC"
+reverse="GGCTGGAAAAGGGCGCGGGGCAACC"
+onemismatch
+sp30=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer31
+forward="TCAGACAGGTTCGCGTCGATCAAGT"
+reverse="ACTTGATCGACGCGAACCTGTCTGA"
+onemismatch
+sp31=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer32
+forward="GACCAAATAGGTATCGGCGTGTTCA"
+reverse="TGAACACGCCGATACCTATTTGGTC"
+onemismatch
+sp32=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer33
+forward="GACATGACGGCGGTGCCGCACTTGA"
+reverse="TCAAGTGCGGCACCGCCGTCATGTC"
+onemismatch
+sp33=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer34
+forward="AAGTCACCTCGCCCACACCGTCGAA"
+reverse="TTCGACGGTGTGGGCGAGGTGACTT"
+onemismatch
+sp34=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer35
+forward="TCCGTACGCTCGAAACGCTTCCAAC"
+reverse="GTTGGAAGCGTTTCGAGCGTACGGA"
+onemismatch
+sp35=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer36
+forward="CGAAATCCAGCACCACATCCGCAGC"
+reverse="GCTGCGGATGTGGTGCTGGATTTCG"
+onemismatch
+sp36=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer37
+forward="CGCGAACTCGTCCACAGTCCCCCTT"
+reverse="AAGGGGGACTGTGGACGAGTTCGCG"
+onemismatch
+sp37=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer38
+forward="CGTGGATGGCGGATGCGTTGTGCGC"
+reverse="GCGCACAACGCATCCGCCATCCACG"
+onemismatch
+sp38=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer39
+forward="GACGATGGCCAGTAAATCGGCGTGG"
+reverse="CCACGCCGATTTACTGGCCATCGTC"
+onemismatch
+sp39=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer40
+forward="CGCCATCTGTGCCTCATACAGGTCC"
+reverse="GGACCTGTATGAGGCACAGATGGCG"
+onemismatch
+sp40=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer41
+forward="GGAGCTTTCCGGCTTCTATCAGGTA"
+reverse="TACCTGATAGAAGCCGGAAAGCTCC"
+onemismatch
+sp41=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer42
+forward="ATGGTGGGACATGGACGAGCGCGAC"
+reverse="GTCGCGCTCGTCCATGTCCCACCAT"
+onemismatch
+sp42=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+#Spacer43
+forward="CGCAGAATCGCACCGGGTGCGGGAG"
+reverse="CTCCCGCACCCGGTGCGATTCTGCG"
+onemismatch
+sp43=`cat $forReads $revReads | egrep -h -m 5 -c -f searchpattern`
+
+rm searchpattern
 
 echo "spacer01	spacer02	spacer03	spacer04	spacer05	spacer06	spacer07	spacer08	spacer09	spacer10	spacer11	spacer12	spacer13	spacer14	spacer15	spacer16	spacer17	spacer18	spacer19	spacer20	spacer21	spacer22	spacer23	spacer24	spacer25	spacer26	spacer27	spacer28	spacer29	spacer30	spacer31	spacer32	spacer33	spacer34	spacer35	spacer36	spacer37	spacer38	spacer39	spacer40	spacer41	spacer42	spacer43" > $n.spacer.txt
 
@@ -158,7 +348,6 @@ elif [ $i == 0 ]
 	echo "0" >> $n.octalcode.txt
 elif [ $i == 1 ]
 	then
-# Changed 4 to 1 on 2013-10-25
 	echo "1" >> $n.octalcode.txt
 else
 	echo "***Error***" >> $n.octalcode.txt
@@ -167,40 +356,17 @@ done
 
 WGSpoligo=`cat $n.octalcode.txt | tr -cd "[:print:]"`
 
-# Grab blot spoligo Octal code
-#p=`grep "$n" /Volumes/Data_HD/Mycobacterium/bovis_tags.txt`
-#fileName=`echo $p | awk '{print $4}'`
-#fileName2=`echo $fileName | tr -d "[:space:]"`
-
 # Add infor to spoligoCheck.txt
 echo "<----- $n ----->" >> /scratch/report/spoligoCheck.txt
 echo "WGSpoligo:	$WGSpoligo" >> /scratch/report/spoligoCheck.txt
-#echo "Blot:		$fileName2" >> /scratch/report/spoligoCheck.txt
 
 #Make FileMaker file
 dateFile=`date "+%Y%m%d"`
 printf "%s\t%s\n" "$n" "$WGSpoligo" >> "/bioinfo11/TStuber/Results/_Mycobacterium/newFiles/${dateFile}_FileMakerSpoligoImport.txt"
 
-#if [ $WGSpoligo == $fileName2 ]
-#then
-#	echo "PASSED" >> /scratch/report/spoligoCheck.txt
-#else
-#	echo "FAILED" >> /scratch/report/spoligoCheck.txt
-#fi
-#echo "" >> /scratch/report/spoligoCheck.txt
-
 # Add infor to spoligoCheck_all.txt
 echo "<----- $n ----->" >> /scratch/report/spoligoCheck_all.txt
 echo "WGSpoligo:	$WGSpoligo" >> /scratch/report/spoligoCheck_all.txt
-#echo "Blot:		$fileName2" >> /scratch/report/spoligoCheck_all.txt
-
-#if [ $WGSpoligo == $fileName2 ]
-#then
-#	echo "PASSED" >> /scratch/report/spoligoCheck_all.txt
-#else
-#	echo "FAILED" >> /scratch/report/spoligoCheck_all.txt
-#fi
-#echo "" >> /scratch/report/spoligoCheck_all.txt
 
 # move back a directory to main sample folder
 cd ..
