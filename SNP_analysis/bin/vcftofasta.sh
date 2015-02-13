@@ -674,7 +674,7 @@ for i in RAxML*Tree*; do mv $i ../${i}.tree; done
 
 pwd
 inputfile=`ls RAxML_result*`
-tr ":" "\n" < ${inputfile} | tr "," "\n" | sed 's/(//g' | sed 's/)//g' | grep -v "\.[0-9]?" | grep -v "root" > cleanedAlignment.txt
+tr ":" "\n" < ${inputfile} | tr "," "\n" | sed 's/(//g' | sed 's/)//g' | grep -v "\.[0-9]*" | grep -v "root" > cleanedAlignment.txt
 
 awk 'NR==FNR{o[FNR]=$1; next} {t[$1]=$0} END{for(x=1; x<=FNR; x++){y=o[x]; print t[y]}}' cleanedAlignment.txt ../$d.table.txt > joined.txt
 grep "reference" ../$d.table.txt > references.txt
