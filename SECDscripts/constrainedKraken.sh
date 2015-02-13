@@ -6,7 +6,6 @@
 # Runs Kraken, Krona, organizes taxIDs and generates folders for further analysis. Runs Abyss, BLAST, BWA on those files and generates reports
 # Results are in ${name}_upload/{name}-resultsSummary.txt
 
-echo "Running dev. branch version"
 NR_CPUS=60 # Computer cores to use when analyzing
 cp $0 ./
 #unzip files if needed
@@ -400,7 +399,7 @@ dev.off()
 EOL
 
 chmod 755 ./plotR.r
-read -p "$LINENO ENTER"
+#read -p "$LINENO ENTER"
 ./plotR.r $1 $2 $3
 rm ./plotR.r
 }
