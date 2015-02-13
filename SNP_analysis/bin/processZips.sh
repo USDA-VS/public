@@ -476,38 +476,6 @@ rm -r fastq
 cp $0 ./
 #  Send files to the Network
 echo "***Sending files to the Network"
-#cp -r $PWD ${bioinfo}
-#
-#mkdir ${bioinfo}/$n/
-#mkdir ${bioinfo}/$n/BWAmem-GATK
-#mkdir ${bioinfo}/$n/Zips
-#mkdir ${bioinfo}/$n/BWAmem-GATK/QualityValues
-#mkdir ${bioinfo}/$n/unmappedReads
-#
-#cp ../${n}-identification.txt ${bioinfo}/$n
-#cp $n.* ${bioinfo}/$n/BWAmem-GATK
-#cp $ref ${bioinfo}/$n/BWAmem-GATK
-#cp $ref.fai ${bioinfo}/$n/BWAmem-GATK
-#cp *-coverage ${bioinfo}/$n/BWAmem-GATK
-#cp -r ../Zips/*.gz ${bioinfo}/$n/Zips
-#cp -r ./QualityValues/* ${bioinfo}/$n/BWAmem-GATK/QualityValues
-#cp -r ../unmappedReads/* ${bioinfo}/$n/unmappedReads
-#cp -r ../../${n} $copyto
-#
-#mkdir ${sharedSAN}/$n/
-#mkdir ${sharedSAN}/$n/BWAmem-GATK
-#mkdir ${sharedSAN}/$n/Zips
-#mkdir ${sharedSAN}/$n/BWAmem-GATK/QualityValues
-#mkdir ${sharedSAN}/$n/unmappedReads
-#
-#cp ../${n}-identification.txt ${sharedSAN}/$n
-#cp $n.* ${sharedSAN}/$n/BWAmem-GATK
-#cp $ref ${sharedSAN}/$n/BWAmem-GATK
-#cp $ref.fai ${sharedSAN}/$n/BWAmem-GATK
-#cp *-coverage ${sharedSAN}/$n/BWAmem-GATK
-#cp -r ../Zips/*.gz ${sharedSAN}/$n/Zips
-#cp -r ./QualityValues/* ${sharedSAN}/$n/BWAmem-GATK/QualityValues
-#cp -r ../unmappedReads/* ${sharedSAN}/$n/unmappedReads
 
 cp -r ${startingdir} ${bioinfo}
 
