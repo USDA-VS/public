@@ -218,13 +218,14 @@ elif [[ $1 == bovis ]]; then
     echo "Script vcftofasta.sh ran using M. bovis variables" >> section5
     email_list="tod.p.stuber@aphis.aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
 
-if [[ $2 == all ]]; then
-	echo "All bovis are being ran"
-	sleep 5
+if [[ $2 == elite ]]; then
+    echo "Only the "elite" bovis isolates are being ran"
+    sleep 5
 else
-	echo "Only the "elite" bovis isolates are being ran"
-	echo "If you would like to run all isolates use: vcftofasta.sh bovis all"
-	sleep 5
+    echo "All bovis are being ran"
+    echo "Like to run selected isolates? Use... vcftofasta.sh bovis elite"
+    sleep 5
+
 fi
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
@@ -853,25 +854,23 @@ removeIsolates
 
 # If bovis are ran default will only run with files check "misc" in FileMaker
 # Untitled.tab exported from FileMaker must contain "isolate names" followed by "Misc".
-if [[  $1 == bovis ]]; then
 
-	if [[ $2 == all ]]; then
-    	echo "all samples will be ran"
-    	cp ./starting_files/* ./
+	if [[ $2 == elite ]]; then
+        echo "Only analyzing elite files"
+        for i in `cat elite`; do
+        name=`ls starting_files | grep $i`
+        cp ./starting_files/$name ./
+        done
+
+        for i in `find ./starting_files/ -mtime -30`; do
+        cp $i ./
 	else
-    	echo "Only analyzing elite files"
-    	for i in `cat elite`; do
-        	name=`ls starting_files | grep $i`
-	        cp ./starting_files/$name ./
-		done
+        echo "all samples will be ran"
+        cp ./starting_files/* ./
 
-   	 for i in `find ./starting_files/ -mtime -30`; do 
-		cp $i ./
 		done
 	fi
 rm elite
-
-fi
 
 ############################### Rename files ###############################
 
