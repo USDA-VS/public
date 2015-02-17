@@ -857,6 +857,7 @@ removeIsolates
 
 	if [[ $2 == elite ]]; then
         echo "Only analyzing elite files"
+
         for i in `cat elite`; do
         name=`ls starting_files | grep $i`
         cp ./starting_files/$name ./
@@ -864,11 +865,11 @@ removeIsolates
 
         for i in `find ./starting_files/ -mtime -30`; do
         cp $i ./
-	else
+        done
+
+    else
         echo "all samples will be ran"
         cp ./starting_files/* ./
-
-		done
 	fi
 rm elite
 
