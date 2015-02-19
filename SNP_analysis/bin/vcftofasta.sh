@@ -832,6 +832,7 @@ sed 's/\*//g' < preparedTags.txt | sed 's/(/_/g' | sed 's/)/_/g' | sed 's/ /_/g'
 rm preparedTags.txt
 
 cat ${genotypingcodes} | tr '\r' '\n' | grep "Yes" | sed 's/_.*//' >> elite
+echo "Only samples in this file will be ran when elite is used as the secound argument" >> elite
 
 ####################
 
@@ -1281,12 +1282,12 @@ mv *.fas ./fasta
 #rm total_pos
 rm root
 
-if [[ $2 == all ]]; then
-    echo "Tree not made when all samples are ran"
-else
-	d="All_vcfs"
-	cd ./fasta
+if [[ $2 == elite ]]; then
+        d="All_vcfs"
+        cd ./fasta
         alignTable
+else
+	echo "Tree not made when all samples are ran"
 fi
 
 echo "***Done"
@@ -1480,12 +1481,13 @@ fileName=`basename $0`
 # As attachment
 
 if [[ $3 == me ]]; then
-	echo "Only Tod received this e-mail! $fileName $@ completed, See attachment"| mutt -s "$fileName $@ completed" -a email_log.html -- tod.p.stuber@aphis.aphis.usda.gov
+	echo "Only Tod received this e-mail! $fileName $@ completed, See attachment" > tempfile; cat tempfile | mutt -s "$fileName $@ completed" -a email_log.html -- tod.p.stuber@aphis.aphis.usda.gov
 	else
 #email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
-	echo "$fileName $@ completed, See attachment"| mutt -s "$fileName $@ completed" -a email_log.html -- $email_list
+	echo "$fileName $@ completed, See attachment" > tempfile; cat tempfile | mutt -s "$fileName $@ completed" -a email_log.html -- $email_list
 fi
 
+rm tempfile
 rm email_log.html
 
 echo "****************************** END ******************************"
