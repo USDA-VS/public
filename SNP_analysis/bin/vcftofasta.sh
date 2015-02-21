@@ -849,10 +849,6 @@ filterFilespreparation
 mkdir starting_files
 mv *.* ./starting_files
 
-# Remove selected isolates from comparison
-# This is optional, and should be turned on or off based on laboratories preference
-removeIsolates
-
 # If bovis are ran default will only run with files check "misc" in FileMaker
 # Untitled.tab exported from FileMaker must contain "isolate names" followed by "Misc".
 
@@ -874,6 +870,10 @@ removeIsolates
 	fi
 rm elite
 
+# Remove selected isolates from comparison
+# This is optional, and should be turned on or off based on laboratories preference
+removeIsolates
+read -p "$LINENO Enter"
 ############################### Rename files ###############################
 
 for i in *.txt; do
