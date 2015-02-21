@@ -216,7 +216,7 @@ elif [[ $1 == bovis ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF"
     echo "vcftofasta.sh ran as M. bovis"
     echo "Script vcftofasta.sh ran using M. bovis variables" >> section5
-    email_list="tod.p.stuber@aphis.aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+    email_list="tod.p.stuber@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
 
 if [[ $2 == elite ]]; then
     echo "Only the "elite" bovis isolates are being ran"
@@ -1481,7 +1481,7 @@ fileName=`basename $0`
 # As attachment
 
 if [[ $3 == me ]]; then
-	echo "Only Tod received this e-mail! $fileName $@ completed, See attachment" > tempfile; cat tempfile | mutt -s "$fileName $@ completed" -a email_log.html -- tod.p.stuber@aphis.aphis.usda.gov
+	echo "Only Tod received this e-mail! $fileName $@ completed, See attachment" > tempfile; cat tempfile | mutt -s "$fileName $@ completed" -a email_log.html -- tod.p.stuber@aphis.usda.gov
 	else
 #email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
 	echo "$fileName $@ completed, See attachment" > tempfile; cat tempfile | mutt -s "$fileName $@ completed" -a email_log.html -- $email_list
