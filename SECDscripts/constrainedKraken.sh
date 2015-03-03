@@ -179,7 +179,8 @@ function blastContigs () {
     blastContigs=`grep -c ">" ${n}-contigs2.fa`
     echo "$blastContigs BLASTed contigs"
 
-    blastn -query ${n}-contigs2.fa -db /usr/local/bin/ncbi-blast-2.2.29+/db/nt -task blastn -num_threads ${NR_CPUS} -outfmt 5 -out ${n}_contig-blastResults-5.xml -max_target_seqs 1
+    #blastn -query ${n}-contigs2.fa -db /usr/local/bin/ncbi-blast-2.2.29+/db/nt -task blastn -num_threads ${NR_CPUS} -outfmt 5 -out ${n}_contig-blastResults-5.xml -max_target_seqs 1
+     blastn -query ${n}-contigs2.fa -db /data/BLAST/db/nt -task blastn -num_threads ${NR_CPUS} -outfmt 5 -out ${n}_contig-blastResults-5.xml -max_target_seqs 1
 
     parseXML
     wait
