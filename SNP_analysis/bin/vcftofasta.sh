@@ -35,7 +35,7 @@ if [[ $1 == ab1 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Abortus1/_VCFs"
     echo "vcftofasta.sh ran as Brucella abortus bv 1, 2 or 4"
     echo "Script vcftofasta.sh ran using Brucella abortus bv 1, 2 or 4 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
+    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
 
 elif [[ $1 == mel ]]; then
 
@@ -53,7 +53,7 @@ elif [[ $1 == mel ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Melitensis/_VCFs"
     echo "vcftofasta.sh ran as B. melitensis"
     echo "Script vcftofasta.sh ran using B. melitensis variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
+    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
 
 elif [[ $1 == suis1 ]]; then
 
@@ -71,7 +71,7 @@ elif [[ $1 == suis1 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Suis1/_VCFs"
     echo "vcftofasta.sh ran as B. suis bv1"
     echo "Script vcftofasta.sh ran using B. suis bv1 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
+    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
 
 elif [[ $1 == suis2 ]]; then
 
@@ -89,7 +89,7 @@ elif [[ $1 == suis2 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Suis2/_VCFs/"
     echo "vcftofasta.sh ran as B. suis bv2"
     echo "Script vcftofasta.sh ran using B. suis bv2 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
+    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
 
 elif [[ $1 == suis3 ]]; then
 
@@ -107,7 +107,7 @@ elif [[ $1 == suis3 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Suis3/_VCFs"
     echo "vcftofasta.sh ran as B. suis bv3"
     echo "Script vcftofasta.sh ran using B. suis bv3 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
+    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
 
 elif [[ $1 == suis4 ]]; then
 
@@ -125,7 +125,7 @@ elif [[ $1 == suis4 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Suis4/_VCF"
     echo "vcftofasta.sh ran as B. suis bv4"
     echo "Script vcftofasta.sh ran using B. suis bv4 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
+    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
 
 elif [[ $1 == canis ]]; then
 
@@ -143,7 +143,7 @@ elif [[ $1 == canis ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Canis/_VCF"
     echo "vcftofasta.sh ran as B. canis"
     echo "Script vcftofasta.sh ran using B. canis variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
+    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
 
 
 elif [[ $1 == ceti1 ]]; then
@@ -162,7 +162,7 @@ elif [[ $1 == ceti1 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Ceti1/_VCF"
     echo "vcftofasta.sh ran as B ceti group 1"
     echo "Script vcftofasta.sh ran using B ceti group 1 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
+    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
 
 
 elif [[ $1 == ceti2 ]]; then
@@ -181,7 +181,7 @@ elif [[ $1 == ceti2 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Ceti2/_VCF"
     echo "vcftofasta.sh ran as B ceti group 2"
     echo "Script vcftofasta.sh ran using B ceti group 2 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
+    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
 
 
 elif [[ $1 == ovis ]]; then
@@ -200,7 +200,7 @@ elif [[ $1 == ovis ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Ovis/_VCFs"
     echo "vcftofasta.sh ran as B. ovis"
     echo "Script vcftofasta.sh ran using B. ovis variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
+    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
 
 elif [[ $1 == bovis ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/_Mycobacterium/Untitled.tab"
@@ -216,7 +216,17 @@ elif [[ $1 == bovis ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF"
     echo "vcftofasta.sh ran as M. bovis"
     echo "Script vcftofasta.sh ran using M. bovis variables" >> section5
-    email_list="tod.p.stuber@usda.gov suelee.robbe-austerman@usda.gov"
+    email_list="tod.p.stuber@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+
+if [[ $2 == elite ]]; then
+    echo "Only the "elite" bovis isolates are being ran"
+    sleep 5
+else
+    echo "All bovis are being ran"
+    echo "Like to run selected isolates? Use... vcftofasta.sh bovis elite"
+    sleep 5
+
+fi
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/Filtered_Regions.xlsx
@@ -669,7 +679,7 @@ cat *.fas >> RAxMLfastaGroup.txt
 /usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} -m GTRCAT -p 12345 && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf &
 wait
 rm RAxML_parsimonyTree*
-for i in RAxML*Tree*; do mv $i ../${i}.tree; done
+for i in RAxML*Tree*; do mv $i ../${i}.tre; done
 #grep ">" alignment.txt | sed 's/>//g' > cleanedAlignment.txt
 
 pwd
@@ -822,6 +832,7 @@ sed 's/\*//g' < preparedTags.txt | sed 's/(/_/g' | sed 's/)/_/g' | sed 's/ /_/g'
 rm preparedTags.txt
 
 cat ${genotypingcodes} | tr '\r' '\n' | grep "Yes" | sed 's/_.*//' >> elite
+echo "Only samples in this file will be ran when elite is used as the secound argument" >> elite
 
 ####################
 
@@ -836,26 +847,33 @@ filterFilespreparation
 
 #copy the original vcfs to /starting_files
 mkdir starting_files
-for i in *.*; do
-    mv $i ./starting_files
-done
+mv *.* ./starting_files
+
+# If bovis are ran default will only run with files check "misc" in FileMaker
+# Untitled.tab exported from FileMaker must contain "isolate names" followed by "Misc".
+
+	if [[ $2 == elite ]]; then
+        echo "Only analyzing elite files"
+
+        for i in `cat elite`; do
+        name=`ls starting_files | grep $i`
+        cp ./starting_files/$name ./
+        done
+
+        for i in `find ./starting_files/ -mtime -30`; do
+        cp $i ./
+        done
+
+    else
+        echo "all samples will be ran"
+        cp ./starting_files/* ./
+	fi
+rm elite
 
 # Remove selected isolates from comparison
 # This is optional, and should be turned on or off based on laboratories preference
 removeIsolates
 
-if [[ $2 == all ]]; then
-    echo "all samples will be ran"
-    cp ./starting_files/* ./
-else
-    echo "Only analyzing elite files"
-    for i in `cat elite`; do
-        name=`ls starting_files | grep $i`
-        cp ./starting_files/$name ./
-    done
-fi
-
-rm elite
 ############################### Rename files ###############################
 
 for i in *.txt; do
@@ -1264,12 +1282,12 @@ mv *.fas ./fasta
 #rm total_pos
 rm root
 
-if [[ $2 == all ]]; then
-    echo "Tree not made when all samples are ran"
-else
-	d="All_vcfs"
-	cd ./fasta
+if [[ $2 == elite ]]; then
+        d="All_vcfs"
+        cd ./fasta
         alignTable
+else
+	echo "Tree not made when all samples are ran"
 fi
 
 echo "***Done"
@@ -1452,9 +1470,9 @@ cp -r $PWD ${bioinfoVCF}
 echo "******* $LINENO, $PWD"
 fileName=`basename $0`
 
-#mail -s "$fileName $@ completed" tod.p.stuber@usda.gov < log.txt
-#mail -s "$fileName $@ completed" suelee.robbe-austerman@usda.gov < log.txt
-#mail -s "$fileName $@ completed" christine.r.quance@usda.gov < log.txt
+#mail -s "$fileName $@ completed" tod.p.stuber@aphis.aphis.usda.gov < log.txt
+#mail -s "$fileName $@ completed" suelee.robbe-austerman@aphis.aphis.usda.gov < log.txt
+#mail -s "$fileName $@ completed" christine.r.quance@aphis.aphis.usda.gov < log.txt
 
 #echo "<html>" > email_log.html
 #awk 'BEGIN{print "<Body>"} {print "<p style=\"line-height: 5%;\">" $0 "</p>"} END{print "</Body>"}' log.txt >> email_log.html
@@ -1463,12 +1481,13 @@ fileName=`basename $0`
 # As attachment
 
 if [[ $3 == me ]]; then
-	echo "Only Tod received this e-mail! $fileName $@ completed, See attachment"| mutt -s "$fileName $@ completed" -a email_log.html -- tod.p.stuber@usda.gov
+	echo "Only Tod received this e-mail! $fileName $@ completed, See attachment" > tempfile; cat tempfile | mutt -s "$fileName $@ completed" -a email_log.html -- tod.p.stuber@aphis.usda.gov
 	else
-#email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
-	echo "$fileName $@ completed, See attachment"| mutt -s "$fileName $@ completed" -a email_log.html -- $email_list
+#email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+	echo "$fileName $@ completed, See attachment" > tempfile; cat tempfile | mutt -s "$fileName $@ completed" -a email_log.html -- $email_list
 fi
 
+rm tempfile
 rm email_log.html
 
 echo "****************************** END ******************************"
