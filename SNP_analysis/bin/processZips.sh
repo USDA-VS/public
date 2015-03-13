@@ -284,7 +284,7 @@ samtools view -h -f4 $n.all.bam > $n.unmappedReads.sam
 java -Xmx6g -jar ${picard}SamToFastq.jar INPUT=$n.unmappedReads.sam FASTQ=${n}-unmapped_R1.fastq SECOND_END_FASTQ=${n}-unmapped_R2.fastq
 rm $n.all.bam
 rm $n.unmappedReads.sam
-abyss-pe name=${n}_abyss k=64 in="${n}-unmapped_R1.fastq ${n}-unmapped_R1.fastq"
+abyss-pe name=${n}_abyss k=64 in="${n}-unmapped_R1.fastq ${n}-unmapped_R2.fastq"
 
 mkdir ../unmappedReads
 mv ${n}-unmapped_R1.fastq ../unmappedReads

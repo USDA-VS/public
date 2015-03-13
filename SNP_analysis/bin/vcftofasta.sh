@@ -97,7 +97,7 @@ elif [[ $1 == suis3 ]]; then
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/_Brucella/Suis3/script_dependents/Suis3_Defining_SNPs.txt"
     coverageFiles="/bioinfo11/TStuber/Results/_Brucella/coverageFiles"
-    FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
+    FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
     FilterDirectory="/bioinfo11/TStuber/Results/_Brucella/Suis3/script_dependents/FilterFiles" #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucella/Suis3/script_dependents/RemoveFromAnalysis.txt"
@@ -996,7 +996,7 @@ echo "***Marking all VCFs and removing filtering regions"
 	# Making a vcf with positions marked that should not be included based on filter file
         awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filter.vcf
         # Clean up
-	
+
         rm $i.file; rm $i.catFile; rm $i.txt
         # Removed positions
         grep -v "Not_Included" $n.filter.vcf > $n.noPPE.vcf
