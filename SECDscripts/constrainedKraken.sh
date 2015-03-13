@@ -792,6 +792,7 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 	    accFasta="${acc}.fasta"
 	    if [ -s $accFasta ]; then
 		echo "Downloaded from NCBI, good to continue."
+	        chmod 744 $accFasta
 		cp $accFasta $mydb
 	    else
 		echo "Try downloading again"
@@ -800,6 +801,7 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 		sleep 5
 		if [ -s $accFasta ]; then
 		    echo "Downloaded from NCBI, good to continue."
+		    chmod 744 $accFasta
 		    cp $accFasta $mydb
 		else
 		    echo "Try downloading again"
@@ -808,6 +810,7 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 		    sleep 5
 		    if [ -s $accFasta ]; then
 			echo "Downloaded from NCBI, good to continue."
+			chmod 744 $accFasta
 			cp $accFasta $mydb
 		    else
 			echo "Try downloading again"
@@ -816,6 +819,7 @@ if [ -s $root/finalGenomesToDownload.txt ]; then
 			sleep 5
 			if [ -s $accFasta ]; then
 			    echo "Downloaded from NCBI, good to continue."
+			    chmod 744 $accFasta
 			    cp $accFasta $mydb
 			else 
 			    echo "Fasta file ${acc} failed to download from NCBI." >> $root/failureSummary.txt
