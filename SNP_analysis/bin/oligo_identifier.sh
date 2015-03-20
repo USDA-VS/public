@@ -303,13 +303,15 @@ i=$parabinary
 if [ $i == 1 ]; then
     catch="para"
     echo "M. paratuberculosis found"
+    `processZips.sh para $catch | tee tee_processZips_out.txt` &
     echo "M. paratuberculosis" >> tee_tb_oligo_identifier_out2.txt
     echo "$parabinary" >> tee_tb_oligo_identifier_out2.txt
     echo "$paracounts" >> tee_tb_oligo_identifier_out2.txt
-elif
+else
     echo "oligo_identifier.sh could not find a match for $n"
     echo "oligo_identifier.sh could not find a match for $n" >> /scratch/report/dailyReport.txt
     echo "${n} Unable to find a reference, oligo_identifier.sh stats: Oligo counts: ${bruccounts} ${tbcounts} ${paracounts}, Binary: ${brucbinary} ${tbbinary} ${parabinary}" >> /scratch/report/dailyReport.txt
+fi
 
 echo "Sample ${n}, ${tagname}, Oligo counts: Bruc ${bruccounts} TB ${tbcounts} MAC ${paracounts}, Binary: Bruc ${brucbinary} TB ${tbbinary} MAC ${parabinary}, ID:  ${catch}"
 
