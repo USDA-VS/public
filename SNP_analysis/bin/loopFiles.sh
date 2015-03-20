@@ -37,12 +37,12 @@ done
 for f in *; do
 	echo "The cd is $currentdir"
 	cd $currentdir
-	t=`echo $f | sed 's/\(^.\).*/\1/'`
-	echo $f
+	echo "$f started"
 	cd ./$f
 	mkdir ./temp
 	cp *R1*.fastq.gz ./temp
 	`gunzip ./temp/*R1*.fastq.gz && oligo_identifier.sh ./temp/*R1*.fastq | tee tee_oligo_identifier_out1.txt` &
+
 done
 
 #
