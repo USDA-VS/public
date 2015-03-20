@@ -16,7 +16,37 @@ Paradigm
 END
 echo "Start Time: `date`" > sectiontime
 starttime=`date +%s`
-###############################################################################
+
+####################################################
+function parseXLS () {
+# Create "here-document"
+cat >./inputXLS.py <<EOL
+#!/usr/bin/env python
+
+import os
+import xlrd
+from sys import argv
+
+script, input = argv
+
+wb = xlrd.open_workbook(input)
+wb.sheet_names()
+#sh = wb.sheet_by_index(1)
+sh = wb.sheet_by_name(u'New groupings')
+for rownum in range(sh.nrows):
+    print sh.row_values(rownum)
+
+EOL
+
+chmod 755 ./inputXLS.py
+
+./inputXLS.py $excelinfile
+
+rm ./inputXLS.py
+
+}
+#####################################################
+
 # Environment controls:
 
 if [[ $1 == ab1 ]]; then
@@ -35,7 +65,7 @@ if [[ $1 == ab1 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Abortus1/_VCFs"
     echo "vcftofasta.sh ran as Brucella abortus bv 1, 2 or 4"
     echo "Script vcftofasta.sh ran using Brucella abortus bv 1, 2 or 4 variables" > section5
-    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
 
 elif [[ $1 == mel ]]; then
 
@@ -53,7 +83,7 @@ elif [[ $1 == mel ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Melitensis/_VCFs"
     echo "vcftofasta.sh ran as B. melitensis"
     echo "Script vcftofasta.sh ran using B. melitensis variables" > section5
-    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
 
 elif [[ $1 == suis1 ]]; then
 
@@ -71,7 +101,7 @@ elif [[ $1 == suis1 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Suis1/_VCFs"
     echo "vcftofasta.sh ran as B. suis bv1"
     echo "Script vcftofasta.sh ran using B. suis bv1 variables" > section5
-    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
 
 elif [[ $1 == suis2 ]]; then
 
@@ -89,7 +119,7 @@ elif [[ $1 == suis2 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Suis2/_VCFs/"
     echo "vcftofasta.sh ran as B. suis bv2"
     echo "Script vcftofasta.sh ran using B. suis bv2 variables" > section5
-    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
 
 elif [[ $1 == suis3 ]]; then
 
@@ -107,7 +137,7 @@ elif [[ $1 == suis3 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Suis3/_VCFs"
     echo "vcftofasta.sh ran as B. suis bv3"
     echo "Script vcftofasta.sh ran using B. suis bv3 variables" > section5
-    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
 
 elif [[ $1 == suis4 ]]; then
 
@@ -125,7 +155,7 @@ elif [[ $1 == suis4 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Suis4/_VCF"
     echo "vcftofasta.sh ran as B. suis bv4"
     echo "Script vcftofasta.sh ran using B. suis bv4 variables" > section5
-    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
 
 elif [[ $1 == canis ]]; then
 
@@ -143,7 +173,7 @@ elif [[ $1 == canis ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Canis/_VCF"
     echo "vcftofasta.sh ran as B. canis"
     echo "Script vcftofasta.sh ran using B. canis variables" > section5
-    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
 
 
 elif [[ $1 == ceti1 ]]; then
@@ -162,7 +192,7 @@ elif [[ $1 == ceti1 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Ceti1/_VCF"
     echo "vcftofasta.sh ran as B ceti group 1"
     echo "Script vcftofasta.sh ran using B ceti group 1 variables" > section5
-    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
 
 
 elif [[ $1 == ceti2 ]]; then
@@ -181,7 +211,7 @@ elif [[ $1 == ceti2 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Ceti2/_VCF"
     echo "vcftofasta.sh ran as B ceti group 2"
     echo "Script vcftofasta.sh ran using B ceti group 2 variables" > section5
-    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
 
 
 elif [[ $1 == ovis ]]; then
@@ -200,7 +230,7 @@ elif [[ $1 == ovis ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Ovis/_VCFs"
     echo "vcftofasta.sh ran as B. ovis"
     echo "Script vcftofasta.sh ran using B. ovis variables" > section5
-    email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
 
 elif [[ $1 == bovis ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/_Mycobacterium/Untitled.tab"
@@ -209,6 +239,7 @@ elif [[ $1 == bovis ]]; then
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
     FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
+    rm ${FilterDirectory}/*
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -216,28 +247,197 @@ elif [[ $1 == bovis ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF"
     echo "vcftofasta.sh ran as M. bovis"
     echo "Script vcftofasta.sh ran using M. bovis variables" >> section5
-    email_list="tod.p.stuber@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov suelee.robbe-austerman@usda.gov"
 
-if [[ $2 == elite ]]; then
-    echo "Only the "elite" bovis isolates are being ran"
-    sleep 5
-else
-    echo "All bovis are being ran"
-    echo "Like to run selected isolates? Use... vcftofasta.sh bovis elite"
-    sleep 5
-
-fi
+    if [[ $2 == elite ]]; then
+        echo "Only the "elite" bovis isolates are being ran"
+        sleep 5
+    else
+        echo "All bovis are being ran"
+        echo "Like to run selected isolates? Use... vcftofasta.sh bovis elite"
+        sleep 5
+    fi
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/Filtered_Regions.xlsx
     # Excel tab label "New groupings"
-    python -u /home/tstuber/workspace/stuber/python_scripts/inputXLS.py | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
+
+    excelinfile="/bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/Filtered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
+    FilterFileCreations.sh
+
+elif [[ $1 == tb1 ]]; then
+    genotypingcodes="/bioinfo11/TStuber/Results/_Mycobacterium/Untitled.tab"
+    # This file tells the script how to cluster VCFs
+    DefiningSNPs="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb1/tb1DefiningSNPsGroupDesignations.txt"
+    FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
+    FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
+    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
+    rm ${FilterDirectory}/*
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysis.txt"
+    QUAL=150 # Minimum quality for calling a SNP
+    lowEnd=1
+    highEnd=200 # QUAL range to change ALT to N
+    bioinfoVCF="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb1/vcfs"
+    echo "vcftofasta.sh ran as ${1}"
+    echo "Script vcftofasta.sh ran using ${1} variables" >> section5
+    email_list="tod.p.stuber@usda.gov" #suelee.robbe-austerman@aphis.usda.gov
+
+    # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
+    # Excel file that is being used is at: /bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/Filtered_Regions.xlsx
+    # Excel tab label "New groupings"
+    excelinfile="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb1/tb1Filtered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
+    FilterFileCreations.sh
+
+elif [[ $1 == tb2 ]]; then
+    genotypingcodes="/bioinfo11/TStuber/Results/_Mycobacterium/Untitled.tab"
+    # This file tells the script how to cluster VCFs
+    DefiningSNPs="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb2/tb2DefiningSNPsGroupDesignations.txt"
+    FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
+    FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
+    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
+    rm ${FilterDirectory}/*
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysis.txt"
+    QUAL=150 # Minimum quality for calling a SNP
+    lowEnd=1
+    highEnd=200 # QUAL range to change ALT to N
+    bioinfoVCF="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb2/vcfs"
+    echo "vcftofasta.sh ran as ${1}"
+    echo "Script vcftofasta.sh ran using ${1} variables" >> section5
+    email_list="tod.p.stuber@usda.gov" #suelee.robbe-austerman@aphis.usda.gov
+
+    # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
+    # Excel file that is being used is at: /bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/Filtered_Regions.xlsx
+    # Excel tab label "New groupings"
+    excelinfile="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb2/tb2Filtered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
+    FilterFileCreations.sh
+
+elif [[ $1 == tb3 ]]; then
+    genotypingcodes="/bioinfo11/TStuber/Results/_Mycobacterium/Untitled.tab"
+    # This file tells the script how to cluster VCFs
+    DefiningSNPs="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb3/tb3DefiningSNPsGroupDesignations.txt"
+    FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
+    FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
+    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
+    rm ${FilterDirectory}/*
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysis.txt"
+    QUAL=150 # Minimum quality for calling a SNP
+    lowEnd=1
+    highEnd=200 # QUAL range to change ALT to N
+    bioinfoVCF="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb3/vcfs"
+    echo "vcftofasta.sh ran as ${1}"
+    echo "Script vcftofasta.sh ran using ${1} variables" >> section5
+    email_list="tod.p.stuber@usda.gov" #suelee.robbe-austerman@aphis.usda.gov
+
+    # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
+    # Excel file that is being used is at: /bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/Filtered_Regions.xlsx
+    # Excel tab label "New groupings"
+    excelinfile="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb3/tb3Filtered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
+    FilterFileCreations.sh
+
+elif [[ $1 == tb4a ]]; then
+    genotypingcodes="/bioinfo11/TStuber/Results/_Mycobacterium/Untitled.tab"
+    # This file tells the script how to cluster VCFs
+    DefiningSNPs="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb4a/tb4aDefiningSNPsGroupDesignations.txt"
+    FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
+    FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
+    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
+    rm ${FilterDirectory}/*
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysis.txt"
+    QUAL=150 # Minimum quality for calling a SNP
+    lowEnd=1
+    highEnd=200 # QUAL range to change ALT to N
+    bioinfoVCF="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb4a/vcfs"
+    echo "vcftofasta.sh ran as ${1}"
+    echo "Script vcftofasta.sh ran using ${1} variables" >> section5
+    email_list="tod.p.stuber@usda.gov" #suelee.robbe-austerman@aphis.usda.gov
+
+    # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
+    # Excel file that is being used is at: /bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/Filtered_Regions.xlsx
+    # Excel tab label "New groupings"
+    excelinfile="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb4a/tb4aFiltered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
+    FilterFileCreations.sh
+
+elif [[ $1 == tb4b ]]; then
+    genotypingcodes="/bioinfo11/TStuber/Results/_Mycobacterium/Untitled.tab"
+    # This file tells the script how to cluster VCFs
+    DefiningSNPs="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb4b/tb4bDefiningSNPsGroupDesignations.txt"
+    FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
+    FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
+    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
+    rm ${FilterDirectory}/*
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysis.txt"
+    QUAL=150 # Minimum quality for calling a SNP
+    lowEnd=1
+    highEnd=200 # QUAL range to change ALT to N
+    bioinfoVCF="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb4b/vcfs"
+    echo "vcftofasta.sh ran as ${1}"
+    echo "Script vcftofasta.sh ran using ${1} variables" >> section5
+    email_list="tod.p.stuber@usda.gov" #suelee.robbe-austerman@aphis.usda.gov
+
+    # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
+    # Excel file that is being used is at: /bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/Filtered_Regions.xlsx
+    # Excel tab label "New groupings"
+    excelinfile="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb4b/tb4bFiltered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
+    FilterFileCreations.sh
+
+elif [[ $1 == tb5 ]]; then
+    genotypingcodes="/bioinfo11/TStuber/Results/_Mycobacterium/Untitled.tab"
+    # This file tells the script how to cluster VCFs
+    DefiningSNPs="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb5/tb5DefiningSNPsGroupDesignations.txt"
+    FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
+    FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
+    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
+    rm ${FilterDirectory}/*
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysis.txt"
+    QUAL=150 # Minimum quality for calling a SNP
+    lowEnd=1
+    highEnd=200 # QUAL range to change ALT to N
+    bioinfoVCF="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb5/vcfs"
+    echo "vcftofasta.sh ran as ${1}"
+    echo "Script vcftofasta.sh ran using ${1} variables" >> section5
+    email_list="tod.p.stuber@usda.gov" #suelee.robbe-austerman@aphis.usda.gov
+
+    # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
+    # Excel file that is being used is at: /bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/Filtered_Regions.xlsx
+    # Excel tab label "New groupings"
+    excelinfile="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb5/tb5Filtered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
+    FilterFileCreations.sh
+
+elif [[ $1 == tb6 ]]; then
+    genotypingcodes="/bioinfo11/TStuber/Results/_Mycobacterium/Untitled.tab"
+    # This file tells the script how to cluster VCFs
+    DefiningSNPs="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb6/tb6DefiningSNPsGroupDesignations.txt"
+    FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
+    FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
+    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
+    rm ${FilterDirectory}/*
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysis.txt"
+    QUAL=150 # Minimum quality for calling a SNP
+    lowEnd=1
+    highEnd=200 # QUAL range to change ALT to N
+    bioinfoVCF="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb6/vcfs"
+    echo "vcftofasta.sh ran as ${1}"
+    echo "Script vcftofasta.sh ran using ${1} variables" >> section5
+    email_list="tod.p.stuber@usda.gov" #suelee.robbe-austerman@aphis.usda.gov
+
+    # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
+    # Excel file that is being used is at: /bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/Filtered_Regions.xlsx
+    # Excel tab label "New groupings"
+    excelinfile="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb6/tb6Filtered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
     FilterFileCreations.sh
 
 else
 
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis"
+    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis, tb1, tb2, tb3, tb4a, tb4b, tb5, tb6"
     echo "For example, type ~$ vcftofasta.sh bovis"
     echo ""
     exit 1
@@ -401,6 +601,7 @@ wait
 sleep 2
 
 cd "${curdr}"
+echo "Finished preparing filter files"
 
 }
 
@@ -996,7 +1197,7 @@ echo "***Marking all VCFs and removing filtering regions"
 	# Making a vcf with positions marked that should not be included based on filter file
         awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filter.vcf
         # Clean up
-
+	
         rm $i.file; rm $i.catFile; rm $i.txt
         # Removed positions
         grep -v "Not_Included" $n.filter.vcf > $n.noPPE.vcf
@@ -1283,11 +1484,11 @@ mv *.fas ./fasta
 rm root
 
 if [[ $2 == elite ]]; then
-        d="All_vcfs"
+	d="All_vcfs"
         cd ./fasta
         alignTable
 else
-	echo "Tree not made when all samples are ran"
+	echo "Tree not made when all samples are ran"	
 fi
 
 echo "***Done"
@@ -1470,9 +1671,9 @@ cp -r $PWD ${bioinfoVCF}
 echo "******* $LINENO, $PWD"
 fileName=`basename $0`
 
-#mail -s "$fileName $@ completed" tod.p.stuber@aphis.aphis.usda.gov < log.txt
-#mail -s "$fileName $@ completed" suelee.robbe-austerman@aphis.aphis.usda.gov < log.txt
-#mail -s "$fileName $@ completed" christine.r.quance@aphis.aphis.usda.gov < log.txt
+#mail -s "$fileName $@ completed" tod.p.stuber@usda.gov < log.txt
+#mail -s "$fileName $@ completed" suelee.robbe-austerman@usda.gov < log.txt
+#mail -s "$fileName $@ completed" christine.r.quance@usda.gov < log.txt
 
 #echo "<html>" > email_log.html
 #awk 'BEGIN{print "<Body>"} {print "<p style=\"line-height: 5%;\">" $0 "</p>"} END{print "</Body>"}' log.txt >> email_log.html
@@ -1481,13 +1682,12 @@ fileName=`basename $0`
 # As attachment
 
 if [[ $3 == me ]]; then
-	echo "Only Tod received this e-mail! $fileName $@ completed, See attachment" > tempfile; cat tempfile | mutt -s "$fileName $@ completed" -a email_log.html -- tod.p.stuber@aphis.usda.gov
+	echo "Only Tod received this e-mail! $fileName $@ completed, See attachment" > mytempfile; cat mytempfile | mutt -s "$fileName $@ completed" -a email_log.html -- tod.p.stuber@usda.gov
 	else
-#email_list="tod.p.stuber@aphis.aphis.usda.gov Christine.R.Quance@aphis.usda.gov suelee.robbe-austerman@aphis.usda.gov"
-	echo "$fileName $@ completed, See attachment" > tempfile; cat tempfile | mutt -s "$fileName $@ completed" -a email_log.html -- $email_list
+#email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
+	echo "$fileName $@ completed, See attachment" > mytempfile; cat mytempfile | mutt -s "$fileName $@ completed" -a email_log.html -- $email_list
 fi
-
-rm tempfile
+rm mytempfile
 rm email_log.html
 
 echo "****************************** END ******************************"
