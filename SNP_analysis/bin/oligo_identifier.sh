@@ -298,19 +298,24 @@ fi
 #count every occurance of 1 in binary.
 check=`echo $parabinary | grep -o "1"`
 echo "M. paratb check= $check"
+
+if [[ $check > 1 ]]; then
+echo "MAC species found"
+tagname=`grep $n /bioinfo11/TStuber/Results/_Mycobacterium/Untitled.txt`
 i=$parabinary
 
-if [ $i == 1 ]; then
-    catch="para"
-    echo "M. paratuberculosis found"
-    `processZips.sh para $catch | tee tee_processZips_out.txt` &
-    echo "M. paratuberculosis" >> tee_tb_oligo_identifier_out2.txt
-    echo "$parabinary" >> tee_tb_oligo_identifier_out2.txt
-    echo "$paracounts" >> tee_tb_oligo_identifier_out2.txt
-else
-    echo "oligo_identifier.sh could not find a match for $n"
-    echo "oligo_identifier.sh could not find a match for $n" >> /scratch/report/dailyReport.txt
-    echo "${n} Unable to find a reference, oligo_identifier.sh stats: Oligo counts: ${bruccounts} ${tbcounts} ${paracounts}, Binary: ${brucbinary} ${tbbinary} ${parabinary}" >> /scratch/report/dailyReport.txt
+    if [ $i == 1 ]; then
+        catch="para"
+        echo "M. paratuberculosis found"
+        `processZips.sh para $catch | tee tee_processZips_out.txt` &
+        echo "M. paratuberculosis" >> tee_tb_oligo_identifier_out2.txt
+        echo "$parabinary" >> tee_tb_oligo_identifier_out2.txt
+        echo "$paracounts" >> tee_tb_oligo_identifier_out2.txt
+    else
+        echo "oligo_identifier.sh could not find a match for $n"
+        echo "oligo_identifier.sh could not find a match for $n" >> /scratch/report/dailyReport.txt
+        echo "${n} Unable to find a reference, oligo_identifier.sh stats: Oligo counts: ${bruccounts} ${tbcounts} ${paracounts}, Binary: ${brucbinary} ${tbbinary} ${parabinary}" >> /scratch/report/dailyReport.txt
+    fi
 fi
 
 echo "Sample ${n}, ${tagname}, Oligo counts: Bruc ${bruccounts} TB ${tbcounts} MAC ${paracounts}, Binary: Bruc ${brucbinary} TB ${tbbinary} MAC ${parabinary}, ID:  ${catch}"
