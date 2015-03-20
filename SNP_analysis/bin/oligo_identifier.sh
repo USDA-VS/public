@@ -38,6 +38,9 @@ primertb3="GAAGACCTTGATGCCGATCTGGGTGTCGATCTTGA"
 primertb4="CGGTGTTGAAGGGTCCCCCGTTCCAGAAGCCGGTG"
 primertb6="ACGGTGATTCGGGTGGTCGACACCGATGGTTCAGA"
 
+# paraTB specific
+ppara="CCTTTCTTGAAGGGTGTTCG|CGAACACCCTTCAAGAAAGG"
+
 base=`basename $1`
 forReads=`echo $1 | grep _R1`
 echo "Forward Reads:  $forReads"
@@ -58,6 +61,7 @@ ceti2=`grep -c $pceti2 $forReads`
 canis4=`grep -c $pcanis4 $forReads`
 canis=`grep -c $pcanis $forReads`
 ovis=`grep -c $povis $forReads`
+para=`egrep -ic $ppara $forReads`
 
 onemismatch $primertb157
 tb157=`egrep -c $regex $forReads`
@@ -93,15 +97,18 @@ echo "tb6 $tb6"
 
 bruccounts=`echo "$ab1 $ab3 $ab5 $mel $suis1 $suis2 $suis3 $ceti1 $ceti2 $canis4 $canis $ovis"`
 tbcounts=`echo "$tb157 $tb7 $tbbov $tb5 $tb2 $tb3 $tb4 $tb6"`
-
+paracounts=`echo "$para"`
 echo $bruccounts
 echo $tbcounts
+echo $paracounts
 
 brucbinary=`echo $bruccounts | awk '{for(i=1;i<=NF;i++) if ($i >= 1) print 1; else print 0}' | tr -cd "[:print:]"`
 tbbinary=`echo $tbcounts | awk '{for(i=1;i<=NF;i++) if ($i >= 1) print 1; else print 0}' | tr -cd "[:print:]"`
+parabinary=`echo $paracounts | awk '{for(i=1;i<=NF;i++) if ($i >= 1) print 1; else print 0}' | tr -cd "[:print:]"`
 
 echo $brucbinary
 echo $tbbinary
+echo $parabinary
 
 #count every occurance of 1 in binary.
 check=`echo $brucbinary | grep -o "1"`
@@ -288,10 +295,26 @@ if [[ $check > 1 ]]; then
 	fi
 fi
 
-echo "Sample ${n}, ${tagname}, Oligo counts: Bruc ${bruccounts} TB ${tbcounts}, Binary: Bruc ${brucbinary} TB ${tbbinary}, ID:  ${catch}"
+#count every occurance of 1 in binary.
+check=`echo $parabinary | grep -o "1"`
+echo "M. paratb check= $check"
+i=$parabinary
+
+if [ $i == 1 ]; then
+    catch="para"
+    echo "M. paratuberculosis found"
+    echo "M. paratuberculosis" >> tee_tb_oligo_identifier_out2.txt
+    echo "$parabinary" >> tee_tb_oligo_identifier_out2.txt
+    echo "$paracounts" >> tee_tb_oligo_identifier_out2.txt
+elif
+    echo "oligo_identifier.sh could not find a match for $n"
+    echo "oligo_identifier.sh could not find a match for $n" >> /scratch/report/dailyReport.txt
+    echo "${n} Unable to find a reference, oligo_identifier.sh stats: Oligo counts: ${bruccounts} ${tbcounts} ${paracounts}, Binary: ${brucbinary} ${tbbinary} ${parabinary}" >> /scratch/report/dailyReport.txt
+
+echo "Sample ${n}, ${tagname}, Oligo counts: Bruc ${bruccounts} TB ${tbcounts} MAC ${paracounts}, Binary: Bruc ${brucbinary} TB ${tbbinary} MAC ${parabinary}, ID:  ${catch}"
 
 #Push to logfile
-echo "Sample ${n}, ${tagname}, Oligo counts: ${bruccounts} ${tbcounts}, Binary: ${brucbinary} ${tbbinary}, ID:  ${catch}" >> /scratch/report/oligo_identifier_log.txt
+echo "Sample ${n}, ${tagname}, Oligo counts: Bruc ${bruccounts} TB ${tbcounts} MAC ${paracounts}, Binary: Bruc ${brucbinary} TB ${tbbinary} MAC ${parabinary}, ID:  ${catch}" >> /scratch/report/oligo_identifier_log.txt
 
 #
 #  Created by Stuber, Tod P - APHIS on 04/11/2014.

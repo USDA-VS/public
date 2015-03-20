@@ -325,9 +325,19 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 ###################################################################
 ###################################################################
 
+###################################################################
+
+elif [ $1 == para ]; then
+   cp /home/shared/mycobacterium/mott/paratb/NC_002944.fasta ./
+   hqs="/home/shared/mycobacterium/mott/paratb/HQ-NC002944.vcf"
+   bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/mac/para_cattle-bison/newFiles"
+   #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+
+    ###################################################################
+
 else
     echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, s
-uis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis"
+uis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis, para"
     exit 1
 fi
 
