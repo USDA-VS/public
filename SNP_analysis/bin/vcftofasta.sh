@@ -434,10 +434,34 @@ elif [[ $1 == tb6 ]]; then
     parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
     FilterFileCreations.sh
 
+elif [[ $1 == para ]]; then
+    genotypingcodes="/bioinfo11/TStuber/Results/_Mycobacterium/mac/tags.txt"
+    # This file tells the script how to cluster VCFs
+    DefiningSNPs="/bioinfo11/TStuber/Results/_Mycobacterium/mac/para_cattle-bison/DefiningSNPsGroupDesignations.txt"
+    FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
+    FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
+    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysis.txt"
+    QUAL=150 # Minimum quality for calling a SNP
+    lowEnd=1
+    highEnd=200 # QUAL range to change ALT to N
+    bioinfoVCF="/bioinfo11/TStuber/Results/_Mycobacterium/mac/para_cattle-bison/vcfs"
+    echo "vcftofasta.sh ran as M. paraTB"
+    echo "Script vcftofasta.sh ran using para variables" >> section5
+    email_list="tod.p.stuber@aphis.usda.gov"
+
+    # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
+    # Excel file that is being used is at: /bioinfo11/TStuber/Results/_Mycobacterium/_TB-VCF/Filtered_Regions.xlsx
+    # Excel tab label "New groupings"
+
+    excelinfile="/bioinfo11/TStuber/Results/_Mycobacterium/mac/para_cattle-bison/vcfs/Filtered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
+    FilterFileCreations.sh
+
 else
 
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis, tb1, tb2, tb3, tb4a, tb4b, tb5, tb6"
+    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis, tb1, tb2, tb3, tb4a, tb4b, tb5, tb6, para"
     echo "For example, type ~$ vcftofasta.sh bovis"
     echo ""
     exit 1
@@ -751,6 +775,30 @@ for d in $directories; do
     echo "***Making total_pos"
     cat concatemer | sort -nk1 | uniq | sort -k1.6n -k1.8n > total_pos
 
+# Find AC1 positions also found in total_pos    
+    awk '{print $1}' total_pos > total.list
+    for i in *.vcf; do 
+	m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
+	grep -v "#" $i | awk ' $8 ~ /^AC=1/ && $6 > 0 {print $1 "-" $2}' > ${n}.list
+	positionsfound=`cat ${n}.list total.list | sort -n | uniq -d`
+	countfind=`echo $positionsfound | wc -w`
+	if [[ -z $positionsfound ]]; then
+		positionsfound="No positions found"
+	fi
+	if [[ $countfind -gt 2  ]]; then
+		echo -e "$n \t \t \t Count Findings: $countfind  <-- !!!!" >> ${d}-AC1findings.txt 
+		searchname=`echo $n | sed 's/_.*//'`
+		unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/_Mycobacterium/_TB-Data/${searchname}*/BWAmem-GATK/QualityValues/*stats.txt`	
+		if [[ -z $unmappedContigs ]]; then 
+			unmappedContigs="Contig counts not available"
+		fi
+		echo -e "$d Sample: $n \t \t \t Count Findings: $countfind  <-- !!!!" $unmappedContigs >> ${fulDir}/emailAC1counts
+	else 
+		echo -e "$n \t \t \t Count Findings: $countfind" >> ${d}-AC1findings.txt
+	fi
+	echo "$positionsfound" >> ${d}-AC1findings.txt
+    done
+
     # Count the number of SNPs
 
     totalSNPs=`grep -c ".*" total_pos`
@@ -793,6 +841,7 @@ pos=`cat ${n}-duplicates | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' 
     rm ${n}-NcatFile
     rm ${n}-duplicates
     rm $n.filledcutnoN
+    rm *list
     rm $i
 done
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
@@ -1629,6 +1678,10 @@ echo "" >> log.txt
 echo "****************************************************" >> log.txt
 echo "SNP counts::" >> log.txt
 cat ssection4 >> log.txt
+echo "" >> log.txt
+echo "****************************************************" >> log.txt
+echo "AC1 called SNPs"
+cat ${fulDir}/emailAC1counts >> log.txt
 
 echo "<html>" > email_log.html
 echo "<Body>" >> email_log.html
@@ -1653,8 +1706,12 @@ awk 'BEGIN{print "<table>"} {print "<tr>";for(i=1;i<=NF;i++)print "<td>" $i"</td
 echo "" >> email_log.html
 echo "****************************************************" >> email_log.html
 echo "" >> email_log.html
-echo "<p> SNP counts:: </p>" >> email_log.html
+echo "<p> SNP counts: </p>" >> email_log.html
 awk 'BEGIN{print "<Body>"} {print "<p style=\"line-height: 40%;\">" $0 "</p>"} END{print "</Body>"}' ssection4 >> email_log.html
+echo "" >> email_log.html
+echo "****************************************************" >> email_log.html
+echo "<p> AC1 called SNPs: </p>" >> email_log.html
+awk 'BEGIN{print "<Body>"} {print "<p style=\"line-height: 40%;\">" $0 "</p>"} END{print "</Body>"}' ${fulDir}/emailAC1counts >> email_log.html
 echo "</Body>" >> email_log.html
 echo "</html>" >> email_log.html
 
