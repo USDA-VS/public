@@ -1,20 +1,19 @@
 #!/bin/sh
 
-#  bovis_processZips.sh
+#  Usage: processZips.sh bovis
 #  Working directory should contain paired-end fastq reads
-#  Sample must be labeled with TB/Bruc number.
-#  TB numbers must be labeled ##-####
-#  Bruc numbers must be labeled B##-####
 #  Reads must be included as _R1 and _R2
-#  See loopfiles.sh and email_loopfiles for multiple samples.
+#  See loopfiles.sh and email_loopfiles for multiple samples
+#  Clone to your home directory, place scripts folder in PATH 
 
 #################################################################################
-#  Dependencies ---
+#  Dependencies --- ALL DEPENDENCES MUST BE IN YOUR PATH
 #   bwa, http://bio-bwa.sourceforge.net/bwa.shtml
 #   samtools, http://samtools.sourceforge.net/samtools.shtml
 #   picard, http://picard.sourceforge.net/command-line-overview.shtml
 #   gatk, http://www.broadinstitute.org/gatk/
-#   bamtools
+#   igvtools, http://www.broadinstitute.org/software/igv/igvtools_commandline
+#   bamtools, https://github.com/pezmaster31/bamtools/wiki/Building-and-installing
 #   File containing high quality SNPs, Volumes/Mycobacterium/Go_To_File/HighestQualitySNPs.vcf
 #   Reference in fasta format, /Volumes/Data_HD/Mycobacterium/Go_To_File/NC_002945.fasta
 #################################################################################
@@ -23,7 +22,7 @@ echo "**************************************************************************
 echo "**************************** START ${PWD##*/} ****************************"
 echo "**************************************************************************"
 
-picard='/usr/local/bin/picard-tools-1.117/'
+picard='/usr/local/bin/picard-tools-1.117'
 gatk='/usr/local/bin/GenomeAnalysisTK/GenomeAnalysisTK.jar'
 igvtools='/usr/local/bin/IGVTools/igvtools.jar'
 
@@ -359,7 +358,7 @@ echo "***Reference naming convention:  $r"
 echo "***Isolate naming convention:  $n"
 
 samtools faidx $ref
-java -Xmx4g -jar ${picard}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${r}.dict
+java -Xmx4g -jar CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${r}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${r}.dict ]; then
     echo "Index and dict are present, continue script"
@@ -367,7 +366,7 @@ if [ -s ${ref}.fai ] && [ -s ${r}.dict ]; then
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
     samtools faidx $ref
-    java -Xmx4g -jar ${picard}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${r}.dict
+    java -Xmx4g -jar CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${r}.dict
         if [ -s ${ref}.fai ] && [ -s ${r}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
         fi
@@ -395,7 +394,7 @@ samtools view -bh -T $ref $n.sam > $n.all.bam
 #Strip off the unmapped reads
 samtools view -h -f4 $n.all.bam > $n.unmappedReads.sam
 #Create fastqs of unmapped reads to assemble
-java -Xmx4g -jar ${picard}SamToFastq.jar INPUT=$n.unmappedReads.sam FASTQ=${n}-unmapped_R1.fastq SECOND_END_FASTQ=${n}-unmapped_R2.fastq
+java -Xmx4g -jar ${picard}/SamToFastq.jar INPUT=$n.unmappedReads.sam FASTQ=${n}-unmapped_R1.fastq SECOND_END_FASTQ=${n}-unmapped_R2.fastq
 rm $n.all.bam
 rm $n.unmappedReads.sam
 abyss-pe name=${n}_abyss k=64 in="${n}-unmapped_R1.fastq ${n}-unmapped_R2.fastq"
@@ -417,7 +416,7 @@ samtools index $n.sorted.bam
 # Remove duplicate molecules
 
 echo "***Marking Duplicates"
-java -Xmx4g -jar  ${picard}MarkDuplicates.jar INPUT=$n.sorted.bam OUTPUT=$n.dup.bam METRICS_FILE=$n.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
+java -Xmx4g -jar  ${picard}/MarkDuplicates.jar INPUT=$n.sorted.bam OUTPUT=$n.dup.bam METRICS_FILE=$n.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
 
 echo "***Index $n.dup.bam"
 samtools index $n.dup.bam
@@ -502,23 +501,23 @@ java -jar ${gatk} -T DepthOfCoverage -R $ref -I $n.ready-mem.bam --omitDepthOutp
 
 #Quality Score Distribution
 echo "***Quality Score Distribution"
-java -Xmx4g -jar ${picard}QualityScoreDistribution.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam CHART_OUTPUT=$n.QualityScorceDistribution.pdf OUTPUT=$n.QualityScoreDistribution ASSUME_SORTED=true
+java -Xmx4g -jar ${picard}/QualityScoreDistribution.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam CHART_OUTPUT=$n.QualityScorceDistribution.pdf OUTPUT=$n.QualityScoreDistribution ASSUME_SORTED=true
 
 #Mean Quality by Cycle
 echo "***Mean Quality by Cycle"
-java -Xmx4g -jar ${picard}CollectMultipleMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.Quality_by_cycle PROGRAM=MeanQualityByCycle ASSUME_SORTED=true
+java -Xmx4g -jar ${picard}/CollectMultipleMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.Quality_by_cycle PROGRAM=MeanQualityByCycle ASSUME_SORTED=true
 
 #Collect Alignment Summary Metrics
 echo "***Collect Alignment Summary Metrics"
-java -Xmx4g -jar ${picard}CollectAlignmentSummaryMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.AlignmentMetrics ASSUME_SORTED=true
+java -Xmx4g -jar ${picard}/CollectAlignmentSummaryMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.AlignmentMetrics ASSUME_SORTED=true
 
 #Collect GC Bias Error
 echo "***Collect GC Bias Error"
-java -Xmx4g -jar ${picard}CollectGcBiasMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.CollectGcBiasMetrics CHART_OUTPUT=$n.GC.PDF ASSUME_SORTED=true
+java -Xmx4g -jar ${picard}/CollectGcBiasMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.CollectGcBiasMetrics CHART_OUTPUT=$n.GC.PDF ASSUME_SORTED=true
 
 #Collect Insert Size Metrics
 echo "***Collect Insert Size Metrics"
-java -Xmx4g -jar ${picard}CollectInsertSizeMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam HISTOGRAM_FILE=$n.InsertSize.pdf OUTPUT=$n.CollectInsertSizeMetrics ASSUME_SORTED=true
+java -Xmx4g -jar ${picard}/CollectInsertSizeMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam HISTOGRAM_FILE=$n.InsertSize.pdf OUTPUT=$n.CollectInsertSizeMetrics ASSUME_SORTED=true
 
 cat $n.DepthofCoverage.xls >> $n.Metrics_summary.xls
 cat $n.AlignmentMetrics >> $n.Metrics_summary.xls

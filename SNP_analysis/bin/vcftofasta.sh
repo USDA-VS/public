@@ -13,6 +13,12 @@ Paradigm
 3) Group, subgroup and clade clusters only show parsimony informative SNPs for the isolates within that cluster
 4) SNPs observed in a single isolate are less informative than SNPs seen in multiple isolates and therefore established in a population
 
+#  Two python dependencies are required: xlrd and elementtree
+        # Install from:
+        # https://pypi.python.org/pypi/xlrd
+        # https://pypi.python.org/pypi/elementtree/
+# Having Excel is recommended using xlsx file extension
+
 END
 echo "Start Time: `date`" > sectiontime
 starttime=`date +%s`
