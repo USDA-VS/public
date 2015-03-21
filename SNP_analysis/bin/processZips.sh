@@ -22,12 +22,48 @@ echo "**************************************************************************
 echo "**************************** START ${PWD##*/} ****************************"
 echo "**************************************************************************"
 
-picard='/usr/local/bin/picard-tools-1.117'
-gatk='/usr/local/bin/GenomeAnalysisTK/GenomeAnalysisTK.jar'
-igvtools='/usr/local/bin/IGVTools/igvtools.jar'
+CREATESEQUENCEDICTIONARY=`which CreateSequenceDictionary.jar`
+if [[ -z CREATESEQUENCEDICTIONARY ]]; then
+    echo "Picard jar files are not in PATH"
+    echo "Add directory containing jars to PATH"
+    exit 1
+fi
 
-BRUC_MLST=`which Bruc_MLST.sh`
+SAMTOFASTQ=`which SamToFastq.jar`
+MARKDUPLICATES=`which MarkDuplicates.jar`
+QUALITYSCOREDISTRIBUTION=`which QualityScoreDistribution.jar`
+COLLECTIONMULTIPLEMETRICS=`which CollectMultipleMetrics.jar`
+COLLECTIONALIGNMENTSUMMARYMETRICS=`which CollectAlignmentSummaryMetrics.jar`
+COLLECTIONGCBIASMETRICS=`which CollectGcBiasMetrics.jar`
+COLLECTIONINSERTSIZEMETRICS=`which CollectInsertSizeMetrics.jar`
+
+BAMTOOLS=`which bamtools`
+if [[ -z BAMTOOLS ]]; then
+    echo "Bamtools is not in PATH"
+    echo "Add Bamtools to PATH"
+    exit 1
+fi
+
+GATK=`which GenomeAnalysisTK.jar`
+if [[ -z GATK ]]; then
+    echo "GenomeAnalysisTK.jar is not in PATH"
+    echo "Add GenomeAnalysisTK.jar to PATH"
+    exit 1
+fi
+
+IGVTOOLS=`which igvtools.jar`
+if [[ -z IGVTOOLS ]]; then
+    echo "igvtools.jar is not in PATH"
+    echo "Add igvtools.jar to PATH"
+    exit 1
+fi
+
 SPOLIGOSPACERFINDER=`which spoligoSpacerFinder.sh`
+if [[ -z SPOLIGOSPACERFINDER ]]; then
+    echo "spoligoSpacerFinder.sh is not in PATH"
+    echo "Add spoligoSpacerFinder.sh to PATH"
+    exit 1
+fi
 
 echo "current directory"
 pwd
@@ -43,302 +79,25 @@ cd BWAmem-GATK/
 # Make alias links in BWA-GATK directory to zip files
 ls ../Zips/*.fastq* | while read file; do ln -s $file; done
 
-if [ $1 == ab1 ]; then
-    cp /home/shared/brucella/abortus1/script_dependents/NC_00693c.fasta ./
-    hqs="/home/shared/brucella/abortus1/script_dependents/NC_00693cHighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/abortus1/newFiles"
-    sharedSAN="/home/shared/brucella/abortus1/newFiles"
-
-    # Run BrucMLST.sh
-    echo "Starting Bruc_MLST.sh"
-    cd ../Zips
-    ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
-    echo "Moving forward from Bruc_MLST.sh"
-
-    ###################################################################
-
-elif [ $1 == mel ]; then
-    cp /home/shared/brucella/melitensis/script_dependents/BmelitensisM5-90.fasta ./
-    hqs="/home/shared/brucella/melitensis/script_dependents/melHighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/melitensis/newFiles"
-    sharedSAN="/home/shared/brucella/melitensis/newFiles"
-
-    # Run BrucMLST.sh
-    echo "Starting Bruc_MLST.sh"
-    cd ../Zips
-    ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
-    echo "Moving forward from Bruc_MLST.sh"
-
-    ###################################################################
-
-elif [ $1 == suis1 ]; then
-    cp /home/shared/brucella/suis1/script_dependents/NC_01725c.fasta ./
-    hqs="/home/shared/brucella/suis1/script_dependents/NC_01725cHighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/suis1/newFiles"
-    sharedSAN="/home/shared/brucella/suis1/newFiles"
-
-    # Run BrucMLST.sh
-    echo "Starting Bruc_MLST.sh"
-    cd ../Zips
-    ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
-    echo "Moving forward from Bruc_MLST.sh"
-
-    ###################################################################
-
-elif [ $1 == suis2 ]; then
-    cp /home/shared/brucella/suis2/script_dependents/Bsuisbv2-94-11.fasta ./
-    hqs="/home/shared/brucella/suis2/script_dependents/suis2HighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/suis2/newFiles"
-    sharedSAN="/home/shared/brucella/suis2/newFiles"
-
-    # Run BrucMLST.sh
-    echo "Starting Bruc_MLST.sh"
-    cd ../Zips
-    ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
-    echo "Moving forward from Bruc_MLST.sh"
-
-    ###################################################################
-
-elif [ $1 == suis3 ]; then
-    cp /home/shared/brucella/suis3/script_dependents/B-REF-BS3-686.fasta ./
-    hqs="/home/shared/brucella/suis3/script_dependents/suis3HighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/suis3/newFiles"
-    sharedSAN="/home/shared/brucella/suis3/newFiles"
-
-    # Run BrucMLST.sh
-    echo "Starting Bruc_MLST.sh"
-    cd ../Zips
-    ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
-    echo "Moving forward from Bruc_MLST.sh"
-
-    ###################################################################
-
-elif [ $1 == suis4 ]; then
-    cp /home/shared/brucella/suis4/script_dependents/B-REF-BS4-40.fasta ./
-    hqs="/home/shared/brucella/suis4/script_dependents/suis4HighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/suis4/newFiles"
-    sharedSAN="/home/shared/brucella/suis4/newFiles"
-
-    # Run BrucMLST.sh
-    echo "Starting Bruc_MLST.sh"
-    cd ../Zips
-    ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
-    echo "Moving forward from Bruc_MLST.sh"
-
-    ###################################################################
-
-elif [ $1 == canis ]; then
-    cp /home/shared/brucella/canis/script_dependents/BcanisATCC23365.fasta ./
-    hqs="/home/shared/brucella/canis/script_dependents/canisHighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/canis/newFiles"
-    sharedSAN="/home/shared/brucella/canis/newFiles"
-
-    # Run BrucMLST.sh
-    echo "Starting Bruc_MLST.sh"
-    cd ../Zips
-    ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
-    echo "Moving forward from Bruc_MLST.sh"
-
-    ###################################################################
-
-elif [ $1 == ceti1 ]; then
-    cp /home/shared/brucella/ceti1/script_dependents/Bceti1Cudo.fasta ./
-    hqs="/home/shared/brucella/ceti1/script_dependents/ceti1HighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/ceti1/newFiles"
-    sharedSAN="/home/shared/brucella/ceti1/newFiles"
-
-    # Run BrucMLST.sh
-    echo "Starting Bruc_MLST.sh"
-    cd ../Zips
-    ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
-    echo "Moving forward from Bruc_MLST.sh"
-
-    ###################################################################
-
-elif [ $1 == ceti2 ]; then
-    cp /home/shared/brucella/ceti2/script_dependents/Bceti2-TE10759.fasta ./
-    hqs="/home/shared/brucella/ceti2/script_dependents/ceti2HighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/ceti2/newFiles"
-    sharedSAN="/home/shared/brucella/ceti2/newFiles"
-
-    # Run BrucMLST.sh
-    echo "Starting Bruc_MLST.sh"
-    cd ../Zips
-    ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
-    echo "Moving forward from Bruc_MLST.sh"
-
-    ###################################################################
-
-elif [ $1 == ovis ]; then
-    cp /home/shared/brucella/ovis/script_dependents/BovisATCC25840.fasta ./
-    hqs="/home/shared/brucella/ovis/script_dependents/BovisATCC25840HighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/ovis/newFiles"
-    sharedSAN="/home/shared/brucella/ovis/newFiles"
-
-    # Run BrucMLST.sh
-    echo "Starting Bruc_MLST.sh"
-    cd ../Zips
-    ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
-    echo "Moving forward from Bruc_MLST.sh"
-
-    ###################################################################
-
-elif [ $1 == taylorella ]; then
-    cp /Users/Shared/_WGS/Taylorella/passage_group/references/T01-0619-PATRIC-Ref.fasta ./
-    hqs="/Users/Shared/_WGS/Taylorella/passage_group/references/etaylorella-hqs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/GenBact/Taylorella"
-
-    ###################################################################
-    ###################################################################
-
-###################################################################
-# Lineage 1
-elif [ $1 == TB1 ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb1/NC_017528.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb1/HQ-NC_017528.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb1/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
-
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
-
-###################################################################
-# Lineage 2
-elif [ $1 == TB2ignore ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb2/NC_021251.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb2/HQ-NC021251.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb2-H37/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
-
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
-
-###################################################################
-# Lineage 2 using H37Rv as the reference
-elif [ $1 == TB2 ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb2-H37/NC000962.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb2-H37/HQ-tb2NC000962.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb2/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
-
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
-
-###################################################################
-
-# Lineage 3
-elif [ $1 == TB3 ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb3/NC_021193.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/HQ-13-7575.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb3/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
-
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
-
-###################################################################
-# Lineage 4.1 and 4.2
-elif [ $1 == TB4a ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb4a/NC002755.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4a/HQ-NC002755.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb4a/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
-
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
-
-###################################################################
-# Lineage 4.9
-elif [ $1 == TB4b ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb4b/NC018143.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4b/HQ-NC018143.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb4b/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
-
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
-
-###################################################################
-# Lineage 5
-elif [ $1 == TB5 ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb5/APKD01000001.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb5/HQ-16-2185-11.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb5/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
-
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
-
-###################################################################
-# Lineage 6
-elif [ $1 == TB6 ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb6/NC_015758.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb6/HQ-NC015758.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb6/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
-
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
-
-###################################################################
+#################################################################################
 
 # Lineage Bov-Afri, AF2122
-elif [ $1 == TBBOV ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tbbov/NC_002945.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tbbov/HighestQualitySNPs.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tbbov/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+if [ $1 == TBBOV ]; then
+    cp /home/shared/mycobacterium/tbc/snppipeline/tbbov/NC_002945.fasta ./
+    hqs="/home/shared/mycobacterium/tbc/snppipeline/tbbov/HighestQualitySNPs.vcf"
+    bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tbbov/newFiles"
 
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
-
-###################################################################
-###################################################################
-###################################################################
-
-###################################################################
-
-elif [ $1 == para ]; then
-   cp /home/shared/mycobacterium/mott/paratb/NC_002944.fasta ./
-   hqs="/home/shared/mycobacterium/mott/paratb/HQ-NC002944.vcf"
-   bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/mac/para_cattle-bison/newFiles"
-   #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
-
-    ###################################################################
+    # Run spoligoSpacerFinder.sh
+    echo "Starting spoligoSpacerFinder.sh"
+    ${SPOLIGOSPACERFINDER} &
+    echo "Moving forward from spoligoSpacerFinder.sh"
 
 else
-    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, s
-uis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis, para"
+    echo "Incorrect argument!  Must use argument: TBBOV"
     exit 1
 fi
+
+#################################################################################
 
 # Grab reads and reference and place them in variables
 ref=`ls | grep .fasta`
