@@ -1,11 +1,11 @@
 #!/bin/sh
 
-#  Clone the repository "public", branch "portable" to your ~ directory
-#  Usage: processZips.sh TBBOV
-#  Working directory should contain paired-end fastq reads
+#  Clone to your home directory, place scripts folder in PATH
+#  Clone the repository "public" --> branch "portable" to your ~ directory
+#  Place ~/public/SNP_analysis/bin into your PATH
+#  Working directory must contain paired-end fastq reads
 #  Reads must be included as _R1 and _R2
-#  See loopfiles.sh and email_loopfiles for multiple samples
-#  Clone to your home directory, place scripts folder in PATH 
+#  Usage: processZips.sh TBBOV
 
 #################################################################################
 #  Dependencies --- ALL DEPENDENCES MUST BE IN YOUR PATH
@@ -16,8 +16,8 @@
 #   igvtools, http://www.broadinstitute.org/software/igv/igvtools_commandline
 #   bamtools, https://github.com/pezmaster31/bamtools/wiki/Building-and-installing
 #   abyss, http://www.bcgsc.ca/platform/bioinfo/software/abyss
-#   File containing high quality SNPs, Volumes/Mycobacterium/Go_To_File/HighestQualitySNPs.vcf
-#   Reference in fasta format, /Volumes/Data_HD/Mycobacterium/Go_To_File/NC_002945.fasta
+#   File containing high quality SNPs, ~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/HighestQualitySNPs.vcf
+#   Reference, ~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/NC_002945.fasta
 #################################################################################
 
 echo "**************************************************************************"
@@ -112,8 +112,11 @@ if [ $1 == TBBOV ]; then
         exit 1
     fi
 
-    hqs="/home/shared/mycobacterium/tbc/snppipeline/tbbov/HighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tbbov/newFiles"
+    hqs="~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/HighestQualitySNPs.vcf"
+    if [[ -z $hqs ]]; then
+        echo "Check your path to VCF containing high quality SNPs at line: $LINENO"
+        exit 1
+    fi
 
     # Run spoligoSpacerFinder.sh
     echo "Starting spoligoSpacerFinder.sh"
@@ -374,11 +377,11 @@ egrep -v "#" $n.ready-mem.vcf | egrep "AC=2" | awk '$6 > 150' | grep -c ".*" >> 
 echo "Mean Coverage"
 awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}'
 
-awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}' >> /scratch/report/coverageReport.txt
+#awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}' >> /scratch/report/coverageReport.txt
 
-echo "Sample identified and ran as:  $1" >> /scratch/report/dailyReport.txt
+#echo "Sample identified and ran as:  $1" >> /scratch/report/dailyReport.txt
 
-awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}' >> /scratch/report/dailyReport.txt
+#awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}' >> /scratch/report/dailyReport.txt
 
 mv $n.Metrics_summary.xls QualityValues/
 mv $n.stats.txt QualityValues/
@@ -393,19 +396,16 @@ mv ${startingdir}/fastq ${startingdir}/spoligo
 cp $0 ./
 rm ${startingdir}/fastq/*fastq
 
-echo "***Sending files to the Network"
-cp -r ${startingdir} ${bioinfo}
-
 #Make dailyStats.txt for each stats.txt made for each isolate.
-echo "" >> /scratch/report/dailyStats.txt
-echo "" >> /scratch/report/dailyStats.txt
-echo "" >> /scratch/report/dailyStats.txt
-echo "ADD_MARKER" >> /scratch/report/dailyStats.txt
-echo "" >> /scratch/report/dailyStats.txt
-echo "<------- $n $1 ------->" >> /scratch/report/dailyStats.txt
-cat QualityValues/$n.stats.txt >> /scratch/report/dailyStats.txt
-cp QualityValues/$n.stats.txt /home/shared/stats
-cp QualityValues/$n.stats.txt /scratch/report/stats
+#echo "" >> /scratch/report/dailyStats.txt
+#echo "" >> /scratch/report/dailyStats.txt
+#echo "" >> /scratch/report/dailyStats.txt
+#echo "ADD_MARKER" >> /scratch/report/dailyStats.txt
+#echo "" >> /scratch/report/dailyStats.txt
+#echo "<------- $n $1 ------->" >> /scratch/report/dailyStats.txt
+#cat QualityValues/$n.stats.txt >> /scratch/report/dailyStats.txt
+#cp QualityValues/$n.stats.txt /home/shared/stats
+#cp QualityValues/$n.stats.txt /scratch/report/stats
 
 echo "**************************** END $n ****************************"
 
