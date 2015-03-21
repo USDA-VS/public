@@ -1,6 +1,7 @@
 #!/bin/sh
 
-#  Usage: processZips.sh bovis
+#  Clone the repository "public", branch "portable" to your ~ directory
+#  Usage: processZips.sh TBBOV
 #  Working directory should contain paired-end fastq reads
 #  Reads must be included as _R1 and _R2
 #  See loopfiles.sh and email_loopfiles for multiple samples
@@ -105,7 +106,12 @@ ls ../Zips/*.fastq* | while read file; do ln -s $file; done
 
 # Lineage Bov-Afri, AF2122
 if [ $1 == TBBOV ]; then
-    cp /home/shared/mycobacterium/tbc/snppipeline/tbbov/NC_002945.fasta ./
+    cp ~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/NC_002945.fasta ./
+    if [[ ! -e NC_002945.fasta ]];
+        echo "At line $LINENO check your path to reference"
+        exit 1
+    fi
+
     hqs="/home/shared/mycobacterium/tbc/snppipeline/tbbov/HighestQualitySNPs.vcf"
     bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tbbov/newFiles"
 
