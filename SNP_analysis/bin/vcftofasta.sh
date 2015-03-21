@@ -16,6 +16,7 @@ Paradigm
 END
 echo "Start Time: `date`" > sectiontime
 starttime=`date +%s`
+argUsed="$1"
 
 ####################################################
 function parseXLS () {
@@ -789,9 +790,9 @@ for d in $directories; do
 		echo -e "$n \t \t \t Count Findings: $countfind  <-- !!!!" >> ${d}-AC1findings.txt 
 		searchname=`echo $n | sed 's/_.*//'`
 
-        if [[  $1 == para ]]; then
-            unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/_Mycobacterium/_TB-Data/${searchname}*/BWAmem-GATK/QualityValues/*stats.txt`
-        elif [[  $1 == bovis ]]; then
+        if [[  $argUsed == para ]]; then
+            unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/_Mycobacterium/mac/para_cattle-bison/data/${searchname}*/BWAmem-GATK/QualityValues/*stats.txt`
+        elif [[  $argUsed == bovis ]]; then
             unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/_Mycobacterium/_TB-Data/${searchname}*/BWAmem-GATK/QualityValues/*stats.txt`
         else
             contigMessage="possibly set a new contig path at script line: $LINENO"
@@ -1736,20 +1737,9 @@ cp -r $PWD ${bioinfoVCF}
 echo "******* $LINENO, $PWD"
 fileName=`basename $0`
 
-#mail -s "$fileName $@ completed" tod.p.stuber@usda.gov < log.txt
-#mail -s "$fileName $@ completed" suelee.robbe-austerman@usda.gov < log.txt
-#mail -s "$fileName $@ completed" christine.r.quance@usda.gov < log.txt
-
-#echo "<html>" > email_log.html
-#awk 'BEGIN{print "<Body>"} {print "<p style=\"line-height: 5%;\">" $0 "</p>"} END{print "</Body>"}' log.txt >> email_log.html
-#echo "</html>" >> email_log.html
-
-# As attachment
-
 if [[ $3 == me ]]; then
-	echo "Only Tod received this e-mail! $fileName $@ completed, See attachment" > mytempfile; cat mytempfile | mutt -s "$fileName $@ completed" -a email_log.html -- tod.p.stuber@usda.gov
+	echo "Only Tod received this e-mail! $fileName $@ completed, See attachment" > mytempfile; cat mytempfile | mutt -s "$fileName $@ completed" -a email_log.html -- "tod.p.stuber@usda.gov"
 	else
-#email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov suelee.robbe-austerman@usda.gov"
 	echo "$fileName $@ completed, See attachment" > mytempfile; cat mytempfile | mutt -s "$fileName $@ completed" -a email_log.html -- $email_list
 fi
 rm mytempfile
