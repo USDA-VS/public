@@ -107,7 +107,7 @@ ls ../Zips/*.fastq* | while read file; do ln -s $file; done
 # Lineage Bov-Afri, AF2122
 if [ $1 == TBBOV ]; then
     cp ~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/NC_002945.fasta ./
-    if [[ ! -e NC_002945.fasta ]];
+    if [[ ! -e NC_002945.fasta ]]; then
         echo "At line $LINENO check your path to reference"
         exit 1
     fi
