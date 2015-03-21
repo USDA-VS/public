@@ -9,13 +9,13 @@ tbNumberV='s/_.*//' #Remove all charaters at and beyond "_"
 tbNumberW='s/\..*//' #Remove all charaters at and beyond "."
 
 # Path to txt file containing paste from Excel worksheet.
-filterFile="/home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt"
+filterFile="~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/filterFile.txt"
 
 # Number of columns in Excel worksheet
 columns=`head $filterFile | awk 'BEGIN{ FS="\t"; OFS="\t" }  END {print NF}'`
 
 # Location filter files are output to.
-output="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups/"
+output="~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/bovisGroups"
 
 # Number of Computer cores
 NR_CPUS=24
