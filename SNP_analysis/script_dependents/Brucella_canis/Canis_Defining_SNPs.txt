@@ -1,2 +1,0 @@
-Designation	Position	ALT	Label
-1	263412		Group

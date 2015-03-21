@@ -14,37 +14,59 @@ Designation	Position	ALT	Label
 13	1042096	T	Group
 14	2212142	T	Group
 15	4146482	T	Group
-16	1928460	A	Group
+16	1941096	T	Group
 17	324581	A	Group
 18	1095144	T	Group
-19	1255911	T	Group
-20	405731	T	Group
-21	2382488	T	Group
-22	1940066		Group
-TB	4110670		Group
+19	3971448	T	Group
+20	144254	T	Group
+21	3349232	C	Group
+22	1954624	T	Group
+23	2228182	T	Group
+24	308852	T	Group
+25	748733	T	Group
+26	960492	T	Group
+27	237923	T	Group
+28	1618394	T	Group
+TB	3910673		Group
 			
 1A	1458346	T	Subgroup
 1A-1	2824728	T	Clade
-1A-2	3989159	T	Clade
-1A-3	2596758	A	Clade
+1A-2	195737	T	Clade
+1A-3	4048354	A	Clade
+1A-4	2596758	A	Clade
+1A-5	1884276	A	Clade
 			
 1B	983339	C	Subgroup
+1B-1	3922503	T	Clade
+1B-2	3027668	G	Clade
+			
 1C	2406621	T	Subgroup
+1C-1	1481408	A	Clade
+1C-2	2924509	T	Clade
+			
 1D	2880336	A	Subgroup
+1D-1	3926299	A	Clade
+1D-2	943203	G	Clade
+1D-3	1473636	T	Clade
+1D-4	1066088	A	Clade
+1D-5	655025	C	Clade
+1D-6	3549343	T	Clade
+			
 4A	1082032	T	Subgroup
-4B	1050729	T	Subgroup
-4C	1942210	T	Subgroup
-4B-1	1395277	T	Clade
+4B	3069145	T	Subgroup
+4B-1	3039284	A	Clade
 4B-2	2029461	T	Clade
 4B-3	937683	T	Clade
-4B-4	1341386	A	Clade
+4B-4	779123	G	Clade
 4B-5	1259403	T	Clade
 4B-6	1442556	T	Clade
 4B-7	2193207	T	Clade
 4B-8	2001093	T	Clade
+4C	1942210	T	Subgroup
 5A	4053799	T	Subgroup
 5B	4138020	T	Subgroup
-6A	3183982	T	Subgroup
+			
+6A	3359732	T	Subgroup
 6B	1135296	T	Subgroup
 			
 7A	33083	T	Subgroup
@@ -53,8 +75,10 @@ TB	4110670		Group
 7B-2	3447544	A	Clade
 7B-3	1141162	T	Clade
 			
+			
+			
 12A	3581139	T	Subgroup
-12B	849541	C	Subgroup
+12B	768011	G	Subgroup
 12C	1399811	T	Subgroup
 12D	1613577	T	Subgroup
 			
@@ -62,32 +86,29 @@ TB	4110670		Group
 14B	3271320	T	Subgroup
 14C	2196986	T	Subgroup
 			
-16A	3743887	T	Subgroup
-16B	751671	T	Subgroup
-16B-1	1578622	T	Clade
-16B-2	1085749	T	Clade
-16B-3	1258607	T	Clade
-			
-			
-			
-16C	3767749	T	Subgroup
-16D	3674586		Subgroup
-16E	424805	T	Subgroup
-16F	4246065	G	Subgroup
-16G	1957833	T	Subgroup
-16H	1072818	T	Subgroup
-16I	1100254	T	Subgroup
-16J	1825637	T	Subgroup
-16K	3180999	A	Subgroup
-16M	1103152	T	Subgroup
-16N	1495055		Subgroup
+16A	1495055	T	Subgroup
+16B	1109651	C	Subgroup
+16C	3180999	A	Subgroup
+16D	1141592	G	Subgroup
+16E	1825637	T	Subgroup
 			
 17A	2103902	T	Subgroup
 17A-1	1560062	T	Clade
-17B	2666542	A	Subgroup
+17B	3519393	A	Subgroup
 17B-1	2993729	T	Clade
-17B-2	1102465	T	Clade
+17B-2	1580242	T	Clade
 17B-3	1061663	T	Clade
+17B-4	1048291	T	Clade
+17B-5	2463606	A	Clade
+17B-6	2922348	T	Clade
 17C	1001972	T	Subgroup
 17D	2318105	T	Subgroup
-
+			
+23A	751671	T	Subgroup
+23A-1	1867854	A	Clade
+23A-2	3198603	T	Clade
+23B	177287	T	Subgroup
+23B-1	1607931	T	Clade
+23C	4246065	G	Subgroup
+23D	1957833	T	Subgroup
+23E	1100254	T	Subgroup
