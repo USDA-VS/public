@@ -788,11 +788,19 @@ for d in $directories; do
 	if [[ $countfind -gt 2  ]]; then
 		echo -e "$n \t \t \t Count Findings: $countfind  <-- !!!!" >> ${d}-AC1findings.txt 
 		searchname=`echo $n | sed 's/_.*//'`
-		unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/_Mycobacterium/_TB-Data/${searchname}*/BWAmem-GATK/QualityValues/*stats.txt`	
-		if [[ -z $unmappedContigs ]]; then 
+
+        if [[  $1 == para ]]; then
+            unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/_Mycobacterium/_TB-Data/${searchname}*/BWAmem-GATK/QualityValues/*stats.txt`
+        elif [[  $1 == bovis ]]; then
+            unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/_Mycobacterium/_TB-Data/${searchname}*/BWAmem-GATK/QualityValues/*stats.txt`
+        else
+            contigMessage="possibly set a new contig path at script line: $LINENO"
+        fi
+
+if [[ -z $unmappedContigs ]]; then
 			unmappedContigs="Contig counts not available"
 		fi
-		echo -e "$d Sample: $n \t \t \t Count Findings: $countfind  <-- !!!!" $unmappedContigs >> ${fulDir}/emailAC1counts
+		echo -e "$d Sample: $n \t \t \t Count Findings: $countfind  <-- !!!!" $unmappedContigs $contigMessage >> ${fulDir}/emailAC1counts
 	else 
 		echo -e "$n \t \t \t Count Findings: $countfind" >> ${d}-AC1findings.txt
 	fi
