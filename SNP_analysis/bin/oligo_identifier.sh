@@ -104,7 +104,7 @@ echo $paracounts
 
 brucbinary=`echo $bruccounts | awk '{for(i=1;i<=NF;i++) if ($i >= 1) print 1; else print 0}' | tr -cd "[:print:]"`
 tbbinary=`echo $tbcounts | awk '{for(i=1;i<=NF;i++) if ($i >= 1) print 1; else print 0}' | tr -cd "[:print:]"`
-parabinary=`echo $paracounts | awk '{for(i=1;i<=NF;i++) if ($i >= 1) print 1; else print 0}' | tr -cd "[:print:]"`
+parabinary=`echo $paracounts | awk '{for(i=1;i<=NF;i++) if ($i >= 10) print 1; else print 0}' | tr -cd "[:print:]"`
 
 echo $brucbinary
 echo $tbbinary
