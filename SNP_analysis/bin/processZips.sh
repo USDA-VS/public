@@ -379,11 +379,9 @@ mv $n.Metrics_summary.xls QualityValues/
 mv $n.stats.txt QualityValues/
 rm $n.Quality_by_cycle.insert_size_metrics
 rm $n.AlignmentMetrics
-rm -r ${startingdir}/temp
-mv ${startingdir}/fastq ${startingdir}/spoligo
+rm -r ${startingdir}/spoligo
 
 cp $0 ./
-rm ${startingdir}/fastq/*fastq
 
 echo "**************************** END $n ****************************"
 
