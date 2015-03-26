@@ -38,9 +38,10 @@ done
 for i in ${output}*.list; do
     (base=`basename "$i"`
     readyfile=`echo $base | sed $tbNumberW`
+echo "Readyfile: $readyfile"
 
     touch ${output}/${readyfile}.txt
-
+read -p "$LINENO FILTERFILECREATIONS.SH ENTER"
     mylist=`cat $i`
 
         for l in $mylist; do
