@@ -1,5 +1,5 @@
 #! /bin/sh
-
+#THIS IS A TEST COMMENT
 # Paired script to run with multiple pairs of fastq files in one directory is "email-secdKraken.sh {argument}"
 
 # Runs in a folder with only two fastq files
