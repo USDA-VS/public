@@ -1,6 +1,7 @@
 #!/bin/sh
 
 #  Clone to your home directory, place scripts folder in PATH
+#  "~" as working directory call... git clone https://github.com/USDA-VS/public.git
 #  Clone the repository "public" --> branch "portable" to your ~ directory
 #  Place ~/public/SNP_analysis/bin into your PATH
 #  Working directory must contain paired-end fastq reads
@@ -112,7 +113,7 @@ if [ $1 == TBBOV ]; then
         exit 1
     fi
 
-    hqs="~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/HighestQualitySNPs.vcf"
+    hqs=~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/HighestQualitySNPs.vcf
     if [[ -z $hqs ]]; then
         echo "Check your path to VCF containing high quality SNPs at line: $LINENO"
         exit 1
@@ -232,16 +233,16 @@ if [ ! -e $n.realignedBam.bam ]; then
 	#cat $n.errorReport | mutt -s "$n Alignment failure" -- tod.p.stuber@usda.gov
 	java -Xmx4g -jar ${gatk} -T IndelRealigner --fix_misencoded_quality_scores -I $n.dup.bam -R $ref -targetIntervals $n.forIndelRealigner.intervals -o $n.realignedBam.bam
 fi
-
+read -p "$LINENO PRESS ENTER"
 # Uses a .vcf file which contains SNP calls of known high value to recalibrates base quality scores
 # http://www.broadinstitute.org/gatk/guide/tagged?tag=baserecalibrator
 echo "***Base Recalibrator"
 java -Xmx4g -jar $GATK -T BaseRecalibrator -I $n.realignedBam.bam -R $ref -knownSites ${hqs} -o $n.recal_data.grp
-
+read -p "$LINENO PRESS ENTER"
 if [ ! -e $n.recal_data.grp ]; then
 	java -Xmx4g -jar $GATK -T BaseRecalibrator --fix_misencoded_quality_scores -I $n.realignedBam.bam -R $ref -knownSites ${hqs} -o $n.recal_data.grp
 fi
-
+read -p "$LINENO PRESS ENTER"
 # Make the finished "ready" .bam file
 echo "***Print Reads"
 java -Xmx4g -jar $GATK -T PrintReads -R $ref -I $n.realignedBam.bam -BQSR $n.recal_data.grp -o $n.ready-mem.bam
