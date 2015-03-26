@@ -9,7 +9,7 @@ tbNumberV='s/_.*//' #Remove all charaters at and beyond "_"
 tbNumberW='s/\..*//' #Remove all charaters at and beyond "."
 
 # Path to txt file containing paste from Excel worksheet.
-filterFile="~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/filterFile.txt"
+filterFile=~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/filterFile.txt
 
 # Number of columns in Excel worksheet
 columns=`head $filterFile | awk 'BEGIN{ FS="\t"; OFS="\t" }  END {print NF}'`
