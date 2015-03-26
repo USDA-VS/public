@@ -31,7 +31,7 @@ while [ $count -lt ${columns} ]; do
     echo ${count}
     filename=`awk -v x=$count 'BEGIN{FS=OFS="\t"}{print $x}' $filterFile | head -n1`
     echo "Filename: $filename"
-    awk -v x=$count 'BEGIN{FS=OFS="\t"} FNR>1 {print $x}' $filterFile | grep -v "^$" > ${output}${filename}.list
+    awk -v x=$count 'BEGIN{FS=OFS="\t"} FNR>1 {print $x}' $filterFile | grep -v "^$" > ${output}/${filename}.list
     let count=count+1
 done
 
@@ -41,7 +41,6 @@ for i in ${output}*.list; do
 echo "Readyfile: $readyfile"
 
     touch ${output}/${readyfile}.txt
-read -p "$LINENO FILTERFILECREATIONS.SH ENTER"
     mylist=`cat $i`
 
         for l in $mylist; do
