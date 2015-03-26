@@ -357,16 +357,8 @@ done
 WGSpoligo=`cat $n.octalcode.txt | tr -cd "[:print:]"`
 
 # Add infor to spoligoCheck.txt
-echo "<----- $n ----->" >> /scratch/report/spoligoCheck.txt
-echo "WGSpoligo:	$WGSpoligo" >> /scratch/report/spoligoCheck.txt
-
-#Make FileMaker file
-dateFile=`date "+%Y%m%d"`
-printf "%s\t%s\n" "$n" "$WGSpoligo" >> "/bioinfo11/TStuber/Results/_Mycobacterium/newFiles/${dateFile}_FileMakerSpoligoImport.txt"
-
-# Add infor to spoligoCheck_all.txt
-echo "<----- $n ----->" >> /scratch/report/spoligoCheck_all.txt
-echo "WGSpoligo:	$WGSpoligo" >> /scratch/report/spoligoCheck_all.txt
+echo "<----- $n ----->" >> ${n}.spoligoCheck.txt
+echo "WGSpoligo:	$WGSpoligo" >> ${n}.spoligoCheck.txt
 
 # move back a directory to main sample folder
 cd ..
