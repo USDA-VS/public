@@ -69,7 +69,7 @@ echo "Readyfile: $readyfile"
  done
 wait
 
-rm ${output}*.list
+rm ${output}/*.list
 
 #
 #  Created by Stuber, Tod P - APHIS on 12/16/2013.
