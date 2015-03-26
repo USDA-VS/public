@@ -379,7 +379,7 @@ mv $n.Metrics_summary.xls QualityValues/
 mv $n.stats.txt QualityValues/
 rm $n.Quality_by_cycle.insert_size_metrics
 rm $n.AlignmentMetrics
-rm -r ${startingdir}/spoligo
+rm -r ${startingdir}/fastq
 
 cp $0 ./
 
