@@ -67,7 +67,7 @@ if [[ $1 == TBBOV ]]; then
         exit 1
     fi
 
-    rm "${FilterDirectory}/*"
+    rm ${FilterDirectory}/*
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=200 # QUAL range to change ALT to N
@@ -81,16 +81,16 @@ email_list="tod.p.stuber@usda.gov" #Replace the email with your own
         echo "Check your path to Filtered_Regions.xlsx at line: $LINENO"
         exit 1
     fi
-
+read -p "$LINENO ENTER"
     parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > ~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/filterFile.txt
 
     FilterFileCreations.sh
-
+read -p "$LINENO ENTER"
 else
 
     echo ""
-    echo "Incorrect argument!  Must use the following argument: bovis"
-    echo "Example:  vcftofasta.sh bovis"
+    echo "Incorrect argument!  Must use the following argument: TBBOV"
+    echo "Example:  vcftofasta.sh TBBOV"
     echo ""
     exit 1
 
