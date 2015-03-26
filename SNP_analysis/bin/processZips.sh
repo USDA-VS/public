@@ -17,6 +17,7 @@
 #   igvtools, http://www.broadinstitute.org/software/igv/igvtools_commandline
 #   bamtools, https://github.com/pezmaster31/bamtools/wiki/Building-and-installing
 #   abyss, http://www.bcgsc.ca/platform/bioinfo/software/abyss
+#   RStudio IDE and R libraries ggplot2 and gsalib, Optional
 #   File containing high quality SNPs, ~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/HighestQualitySNPs.vcf
 #   Reference, ~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/NC_002945.fasta
 #################################################################################
@@ -233,16 +234,16 @@ if [ ! -e $n.realignedBam.bam ]; then
 	#cat $n.errorReport | mutt -s "$n Alignment failure" -- tod.p.stuber@usda.gov
 	java -Xmx4g -jar ${gatk} -T IndelRealigner --fix_misencoded_quality_scores -I $n.dup.bam -R $ref -targetIntervals $n.forIndelRealigner.intervals -o $n.realignedBam.bam
 fi
-read -p "$LINENO PRESS ENTER"
+
 # Uses a .vcf file which contains SNP calls of known high value to recalibrates base quality scores
 # http://www.broadinstitute.org/gatk/guide/tagged?tag=baserecalibrator
 echo "***Base Recalibrator"
 java -Xmx4g -jar $GATK -T BaseRecalibrator -I $n.realignedBam.bam -R $ref -knownSites ${hqs} -o $n.recal_data.grp
-read -p "$LINENO PRESS ENTER"
+
 if [ ! -e $n.recal_data.grp ]; then
 	java -Xmx4g -jar $GATK -T BaseRecalibrator --fix_misencoded_quality_scores -I $n.realignedBam.bam -R $ref -knownSites ${hqs} -o $n.recal_data.grp
 fi
-read -p "$LINENO PRESS ENTER"
+
 # Make the finished "ready" .bam file
 echo "***Print Reads"
 java -Xmx4g -jar $GATK -T PrintReads -R $ref -I $n.realignedBam.bam -BQSR $n.recal_data.grp -o $n.ready-mem.bam
@@ -357,11 +358,11 @@ cat $n.stats2.txt | grep -v "Failed" | grep -v "Duplicates" | grep -v "Proper-pa
 rm $n.stats2.txt
 echo "" >> $n.stats.txt
 ###########################
-
+read -p "$LINENO PRESS ENTER"
 #  Add Insert_Size and Read_Length to stats.txt file
 echo 'Mean_Insert_Size  Standard_Deviation:' >> $n.stats.txt
 awk 'BEGIN {OFS="\t"} { print $5,$6 }' $n.Quality_by_cycle.insert_size_metrics | awk 'FNR == 8 {print $0}' >> $n.stats.txt
-
+read -p "$LINENO PRESS ENTER"
 echo 'Mean_Read_Length:' >> $n.stats.txt
 awk 'BEGIN {OFS="\t"} { print $16 }' $n.AlignmentMetrics | awk 'FNR == 10 {print $0}' >> $n.stats.txt
 
@@ -378,35 +379,15 @@ egrep -v "#" $n.ready-mem.vcf | egrep "AC=2" | awk '$6 > 150' | grep -c ".*" >> 
 echo "Mean Coverage"
 awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}'
 
-#awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}' >> /scratch/report/coverageReport.txt
-
-#echo "Sample identified and ran as:  $1" >> /scratch/report/dailyReport.txt
-
-#awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}' >> /scratch/report/dailyReport.txt
-
 mv $n.Metrics_summary.xls QualityValues/
 mv $n.stats.txt QualityValues/
 rm $n.Quality_by_cycle.insert_size_metrics
 rm $n.AlignmentMetrics
-cat ../*out1* ../*out2* > ../${n}-identification.txt
-rm ../*identifier_out1*
-rm ../*identifier_out2*
 rm -r ${startingdir}/temp
 mv ${startingdir}/fastq ${startingdir}/spoligo
 
 cp $0 ./
 rm ${startingdir}/fastq/*fastq
-
-#Make dailyStats.txt for each stats.txt made for each isolate.
-#echo "" >> /scratch/report/dailyStats.txt
-#echo "" >> /scratch/report/dailyStats.txt
-#echo "" >> /scratch/report/dailyStats.txt
-#echo "ADD_MARKER" >> /scratch/report/dailyStats.txt
-#echo "" >> /scratch/report/dailyStats.txt
-#echo "<------- $n $1 ------->" >> /scratch/report/dailyStats.txt
-#cat QualityValues/$n.stats.txt >> /scratch/report/dailyStats.txt
-#cp QualityValues/$n.stats.txt /home/shared/stats
-#cp QualityValues/$n.stats.txt /scratch/report/stats
 
 echo "**************************** END $n ****************************"
 

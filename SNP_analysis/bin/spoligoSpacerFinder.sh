@@ -354,14 +354,18 @@ else
 fi
 done
 
+rm $forReads
+rm $revReads
+
 WGSpoligo=`cat $n.octalcode.txt | tr -cd "[:print:]"`
 
 # Add infor to spoligoCheck.txt
-echo "<----- $n ----->" >> ${n}.spoligoCheck.txt
-echo "WGSpoligo:	$WGSpoligo" >> ${n}.spoligoCheck.txt
+echo "<----- $n ----->" >> ../${n}.spoligoResults.txt
+echo "WGSpoligo:	$WGSpoligo" >> ../${n}.spoligoResults.txt
 
 # move back a directory to main sample folder
 cd ..
+rm -r spoligo
 
 #
 #  Created by Stuber, Tod P - APHIS on 03/07/2013.
