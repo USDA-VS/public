@@ -39,7 +39,7 @@ for i in ${output}*.list; do
     (base=`basename "$i"`
     readyfile=`echo $base | sed $tbNumberW`
 
-    touch "${output}/${readyfile}.txt"
+    touch ${output}/${readyfile}.txt
 
     mylist=`cat $i`
 
@@ -52,14 +52,14 @@ for i in ${output}*.list; do
                 let pos2=pos1+1
                     while [ $pos1 -lt $pos2 ]; do
                         #echo $pos1
-                        echo $pos1 >> "${output}/${readyfile}.txt"
+                        echo $pos1 >> ${output}/${readyfile}.txt
                         let pos1=pos1+1
                     done
                 else
                 let pos2=pos2+1
                     while [ $pos1 -lt $pos2 ]; do
                         #echo $pos1
-                        echo $pos1 >> "${output}/${readyfile}.txt"
+                        echo $pos1 >> ${output}/${readyfile}.txt
                         let pos1=pos1+1
                     done
                 fi
