@@ -35,7 +35,7 @@ while [ $count -lt ${columns} ]; do
     let count=count+1
 done
 
-for i in ${output}*.list; do
+for i in ${output}/*.list; do
     (base=`basename "$i"`
     readyfile=`echo $base | sed $tbNumberW`
 echo "Readyfile: $readyfile"
