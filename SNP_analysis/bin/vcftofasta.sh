@@ -50,7 +50,7 @@ rm ./inputXLS.py
 
 # Environment controls:
 
-if [[ $1 == bovis ]]; then
+if [[ $1 == TBBOV ]]; then
     genotypingcodes="~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/nameswap.tab"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/DefiningSNPsGroupDesignations.txt"
