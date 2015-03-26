@@ -27,6 +27,9 @@ picard='/usr/local/bin/picard-tools-1.117/'
 gatk='/usr/local/bin/GenomeAnalysisTK/GenomeAnalysisTK.jar'
 igvtools='/usr/local/bin/IGVTools/igvtools.jar'
 
+BRUC_MLST=`which Bruc_MLST.sh`
+SPOLIGOSPACERFINDER=`which spoligoSpacerFinder.sh`
+
 echo "current directory"
 pwd
 startingdir=`pwd`
@@ -50,7 +53,7 @@ if [ $1 == ab1 ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
+    ${BRUC_MLST} &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -65,7 +68,7 @@ elif [ $1 == mel ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
+    ${BRUC_MLST} &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -80,7 +83,7 @@ elif [ $1 == suis1 ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
+    ${BRUC_MLST} &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -95,7 +98,7 @@ elif [ $1 == suis2 ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
+    ${BRUC_MLST} &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -110,7 +113,7 @@ elif [ $1 == suis3 ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
+    ${BRUC_MLST} &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -125,7 +128,7 @@ elif [ $1 == suis4 ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
+    ${BRUC_MLST} &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -140,7 +143,7 @@ elif [ $1 == canis ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
+    ${BRUC_MLST} &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -155,7 +158,7 @@ elif [ $1 == ceti1 ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
+    ${BRUC_MLST} &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -170,7 +173,7 @@ elif [ $1 == ceti2 ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
+    ${BRUC_MLST} &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -185,7 +188,7 @@ elif [ $1 == ovis ]; then
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
     cd ../Zips
-    /home/tstuber/workspace/stuber/play_ground/Bruc_MLST.sh &
+    ${BRUC_MLST} &
     cd ../BWAmem-GATK/
     echo "Moving forward from Bruc_MLST.sh"
 
@@ -197,23 +200,144 @@ elif [ $1 == taylorella ]; then
     bioinfo="/bioinfo11/TStuber/Results/GenBact/Taylorella"
 
     ###################################################################
+    ###################################################################
 
-elif [ $1 == bovis ]; then
-   cp /home/shared/mycobacterium/bovis/scriptDependents/NC_002945.fasta ./
-   hqs="/home/shared/mycobacterium/bovis/scriptDependents/HighestQualitySNPs.vcf"
-   bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/newFiles"
-   sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+###################################################################
+# Lineage 1
+elif [ $1 == TB1 ]; then
+cp /home/shared/mycobacterium/tbc/snppipeline/tb1/NC_017528.fasta ./
+hqs="/home/shared/mycobacterium/tbc/snppipeline/tb1/HQ-NC_017528.vcf"
+bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb1/newFiles"
+#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
-    # Run spoligoSpacerFinder.sh
-    echo "Starting spoligoSpacerFinder.sh"
-    /home/tstuber/workspace/public/SNP_analysis/bin/spoligoSpacerFinder.sh &
-    echo "Moving forward from spoligoSpacerFinder.sh"
+# Run spoligoSpacerFinder.sh
+echo "Starting spoligoSpacerFinder.sh"
+${SPOLIGOSPACERFINDER} &
+echo "Moving forward from spoligoSpacerFinder.sh"
+
+###################################################################
+# Lineage 2
+elif [ $1 == TB2ignore ]; then
+cp /home/shared/mycobacterium/tbc/snppipeline/tb2/NC_021251.fasta ./
+hqs="/home/shared/mycobacterium/tbc/snppipeline/tb2/HQ-NC021251.vcf"
+bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb2-H37/newFiles"
+#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+
+# Run spoligoSpacerFinder.sh
+echo "Starting spoligoSpacerFinder.sh"
+${SPOLIGOSPACERFINDER} &
+echo "Moving forward from spoligoSpacerFinder.sh"
+
+###################################################################
+# Lineage 2 using H37Rv as the reference
+elif [ $1 == TB2 ]; then
+cp /home/shared/mycobacterium/tbc/snppipeline/tb2-H37/NC000962.fasta ./
+hqs="/home/shared/mycobacterium/tbc/snppipeline/tb2-H37/HQ-tb2NC000962.vcf"
+bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb2/newFiles"
+#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+
+# Run spoligoSpacerFinder.sh
+echo "Starting spoligoSpacerFinder.sh"
+${SPOLIGOSPACERFINDER} &
+echo "Moving forward from spoligoSpacerFinder.sh"
+
+###################################################################
+
+# Lineage 3
+elif [ $1 == TB3 ]; then
+cp /home/shared/mycobacterium/tbc/snppipeline/tb3/NC_021193.fasta ./
+hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/HQ-13-7575.vcf"
+bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb3/newFiles"
+#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+
+# Run spoligoSpacerFinder.sh
+echo "Starting spoligoSpacerFinder.sh"
+${SPOLIGOSPACERFINDER} &
+echo "Moving forward from spoligoSpacerFinder.sh"
+
+###################################################################
+# Lineage 4.1 and 4.2
+elif [ $1 == TB4a ]; then
+cp /home/shared/mycobacterium/tbc/snppipeline/tb4a/NC002755.fasta ./
+hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4a/HQ-NC002755.vcf"
+bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb4a/newFiles"
+#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+
+# Run spoligoSpacerFinder.sh
+echo "Starting spoligoSpacerFinder.sh"
+${SPOLIGOSPACERFINDER} &
+echo "Moving forward from spoligoSpacerFinder.sh"
+
+###################################################################
+# Lineage 4.9
+elif [ $1 == TB4b ]; then
+cp /home/shared/mycobacterium/tbc/snppipeline/tb4b/NC018143.fasta ./
+hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4b/HQ-NC018143.vcf"
+bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb4b/newFiles"
+#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+
+# Run spoligoSpacerFinder.sh
+echo "Starting spoligoSpacerFinder.sh"
+${SPOLIGOSPACERFINDER} &
+echo "Moving forward from spoligoSpacerFinder.sh"
+
+###################################################################
+# Lineage 5
+elif [ $1 == TB5 ]; then
+cp /home/shared/mycobacterium/tbc/snppipeline/tb5/APKD01000001.fasta ./
+hqs="/home/shared/mycobacterium/tbc/snppipeline/tb5/HQ-16-2185-11.vcf"
+bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb5/newFiles"
+#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+
+# Run spoligoSpacerFinder.sh
+echo "Starting spoligoSpacerFinder.sh"
+${SPOLIGOSPACERFINDER} &
+echo "Moving forward from spoligoSpacerFinder.sh"
+
+###################################################################
+# Lineage 6
+elif [ $1 == TB6 ]; then
+cp /home/shared/mycobacterium/tbc/snppipeline/tb6/NC_015758.fasta ./
+hqs="/home/shared/mycobacterium/tbc/snppipeline/tb6/HQ-NC015758.vcf"
+bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb6/newFiles"
+#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+
+# Run spoligoSpacerFinder.sh
+echo "Starting spoligoSpacerFinder.sh"
+${SPOLIGOSPACERFINDER} &
+echo "Moving forward from spoligoSpacerFinder.sh"
+
+###################################################################
+
+# Lineage Bov-Afri, AF2122
+elif [ $1 == TBBOV ]; then
+cp /home/shared/mycobacterium/tbc/snppipeline/tbbov/NC_002945.fasta ./
+hqs="/home/shared/mycobacterium/tbc/snppipeline/tbbov/HighestQualitySNPs.vcf"
+bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tbbov/newFiles"
+#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+
+# Run spoligoSpacerFinder.sh
+echo "Starting spoligoSpacerFinder.sh"
+${SPOLIGOSPACERFINDER} &
+echo "Moving forward from spoligoSpacerFinder.sh"
+
+###################################################################
+###################################################################
+###################################################################
+
+###################################################################
+
+elif [ $1 == para ]; then
+   cp /home/shared/mycobacterium/mott/paratb/NC_002944.fasta ./
+   hqs="/home/shared/mycobacterium/mott/paratb/HQ-NC002944.vcf"
+   bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/mac/para_cattle-bison/newFiles"
+   #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
     ###################################################################
 
 else
     echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, s
-uis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis"
+uis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis, para"
     exit 1
 fi
 
@@ -265,23 +389,13 @@ bwa mem -M -t 16 -R @RG"\t"ID:"$n""\t"PL:ILLUMINA"\t"PU:"$n"_RG1_UNIT1"\t"LB:"$n
 echo "***Making Bam file"
 samtools view -bh -F4 -T $ref $n.sam > $n.raw.bam
 
-####### mapped reads #######
-#Bam with mapped and unmapped reads
-#samtools view -bh -T $ref $n.sam > $n.all.bam
-#Strip off the unmapped reads
-#samtools view -h -F4 $n.all.bam > $n.mappedReads.sam
-#Create fastqs of unmapped reads to assemble
-#java -Xmx6g -jar ${picard}SamToFastq.jar INPUT=$n.mappedReads.sam FASTQ=${n}-mapped_R1.fastq SECOND_END_FASTQ=${n}-mapped_R2.fastq
-#read -p "$LINENO Enter"
-########################
-
 ####### unmapped reads #######
 #Bam with mapped and unmapped reads
 samtools view -bh -T $ref $n.sam > $n.all.bam
 #Strip off the unmapped reads
 samtools view -h -f4 $n.all.bam > $n.unmappedReads.sam
 #Create fastqs of unmapped reads to assemble
-java -Xmx6g -jar ${picard}SamToFastq.jar INPUT=$n.unmappedReads.sam FASTQ=${n}-unmapped_R1.fastq SECOND_END_FASTQ=${n}-unmapped_R2.fastq
+java -Xmx4g -jar ${picard}SamToFastq.jar INPUT=$n.unmappedReads.sam FASTQ=${n}-unmapped_R1.fastq SECOND_END_FASTQ=${n}-unmapped_R2.fastq
 rm $n.all.bam
 rm $n.unmappedReads.sam
 abyss-pe name=${n}_abyss k=64 in="${n}-unmapped_R1.fastq ${n}-unmapped_R2.fastq"
@@ -303,7 +417,7 @@ samtools index $n.sorted.bam
 # Remove duplicate molecules
 
 echo "***Marking Duplicates"
-java -Xmx6g -jar  ${picard}MarkDuplicates.jar INPUT=$n.sorted.bam OUTPUT=$n.dup.bam METRICS_FILE=$n.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
+java -Xmx4g -jar  ${picard}MarkDuplicates.jar INPUT=$n.sorted.bam OUTPUT=$n.dup.bam METRICS_FILE=$n.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
 
 echo "***Index $n.dup.bam"
 samtools index $n.dup.bam
@@ -312,37 +426,56 @@ samtools index $n.dup.bam
 # locally realign reads such that the number of mismatching bases is minimized across all the reads
 # http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_indels_RealignerTargetCreator.html
 echo "***Realigner Target Creator"
-java -Xmx6g -jar ${gatk} -T RealignerTargetCreator -I $n.dup.bam -R $ref -o $n.forIndelRealigner.intervals
+java -Xmx4g -jar ${gatk} -T RealignerTargetCreator -I $n.dup.bam -R $ref -o $n.forIndelRealigner.intervals
+
+if [ ! -e $n.forIndelRealigner.intervals ]; then
+	java -Xmx4g -jar ${gatk} -T RealignerTargetCreator --fix_misencoded_quality_scores -I $n.dup.bam -R $ref -o $n.forIndelRealigner.intervals
+fi
 
 # Uses the RealignerTargetCreator output file to improve BAM alignment
 # http://www.broadinstitute.org/gatk/guide/tagged?tag=indelrealigner
 echo "***Target Intervals"
-java -Xmx6g -jar ${gatk} -T IndelRealigner -I $n.dup.bam -R $ref -targetIntervals $n.forIndelRealigner.intervals -o $n.realignedBam.bam
+java -Xmx4g -jar ${gatk} -T IndelRealigner -I $n.dup.bam -R $ref -targetIntervals $n.forIndelRealigner.intervals -o $n.realignedBam.bam
+
+if [ ! -e $n.realignedBam.bam ]; then
+	echo "$n RealignedBam.bam failed to make.  Possible cause: Error in quality scores.  Try --fix_misencoded_quality_scores"
+	echo "$n RealignedBam.bam failed to make.  Possible cause: Error in quality scores.  Try --fix_misencoded_quality_scores" > $n.errorReport
+	#cat $n.errorReport | mutt -s "$n Alignment failure" -- tod.p.stuber@usda.gov
+	java -Xmx4g -jar ${gatk} -T IndelRealigner --fix_misencoded_quality_scores -I $n.dup.bam -R $ref -targetIntervals $n.forIndelRealigner.intervals -o $n.realignedBam.bam
+fi
 
 # Uses a .vcf file which contains SNP calls of known high value to recalibrates base quality scores
 # http://www.broadinstitute.org/gatk/guide/tagged?tag=baserecalibrator
 echo "***Base Recalibrator"
-java -Xmx6g -jar ${gatk} -T BaseRecalibrator -I $n.realignedBam.bam -R $ref -knownSites ${hqs} -o $n.recal_data.grp
+java -Xmx4g -jar ${gatk} -T BaseRecalibrator -I $n.realignedBam.bam -R $ref -knownSites ${hqs} -o $n.recal_data.grp
+
+if [ ! -e $n.recal_data.grp ]; then
+	java -Xmx4g -jar ${gatk} -T BaseRecalibrator --fix_misencoded_quality_scores -I $n.realignedBam.bam -R $ref -knownSites ${hqs} -o $n.recal_data.grp
+fi
 
 # Make the finished "ready" .bam file
 echo "***Print Reads"
-java -Xmx6g -jar ${gatk} -T PrintReads -R $ref -I $n.realignedBam.bam -BQSR $n.recal_data.grp -o $n.ready-mem.bam
+java -Xmx4g -jar ${gatk} -T PrintReads -R $ref -I $n.realignedBam.bam -BQSR $n.recal_data.grp -o $n.ready-mem.bam
+
+if [ ! -e $n.ready-mem.bam ]; then
+	java -Xmx4g -jar ${gatk} -T PrintReads --fix_misencoded_quality_scores -R $ref -I $n.realignedBam.bam -BQSR $n.recal_data.grp -o $n.ready-mem.bam
+fi
 
 # Add zero positions to vcf
-java -Xmx6g -jar ${gatk} -R $ref -T UnifiedGenotyper -out_mode EMIT_ALL_SITES -I ${n}.ready-mem.bam -o ${n}.allsites.vcf -nt 8
+java -Xmx4g -jar ${gatk} -R $ref -T UnifiedGenotyper -out_mode EMIT_ALL_SITES -I ${n}.ready-mem.bam -o ${n}.allsites.vcf -nt 8
 awk ' $0 ~ /#/ || $8 !~ /^AN=2;/ {print $0}' ${n}.allsites.vcf > $n.ready-mem.vcf
-java -Xmx6g -jar ${igvtools} index $n.ready-mem.vcf
+java -Xmx4g -jar ${igvtools} index $n.ready-mem.vcf
 
 # SNP calling and .vcf making
 # Threads used can be changed
 # http://www.broadinstitute.org/gatk/guide/tagged?tag=unifiedgenotyper
 echo "***HaplotypeCaller, aka calling SNPs"
-java -Xmx6g -jar ${gatk} -R $ref -T HaplotypeCaller -I $n.ready-mem.bam -o $n.hapreadyAll.vcf -nct 8
+java -Xmx4g -jar ${gatk} -R $ref -T HaplotypeCaller -I $n.ready-mem.bam -o $n.hapreadyAll.vcf -nct 8
 
 echo "******Awk VCF leaving just SNPs******"
 awk '/#/ || $4 ~ /^[ATGC]$/ && $5 ~ /^[ATGC]$/ {print $0}' $n.hapreadyAll.vcf > $n.hapreadyOnlySNPs.vcf
 
-java -Xmx6g -jar ${igvtools} index $n.hapreadyOnlySNPs.vcf
+java -Xmx4g -jar ${igvtools} index $n.hapreadyOnlySNPs.vcf
 
 echo "***Deleting Files"
 rm $n.sam
@@ -369,23 +502,23 @@ java -jar ${gatk} -T DepthOfCoverage -R $ref -I $n.ready-mem.bam --omitDepthOutp
 
 #Quality Score Distribution
 echo "***Quality Score Distribution"
-java -Xmx6g -jar ${picard}QualityScoreDistribution.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam CHART_OUTPUT=$n.QualityScorceDistribution.pdf OUTPUT=$n.QualityScoreDistribution ASSUME_SORTED=true
+java -Xmx4g -jar ${picard}QualityScoreDistribution.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam CHART_OUTPUT=$n.QualityScorceDistribution.pdf OUTPUT=$n.QualityScoreDistribution ASSUME_SORTED=true
 
 #Mean Quality by Cycle
 echo "***Mean Quality by Cycle"
-java -Xmx6g -jar ${picard}CollectMultipleMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.Quality_by_cycle PROGRAM=MeanQualityByCycle ASSUME_SORTED=true
+java -Xmx4g -jar ${picard}CollectMultipleMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.Quality_by_cycle PROGRAM=MeanQualityByCycle ASSUME_SORTED=true
 
 #Collect Alignment Summary Metrics
 echo "***Collect Alignment Summary Metrics"
-java -Xmx6g -jar ${picard}CollectAlignmentSummaryMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.AlignmentMetrics ASSUME_SORTED=true
+java -Xmx4g -jar ${picard}CollectAlignmentSummaryMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.AlignmentMetrics ASSUME_SORTED=true
 
 #Collect GC Bias Error
 echo "***Collect GC Bias Error"
-java -Xmx6g -jar ${picard}CollectGcBiasMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.CollectGcBiasMetrics CHART_OUTPUT=$n.GC.PDF ASSUME_SORTED=true
+java -Xmx4g -jar ${picard}CollectGcBiasMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.CollectGcBiasMetrics CHART_OUTPUT=$n.GC.PDF ASSUME_SORTED=true
 
 #Collect Insert Size Metrics
 echo "***Collect Insert Size Metrics"
-java -Xmx6g -jar ${picard}CollectInsertSizeMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam HISTOGRAM_FILE=$n.InsertSize.pdf OUTPUT=$n.CollectInsertSizeMetrics ASSUME_SORTED=true
+java -Xmx4g -jar ${picard}CollectInsertSizeMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam HISTOGRAM_FILE=$n.InsertSize.pdf OUTPUT=$n.CollectInsertSizeMetrics ASSUME_SORTED=true
 
 cat $n.DepthofCoverage.xls >> $n.Metrics_summary.xls
 cat $n.AlignmentMetrics >> $n.Metrics_summary.xls
@@ -470,13 +603,13 @@ rm $n.AlignmentMetrics
 cat ../*out1* ../*out2* > ../${n}-identification.txt
 rm ../*identifier_out1*
 rm ../*identifier_out2*
-rm -r temp
-rm -r fastq
+rm -r ${startingdir}/temp
+mv ${startingdir}/fastq ${startingdir}/spoligo
 
 cp $0 ./
-#  Send files to the Network
-echo "***Sending files to the Network"
+rm ${startingdir}/fastq/*fastq
 
+echo "***Sending files to the Network"
 cp -r ${startingdir} ${bioinfo}
 
 #Make dailyStats.txt for each stats.txt made for each isolate.
