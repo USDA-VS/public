@@ -15,7 +15,7 @@ filterFile="~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/filterFi
 columns=`head $filterFile | awk 'BEGIN{ FS="\t"; OFS="\t" }  END {print NF}'`
 
 # Location filter files are output to.
-output="~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/bovisGroups"
+output=~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/bovisGroups
 
 # Number of Computer cores
 NR_CPUS=24
