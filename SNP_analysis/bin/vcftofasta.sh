@@ -67,7 +67,7 @@ if [[ $1 == TBBOV ]]; then
         exit 1
     fi
 
-    rm ${FilterDirectory}/*
+    rm "${FilterDirectory}/*"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=200 # QUAL range to change ALT to N

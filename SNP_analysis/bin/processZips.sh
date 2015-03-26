@@ -358,11 +358,7 @@ cat $n.stats2.txt | grep -v "Failed" | grep -v "Duplicates" | grep -v "Proper-pa
 rm $n.stats2.txt
 echo "" >> $n.stats.txt
 ###########################
-read -p "$LINENO PRESS ENTER"
-#  Add Insert_Size and Read_Length to stats.txt file
-echo 'Mean_Insert_Size  Standard_Deviation:' >> $n.stats.txt
-awk 'BEGIN {OFS="\t"} { print $5,$6 }' $n.Quality_by_cycle.insert_size_metrics | awk 'FNR == 8 {print $0}' >> $n.stats.txt
-read -p "$LINENO PRESS ENTER"
+
 echo 'Mean_Read_Length:' >> $n.stats.txt
 awk 'BEGIN {OFS="\t"} { print $16 }' $n.AlignmentMetrics | awk 'FNR == 10 {print $0}' >> $n.stats.txt
 
