@@ -51,9 +51,9 @@ rm ./inputXLS.py
 # Environment controls:
 
 if [[ $1 == TBBOV ]]; then
-    genotypingcodes="~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/nameswap.tab"
+    genotypingcodes=~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/nameswap.tab
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/DefiningSNPsGroupDesignations.txt"
+    DefiningSNPs=~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/DefiningSNPsGroupDesignations.txt
     if [[ -z $DefiningSNPs ]]; then
         echo "Check your path to DefiningSNPs at line: $LINENO"
         exit 1
@@ -61,7 +61,7 @@ if [[ $1 == TBBOV ]]; then
 
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/bovisGroups" #Files containing positions to filter
+    FilterDirectory=~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/bovisGroups #Files containing positions to filter
     if [[ -z $FilterDirectory ]]; then
         echo "Check your path to FilterDirectory at line: $LINENO"
         exit 1
@@ -76,7 +76,7 @@ if [[ $1 == TBBOV ]]; then
 
 email_list="tod.p.stuber@usda.gov" #Replace the email with your own
 
-    excelinfile="~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/Filtered_Regions.xlsx"
+    excelinfile=~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/Filtered_Regions.xlsx
     if [[ -z $excelinfile ]]; then
         echo "Check your path to Filtered_Regions.xlsx at line: $LINENO"
         exit 1
