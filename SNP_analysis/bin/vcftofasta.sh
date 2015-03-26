@@ -83,7 +83,7 @@ email_list="tod.p.stuber@usda.gov" #Replace the email with your own
     fi
 read -p "$LINENO ENTER"
     parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > ~/public/SNP_analysis/script_dependents/Mycobacterium_bovis/filterFile.txt
-
+read -p "$LINENO ENTER"
     FilterFileCreations.sh
 read -p "$LINENO ENTER"
 else
