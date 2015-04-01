@@ -382,26 +382,53 @@ for d in $directories; do
     awk '{print $1}' total_pos > total.list
     for i in *.vcf; do 
 	m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
+	# search for AC1 positions
 	grep -v "#" $i | awk ' $8 ~ /^AC=1/ && $6 > 0 {print $1 "-" $2}' > ${n}.list
+	# AC1 positions that are being found in this group
 	positionsfound=`cat ${n}.list total.list | sort -n | uniq -d`
 	countfind=`echo $positionsfound | wc -w`
+	echo "positonsfound: $positionsfound  countfind: $countfind"
+
 	if [[ -z $positionsfound ]]; then
 		positionsfound="No positions found"
 	fi
+	
 	if [[ $countfind -gt 2  ]]; then
-		echo -e "$n \t \t \t Count Findings: $countfind  <-- !!!!" >> ${d}-AC1findings.txt 
-		searchname=`echo $n | sed 's/_.*//'`
-		unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/_Mycobacterium/_TB-Data/${searchname}*/BWAmem-GATK/QualityValues/*stats.txt`	
-		if [[ -z $unmappedContigs ]]; then 
+	searchname=`echo $n | sed 's/_.*//'`
+
+        	if [[  $argUsed == para ]]; then
+            	unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/_Mycobacterium/mac/para_cattle-bison/data/${searchname}*/BWAmem-GATK/QualityValues/*stats.txt`
+        	elif [[  $argUsed == bovis ]]; then
+            	unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/_Mycobacterium/_TB-Data/${searchname}*/BWAmem-GATK/QualityValues/*stats.txt`
+        	else
+            contigMessage="possibly set a new contig path at script line: $LINENO"
+        	fi
+
+        	if [[ -z $unmappedContigs ]]; then
 			unmappedContigs="Contig counts not available"
 		fi
-		echo -e "$d Sample: $n \t \t \t Count Findings: $countfind  <-- !!!!" $unmappedContigs >> ${fulDir}/emailAC1counts
-	else 
-		echo -e "$n \t \t \t Count Findings: $countfind" >> ${d}-AC1findings.txt
-	fi
-	echo "$positionsfound" >> ${d}-AC1findings.txt
-    done
 
+    echo "$d" >> $d-AC1postions.txt
+	echo "" >> $d-AC1postions.txt
+
+	echo "$d Sample: $n  AC1 findings: $countfind  $unmappedContigs $contigMessage" > delete
+	tr -d "\n" < delete >> $d-AC1postions.txt
+	echo "" >> $d-AC1postions.txt
+	tr -d "\n" < delete >> ${fulDir}/emailAC1counts.txt
+        echo "" >> ${fulDir}/emailAC1counts.txt
+	
+	for p in `echo $positionsfound`; do
+            position=`echo $p | sed 's/chrom[0-9]*-//'`
+            echo "working on sample: $i"
+	    echo "Found position: $position"
+	    awk -v p="$position" '$2 == p {print $0}' $i
+            awk -v p="$position" '$2 == p {print $0}' $i >> $d-AC1postions.txt
+        done
+
+	fi
+
+    done
+rm delete
     # Count the number of SNPs
 
     totalSNPs=`grep -c ".*" total_pos`
@@ -950,7 +977,8 @@ for i in *.vcf; do
     echo "This is the Clade Numbers: $cladeNumbers"
 
 echo "${i%.vcf} $groupNumbers $subgroupNumbers $cladeNumbers" >> section3
-printf "%s\t%s\t%s\t%s\n" "${i%.vcf}" "$groupNumbers" "$subgroupNumbers" "$cladeNumbers" >> FileMakerGroupImport.txt
+tbn=`echo $i | sed 's/_.*//'`
+printf "%s\t%s\t%s\t%s\n" "${tbn}" "$groupNumbers" "$subgroupNumbers" "$cladeNumbers" >> FileMakerGroupImport.txt
         # Check if a Group, subgroup or clade was called.
         sizeGroup=`echo $cladeNumbers | wc | awk '{print $3}'`
         loops=`grep "Clade" "${DefiningSNPs}" | awk -v x=$formatedpos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1}' | awk 'END {print NR}'`
@@ -1254,7 +1282,7 @@ cat ssection4 >> log.txt
 echo "" >> log.txt
 echo "****************************************************" >> log.txt
 echo "AC1 called SNPs"
-cat ${fulDir}/emailAC1counts >> log.txt
+cat ${fulDir}/emailAC1counts.txt >> log.txt
 
 echo "<html>" > email_log.html
 echo "<Body>" >> email_log.html
@@ -1284,7 +1312,7 @@ awk 'BEGIN{print "<Body>"} {print "<p style=\"line-height: 40%;\">" $0 "</p>"} E
 echo "" >> email_log.html
 echo "****************************************************" >> email_log.html
 echo "<p> AC1 called SNPs: </p>" >> email_log.html
-awk 'BEGIN{print "<Body>"} {print "<p style=\"line-height: 40%;\">" $0 "</p>"} END{print "</Body>"}' ${fulDir}/emailAC1counts >> email_log.html
+awk 'BEGIN{print "<Body>"} {print "<p style=\"line-height: 40%;\">" $0 "</p>"} END{print "</Body>"}' ${fulDir}/emailAC1counts.txt >> email_log.html
 echo "</Body>" >> email_log.html
 echo "</html>" >> email_log.html
 
