@@ -47,7 +47,7 @@ ls ../Zips/*.fastq* | while read file; do ln -s $file; done
 if [ $1 == ab1 ]; then
     cp /home/shared/brucella/abortus1/script_dependents/NC_00693c.fasta ./
     hqs="/home/shared/brucella/abortus1/script_dependents/NC_00693cHighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/abortus1/newFiles"
+    bioinfo="/bioinfo11/TStuber/Results/brucella/abortus1/newFiles"
     sharedSAN="/home/shared/brucella/abortus1/newFiles"
 
     # Run BrucMLST.sh
@@ -62,7 +62,7 @@ if [ $1 == ab1 ]; then
 elif [ $1 == mel ]; then
     cp /home/shared/brucella/melitensis/script_dependents/BmelitensisM5-90.fasta ./
     hqs="/home/shared/brucella/melitensis/script_dependents/melHighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/melitensis/newFiles"
+    bioinfo="/bioinfo11/TStuber/Results/brucella/melitensis/newFiles"
     sharedSAN="/home/shared/brucella/melitensis/newFiles"
 
     # Run BrucMLST.sh
@@ -77,7 +77,7 @@ elif [ $1 == mel ]; then
 elif [ $1 == suis1 ]; then
     cp /home/shared/brucella/suis1/script_dependents/NC_01725c.fasta ./
     hqs="/home/shared/brucella/suis1/script_dependents/NC_01725cHighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/suis1/newFiles"
+    bioinfo="/bioinfo11/TStuber/Results/brucella/suis1/newFiles"
     sharedSAN="/home/shared/brucella/suis1/newFiles"
 
     # Run BrucMLST.sh
@@ -92,7 +92,7 @@ elif [ $1 == suis1 ]; then
 elif [ $1 == suis2 ]; then
     cp /home/shared/brucella/suis2/script_dependents/Bsuisbv2-94-11.fasta ./
     hqs="/home/shared/brucella/suis2/script_dependents/suis2HighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/suis2/newFiles"
+    bioinfo="/bioinfo11/TStuber/Results/brucella/suis2/newFiles"
     sharedSAN="/home/shared/brucella/suis2/newFiles"
 
     # Run BrucMLST.sh
@@ -107,7 +107,7 @@ elif [ $1 == suis2 ]; then
 elif [ $1 == suis3 ]; then
     cp /home/shared/brucella/suis3/script_dependents/B-REF-BS3-686.fasta ./
     hqs="/home/shared/brucella/suis3/script_dependents/suis3HighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/suis3/newFiles"
+    bioinfo="/bioinfo11/TStuber/Results/brucella/suis3/newFiles"
     sharedSAN="/home/shared/brucella/suis3/newFiles"
 
     # Run BrucMLST.sh
@@ -122,7 +122,7 @@ elif [ $1 == suis3 ]; then
 elif [ $1 == suis4 ]; then
     cp /home/shared/brucella/suis4/script_dependents/B-REF-BS4-40.fasta ./
     hqs="/home/shared/brucella/suis4/script_dependents/suis4HighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/suis4/newFiles"
+    bioinfo="/bioinfo11/TStuber/Results/brucella/suis4/newFiles"
     sharedSAN="/home/shared/brucella/suis4/newFiles"
 
     # Run BrucMLST.sh
@@ -137,7 +137,7 @@ elif [ $1 == suis4 ]; then
 elif [ $1 == canis ]; then
     cp /home/shared/brucella/canis/script_dependents/BcanisATCC23365.fasta ./
     hqs="/home/shared/brucella/canis/script_dependents/canisHighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/canis/newFiles"
+    bioinfo="/bioinfo11/TStuber/Results/brucella/canis/newFiles"
     sharedSAN="/home/shared/brucella/canis/newFiles"
 
     # Run BrucMLST.sh
@@ -152,7 +152,7 @@ elif [ $1 == canis ]; then
 elif [ $1 == ceti1 ]; then
     cp /home/shared/brucella/ceti1/script_dependents/Bceti1Cudo.fasta ./
     hqs="/home/shared/brucella/ceti1/script_dependents/ceti1HighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/ceti1/newFiles"
+    bioinfo="/bioinfo11/TStuber/Results/brucella/ceti1/newFiles"
     sharedSAN="/home/shared/brucella/ceti1/newFiles"
 
     # Run BrucMLST.sh
@@ -167,7 +167,7 @@ elif [ $1 == ceti1 ]; then
 elif [ $1 == ceti2 ]; then
     cp /home/shared/brucella/ceti2/script_dependents/Bceti2-TE10759.fasta ./
     hqs="/home/shared/brucella/ceti2/script_dependents/ceti2HighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/ceti2/newFiles"
+    bioinfo="/bioinfo11/TStuber/Results/brucella/ceti2/newFiles"
     sharedSAN="/home/shared/brucella/ceti2/newFiles"
 
     # Run BrucMLST.sh
@@ -182,7 +182,7 @@ elif [ $1 == ceti2 ]; then
 elif [ $1 == ovis ]; then
     cp /home/shared/brucella/ovis/script_dependents/BovisATCC25840.fasta ./
     hqs="/home/shared/brucella/ovis/script_dependents/BovisATCC25840HighestQualitySNPs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/_Brucella/ovis/newFiles"
+    bioinfo="/bioinfo11/TStuber/Results/brucella/ovis/newFiles"
     sharedSAN="/home/shared/brucella/ovis/newFiles"
 
     # Run BrucMLST.sh
