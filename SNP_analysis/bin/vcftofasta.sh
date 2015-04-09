@@ -52,126 +52,126 @@ rm ./inputXLS.py
 
 if [[ $1 == ab1 ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/_Brucella/bruc_tags.txt"
+    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/_Brucella/Abortus1/script_dependents/Abortus1_Defining_SNPs.txt"
-    #coverageFiles="/bioinfo11/TStuber/Results/_Brucella/Abortus1/coverageFiles"
+    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/Abortus1/script_dependents/Abortus1_Defining_SNPs.txt"
+    #coverageFiles="/bioinfo11/TStuber/Results/brucella/Abortus1/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/_Brucella/Abortus1/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucella/Abortus1/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="/bioinfo11/TStuber/Results/brucella/Abortus1/script_dependents/FilterFiles" #Files containing positions to filter
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Abortus1/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Abortus1/_VCFs"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Abortus1/_VCFs"
     echo "vcftofasta.sh ran as Brucella abortus bv 1, 2 or 4"
     echo "Script vcftofasta.sh ran using Brucella abortus bv 1, 2 or 4 variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == mel ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/_Brucella/bruc_tags.txt"
+    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/_Brucella/Melitensis/script_dependents/Mel_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/_Brucella/coverageFiles"
+    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/Melitensis/script_dependents/Mel_Defining_SNPs.txt"
+    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/_Brucella/Melitensis/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucella/Melitensis/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="/bioinfo11/TStuber/Results/brucella/Melitensis/script_dependents/FilterFiles" #Files containing positions to filter
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Melitensis/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Melitensis/_VCFs"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Melitensis/_VCFs"
     echo "vcftofasta.sh ran as B. melitensis"
     echo "Script vcftofasta.sh ran using B. melitensis variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == suis1 ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/_Brucella/bruc_tags.txt"
+    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/_Brucella/Suis1/script_dependents/Suis1_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/_Brucella/coverageFiles"
+    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/Suis1/script_dependents/Suis1_Defining_SNPs.txt"
+    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/_Brucella/Suis1/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucella/Suis1/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="/bioinfo11/TStuber/Results/brucella/Suis1/script_dependents/FilterFiles" #Files containing positions to filter
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Suis1/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Suis1/_VCFs"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Suis1/_VCFs"
     echo "vcftofasta.sh ran as B. suis bv1"
     echo "Script vcftofasta.sh ran using B. suis bv1 variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == suis2 ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/_Brucella/bruc_tags.txt"
+    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/_Brucella/Suis2/script_dependents/suis2_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/_Brucella/coverageFiles"
+    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/Suis2/script_dependents/suis2_Defining_SNPs.txt"
+    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/_Brucella/Suis2/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucella/Suis2/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="/bioinfo11/TStuber/Results/brucella/Suis2/script_dependents/FilterFiles" #Files containing positions to filter
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Suis2/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Suis2/_VCFs/"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Suis2/_VCFs/"
     echo "vcftofasta.sh ran as B. suis bv2"
     echo "Script vcftofasta.sh ran using B. suis bv2 variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == suis3 ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/_Brucella/bruc_tags.txt"
+    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/_Brucella/Suis3/script_dependents/Suis3_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/_Brucella/coverageFiles"
+    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/Suis3/script_dependents/Suis3_Defining_SNPs.txt"
+    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/_Brucella/Suis3/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucella/Suis3/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="/bioinfo11/TStuber/Results/brucella/Suis3/script_dependents/FilterFiles" #Files containing positions to filter
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Suis3/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Suis3/_VCFs"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Suis3/_VCFs"
     echo "vcftofasta.sh ran as B. suis bv3"
     echo "Script vcftofasta.sh ran using B. suis bv3 variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == suis4 ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/_Brucella/bruc_tags.txt"
+    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/_Brucella/Suis4/script_dependents/Suis4_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/_Brucella/coverageFiles"
+    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/Suis4/script_dependents/Suis4_Defining_SNPs.txt"
+    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/_Brucella/Suis4/script_dependents/FilterFiles" #Files containing positions to filter
+    FilterDirectory="/bioinfo11/TStuber/Results/brucella/Suis4/script_dependents/FilterFiles" #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucela/Suis4/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Suis4/_VCF"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Suis4/_VCF"
     echo "vcftofasta.sh ran as B. suis bv4"
     echo "Script vcftofasta.sh ran using B. suis bv4 variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == canis ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/_Brucella/bruc_tags.txt"
+    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/_Brucella/Canis/script_dependents/Canis_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/_Brucella/coverageFiles"
+    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/Canis/script_dependents/Canis_Defining_SNPs.txt"
+    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/_Brucella/Canis/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucella/Canis/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="/bioinfo11/TStuber/Results/brucella/Canis/script_dependents/FilterFiles" #Files containing positions to filter
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Canis/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Canis/_VCF"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Canis/_VCF"
     echo "vcftofasta.sh ran as B. canis"
     echo "Script vcftofasta.sh ran using B. canis variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
@@ -179,18 +179,18 @@ elif [[ $1 == canis ]]; then
 
 elif [[ $1 == ceti1 ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/_Brucella/bruc_tags.txt"
+    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/_Brucella/Ceti1/script_dependents/Ceti1_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/_Brucella/coverageFiles"
+    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/ceti1/script_dependents/Ceti1_Defining_SNPs.txt"
+    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/_Brucella/Ceti1/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucella/Ceti1/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="/bioinfo11/TStuber/Results/brucella/ceti1/script_dependents/FilterFiles" #Files containing positions to filter
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/ceti1/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Ceti1/_VCF"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/ceti1/_VCF"
     echo "vcftofasta.sh ran as B ceti group 1"
     echo "Script vcftofasta.sh ran using B ceti group 1 variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
@@ -198,18 +198,18 @@ elif [[ $1 == ceti1 ]]; then
 
 elif [[ $1 == ceti2 ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/_Brucella/bruc_tags.txt"
+    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/_Brucella/Ceti2/script_dependents/Ceti2_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/_Brucella/coverageFiles"
+    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/ceti2/script_dependents/Ceti2_Defining_SNPs.txt"
+    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/_Brucella/Ceti2/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucella/Ceti2/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="/bioinfo11/TStuber/Results/brucella/ceti2/script_dependents/FilterFiles" #Files containing positions to filter
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/ceti2/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Ceti2/_VCF"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/ceti2/_VCF"
     echo "vcftofasta.sh ran as B ceti group 2"
     echo "Script vcftofasta.sh ran using B ceti group 2 variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
@@ -217,18 +217,18 @@ elif [[ $1 == ceti2 ]]; then
 
 elif [[ $1 == ovis ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/_Brucella/bruc_tags.txt"
+    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/_Brucella/Ovis/script_dependents/Ovis_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/_Brucella/coverageFiles"
+    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/Ovis/script_dependents/Ovis_Defining_SNPs.txt"
+    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/_Brucella/Ovis/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucella/Ovis/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="/bioinfo11/TStuber/Results/brucella/Ovis/script_dependents/FilterFiles" #Files containing positions to filter
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Ovis/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/_Brucella/Ovis/_VCFs"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Ovis/_VCFs"
     echo "vcftofasta.sh ran as B. ovis"
     echo "Script vcftofasta.sh ran using B. ovis variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
