@@ -207,7 +207,7 @@ elif [ $1 == taylorella ]; then
 elif [ $1 == TB1 ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb1/NC_017528.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tb1/HQ-NC_017528.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb1/newFiles"
+bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb1/newFiles"
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 # Run spoligoSpacerFinder.sh
@@ -220,7 +220,7 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 elif [ $1 == TB2ignore ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb2/NC_021251.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tb2/HQ-NC021251.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb2-H37/newFiles"
+bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb2-H37/newFiles"
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 # Run spoligoSpacerFinder.sh
@@ -233,7 +233,7 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 elif [ $1 == TB2 ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb2-H37/NC000962.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tb2-H37/HQ-tb2NC000962.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb2/newFiles"
+bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb2/newFiles"
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 # Run spoligoSpacerFinder.sh
@@ -247,7 +247,7 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 elif [ $1 == TB3 ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb3/NC_021193.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/HQ-13-7575.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb3/newFiles"
+bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/newFiles"
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 # Run spoligoSpacerFinder.sh
@@ -260,7 +260,7 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 elif [ $1 == TB4a ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb4a/NC002755.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4a/HQ-NC002755.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb4a/newFiles"
+bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4a/newFiles"
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 # Run spoligoSpacerFinder.sh
@@ -273,7 +273,7 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 elif [ $1 == TB4b ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb4b/NC018143.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4b/HQ-NC018143.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb4b/newFiles"
+bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/newFiles"
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 # Run spoligoSpacerFinder.sh
@@ -286,7 +286,7 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 elif [ $1 == TB5 ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb5/APKD01000001.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tb5/HQ-16-2185-11.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb5/newFiles"
+bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb5/newFiles"
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 # Run spoligoSpacerFinder.sh
@@ -299,7 +299,7 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 elif [ $1 == TB6 ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb6/NC_015758.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tb6/HQ-NC015758.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tb6/newFiles"
+bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb6/newFiles"
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 # Run spoligoSpacerFinder.sh
@@ -313,7 +313,7 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 elif [ $1 == TBBOV ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tbbov/NC_002945.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tbbov/HighestQualitySNPs.vcf"
-bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tbbov/newFiles"
+bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/newFiles"
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 # Run spoligoSpacerFinder.sh
@@ -330,7 +330,7 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 elif [ $1 == para ]; then
    cp /home/shared/mycobacterium/mott/paratb/NC_002944.fasta ./
    hqs="/home/shared/mycobacterium/mott/paratb/HQ-NC002944.vcf"
-   bioinfo="/bioinfo11/TStuber/Results/_Mycobacterium/mac/para_cattle-bison/newFiles"
+   bioinfo="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/newFiles"
    #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
     ###################################################################
