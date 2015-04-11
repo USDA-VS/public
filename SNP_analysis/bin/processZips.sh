@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#  bovis_processZips.sh
+#  bovis_processzips.sh
 #  Working directory should contain paired-end fastq reads
 #  Sample must be labeled with TB/Bruc number.
 #  TB numbers must be labeled ##-####
@@ -35,14 +35,14 @@ pwd
 startingdir=`pwd`
 
 # Move zip files to their own directory
-mkdir ./Zips
-mv *.fastq* ./Zips
-mkdir ./BWAmem-GATK
-cd BWAmem-GATK/
+mkdir ./zips
+mv *.fastq* ./zips
+mkdir ./bwamem-gatk
+cd bwamem-gatk/
 
 
 # Make alias links in BWA-GATK directory to zip files
-ls ../Zips/*.fastq* | while read file; do ln -s $file; done
+ls ../zips/*.fastq* | while read file; do ln -s $file; done
 
 if [ $1 == ab1 ]; then
     cp /home/shared/brucella/abortus1/script_dependents/NC_00693c.fasta ./
@@ -52,9 +52,9 @@ if [ $1 == ab1 ]; then
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
-    cd ../Zips
+    cd ../zips
     ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
+    cd ../bwamem-gatk/
     echo "Moving forward from Bruc_MLST.sh"
 
     ###################################################################
@@ -67,9 +67,9 @@ elif [ $1 == mel ]; then
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
-    cd ../Zips
+    cd ../zips
     ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
+    cd ../bwamem-gatk/
     echo "Moving forward from Bruc_MLST.sh"
 
     ###################################################################
@@ -82,9 +82,9 @@ elif [ $1 == suis1 ]; then
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
-    cd ../Zips
+    cd ../zips
     ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
+    cd ../bwamem-gatk/
     echo "Moving forward from Bruc_MLST.sh"
 
     ###################################################################
@@ -97,9 +97,9 @@ elif [ $1 == suis2 ]; then
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
-    cd ../Zips
+    cd ../zips
     ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
+    cd ../bwamem-gatk/
     echo "Moving forward from Bruc_MLST.sh"
 
     ###################################################################
@@ -112,9 +112,9 @@ elif [ $1 == suis3 ]; then
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
-    cd ../Zips
+    cd ../zips
     ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
+    cd ../bwamem-gatk/
     echo "Moving forward from Bruc_MLST.sh"
 
     ###################################################################
@@ -127,9 +127,9 @@ elif [ $1 == suis4 ]; then
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
-    cd ../Zips
+    cd ../zips
     ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
+    cd ../bwamem-gatk/
     echo "Moving forward from Bruc_MLST.sh"
 
     ###################################################################
@@ -142,9 +142,9 @@ elif [ $1 == canis ]; then
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
-    cd ../Zips
+    cd ../zips
     ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
+    cd ../bwamem-gatk/
     echo "Moving forward from Bruc_MLST.sh"
 
     ###################################################################
@@ -157,9 +157,9 @@ elif [ $1 == ceti1 ]; then
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
-    cd ../Zips
+    cd ../zips
     ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
+    cd ../bwamem-gatk/
     echo "Moving forward from Bruc_MLST.sh"
 
     ###################################################################
@@ -172,9 +172,9 @@ elif [ $1 == ceti2 ]; then
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
-    cd ../Zips
+    cd ../zips
     ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
+    cd ../bwamem-gatk/
     echo "Moving forward from Bruc_MLST.sh"
 
     ###################################################################
@@ -187,9 +187,9 @@ elif [ $1 == ovis ]; then
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
-    cd ../Zips
+    cd ../zips
     ${BRUC_MLST} &
-    cd ../BWAmem-GATK/
+    cd ../bwamem-gatk/
     echo "Moving forward from Bruc_MLST.sh"
 
     ###################################################################
@@ -273,8 +273,7 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 elif [ $1 == TB4b ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb4b/NC018143.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4b/HQ-NC018143.vcf"
-bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b-hap/newfiles"
 
 # Run spoligoSpacerFinder.sh
 echo "Starting spoligoSpacerFinder.sh"
@@ -461,21 +460,54 @@ if [ ! -e $n.ready-mem.bam ]; then
 	java -Xmx4g -jar ${gatk} -T PrintReads --fix_misencoded_quality_scores -R $ref -I $n.realignedBam.bam -BQSR $n.recal_data.grp -o $n.ready-mem.bam
 fi
 
-# Add zero positions to vcf
-java -Xmx4g -jar ${gatk} -R $ref -T UnifiedGenotyper -out_mode EMIT_ALL_SITES -I ${n}.ready-mem.bam -o ${n}.allsites.vcf -nt 8
-awk ' $0 ~ /#/ || $8 !~ /^AN=2;/ {print $0}' ${n}.allsites.vcf > $n.ready-mem.vcf
-java -Xmx4g -jar ${igvtools} index $n.ready-mem.vcf
 
-# SNP calling and .vcf making
-# Threads used can be changed
+#Collect Depth of coverage info
+echo "***Collect Depth of Coverage"
+java -jar ${gatk} -T DepthOfCoverage -R $ref -I $n.ready-mem.bam -o $n.coverage -omitIntervals --omitLocusTable --omitPerSampleStats -nt 8
+
+#########################
+
 # http://www.broadinstitute.org/gatk/guide/tagged?tag=unifiedgenotyper
+# In group tb4b position 3336835 was not being found in some isolates.  Adding this advance flag allowed these positions to be found.
+# ploidy 2 is default
 echo "***HaplotypeCaller, aka calling SNPs"
-java -Xmx4g -jar ${gatk} -R $ref -T HaplotypeCaller -I $n.ready-mem.bam -o $n.hapreadyAll.vcf -nct 8
+java -Xmx4g -jar ${gatk} -R $ref -T HaplotypeCaller -I $n.ready-mem.bam -o $n.hapreadyAll.vcf -allowNonUniqueKmersInRef -nct 8
+java -Xmx4g -jar ${igvtools} index $n.hapreadyAll.vcf
 
 echo "******Awk VCF leaving just SNPs******"
 awk '/#/ || $4 ~ /^[ATGC]$/ && $5 ~ /^[ATGC]$/ {print $0}' $n.hapreadyAll.vcf > $n.hapreadyOnlySNPs.vcf
 
-java -Xmx4g -jar ${igvtools} index $n.hapreadyOnlySNPs.vcf
+#Split header lines from position calls
+grep "#" $n.hapreadyOnlySNPs.vcf > $n.header
+grep -v "#" $n.hapreadyOnlySNPs.vcf > $n.body
+
+#SNP positons that will be used
+awk '{print $2}' $n.body > $n.calledSNPpositions
+
+#Zero coverage positions
+awk 'BEGIN {FS="[:\t]"} $3 == 0 {print $2}' $n.coverage > $n.zeroCoveragePositions
+
+#Remove zero coverage positions that will be are in $n.hapreadyOnlySNPs.vcf
+cat $n.calledSNPpositions $n.zeroCoveragePositions | sort | uniq -d > $n.duplicates
+cat $n.zeroCoveragePositions $n.duplicates | sort | uniq -u > $n.keepTheseZeroCovPositions
+zeroposition=`grep -c ".*" $n.keepTheseZeroCovPositions`
+refsize=`wc -m $ref | awk '{print $1}'`
+
+refheader=`head -1 $n.body | awk '{print $1}'`
+
+#Fromat $n.keepTheseZeroCovPositions to VCF
+awk -v xref="$refheader" 'BEGIN{OFS="\t"}{print xref, $1, ".", ".", ".", ".", ".", ".", "GT", "./."}' $n.keepTheseZeroCovPositions > $n.vcfFormated
+
+cat $n.body $n.vcfFormated | sort -nk2,2 | awk 'BEGIN{OFS="\t"}{if ($4 == ".") print $1, $2, $3, "N", $5, $6, $7, $8, $9, $10; else print $0}' > $n.SNPsMapzeroNoHeader.vcf
+cat $n.header $n.SNPsMapzeroNoHeader.vcf > $n.SNPsZeroCoverage.vcf
+
+java -Xmx4g -jar ${igvtools} index $n.SNPsZeroCoverage.vcf
+
+
+# Add zero positions to vcf
+java -Xmx4g -jar ${gatk} -R $ref -T UnifiedGenotyper -out_mode EMIT_ALL_SITES -I ${n}.ready-mem.bam -o ${n}.allsites.vcf -nt 8
+awk ' $0 ~ /#/ || $8 !~ /^AN=2;/ {print $0}' ${n}.allsites.vcf > $n.ready-mem.vcf
+java -Xmx4g -jar ${igvtools} index $n.ready-mem.vcf
 
 echo "***Deleting Files"
 rm $n.sam
@@ -492,13 +524,20 @@ rm igv.log
 rm ${n}.allsites.vcf
 rm ${n}.allsites.vcf.idx
 
-###################################
-# The next 6 steps collect metrics
-###################################
 
-#Collect Depth of coverage info
-echo "***Collect Depth of Coverage"
-java -jar ${gatk} -T DepthOfCoverage -R $ref -I $n.ready-mem.bam --omitDepthOutputAtEachBase > $n.DepthofCoverage.xls
+rm $n.SNPsMapzeroNoHeader.vcf
+rm $n.vcfFormated
+rm $n.keepTheseZeroCovPositions
+rm $n.duplicates
+rm $n.zeroCoveragePositions
+rm $n.calledSNPpositions
+rm $n.body
+rm $n.header
+rm $n.hapreadyOnlySNPs.vcf
+
+###################################
+# The next 5 steps collect metrics
+###################################
 
 #Quality Score Distribution
 echo "***Quality Score Distribution"
@@ -520,40 +559,32 @@ java -Xmx4g -jar ${picard}CollectGcBiasMetrics.jar REFERENCE_SEQUENCE=$ref INPUT
 echo "***Collect Insert Size Metrics"
 java -Xmx4g -jar ${picard}CollectInsertSizeMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam HISTOGRAM_FILE=$n.InsertSize.pdf OUTPUT=$n.CollectInsertSizeMetrics ASSUME_SORTED=true
 
-cat $n.DepthofCoverage.xls >> $n.Metrics_summary.xls
 cat $n.AlignmentMetrics >> $n.Metrics_summary.xls
 cat $n.CollectInsertSizeMetrics >> $n.Metrics_summary.xls
 
 echo "***Organizing files"
 
-#Move to QualityValues subfolder
-mkdir QualityValues
-mv $n.GC.PDF QualityValues/
-mv $n.QualityScorceDistribution.pdf QualityValues/
-mv $n.InsertSize.pdf QualityValues/
-mv $n.Quality_by_cycle*.pdf QualityValues/
+#Move to qualityvalues subfolder
+mkdir qualityvalues
+mv $n.GC.PDF qualityvalues/
+mv $n.QualityScorceDistribution.pdf qualityvalues/
+mv $n.InsertSize.pdf qualityvalues/
+mv $n.Quality_by_cycle*.pdf qualityvalues/
 
 #Remove files
-rm $n.DepthofCoverage.xls
 rm $n.CollectInsertSizeMetrics
-rm $n.forIndelRealigner.intervals
-rm $n.recal_data.grp
-rm $n.FilteredReads.xls
 rm $n.Quality_by_cycle.quality_distribution_metrics
 rm $n.Quality_by_cycle.quality_by_cycle_metrics
 rm $n.Quality_by_cycle.alignment_summary_metrics
-#rm $n.Quality_by_cycle.insert_size_histogram.pdf
-#rm $n.Quality_by_cycle.quality_distribution.pdf
 rm $n.CollectGcBiasMetrics
 rm $n.QualityScoreDistribution
+rm $n.coverage
 
 ###########################
 echo "***Getting stats for $n"
 
-bamtools stats -in $n.ready-mem.bam > $n.stats2.txt
-
-echo "fastq.gz file sizes:" >> $n.stats2.txt
-ls -lh ../Zips/ | awk '{print $5}' | egrep -v '^$' >> $n.stats2.txt
+echo "fastq.gz file sizes:" > $n.stats2.txt
+ls -lh ../zips/ | awk '{print $5}' | egrep -v '^$' >> $n.stats2.txt
 
 echo "Unmapped fastq file sizes:" >> $n.stats2.txt
 ls -lh ../unmappedReads/*.fastq | awk '{print $5}' | egrep -v '^$' >> $n.stats2.txt
@@ -561,13 +592,26 @@ ls -lh ../unmappedReads/*.fastq | awk '{print $5}' | egrep -v '^$' >> $n.stats2.
 echo "Unmapped contig count:" >> $n.stats2.txt
 grep -c ">" ../unmappedReads/${n}_abyss-3.fa >> $n.stats2.txt
 echo "" >> $n.stats2.txt
+sed -n 7,8p $n.FilteredReads.xls | awk '{print $2}' >> $n.stats2.txt
+sed -n 7,8p $n.FilteredReads.xls | awk '{print $3}' >> $n.stats2.txt
+sed -n 7,8p $n.FilteredReads.xls | awk '{print $8}' >> $n.stats2.txt
+readcount=`sed -n 8p $n.FilteredReads.xls | awk '{print $3}'`
+echo "" >> $n.stats2.txt
 
-bamtools coverage -in $n.ready-mem.bam | awk '{sum+=$3} END { print "Average coverage: ",sum/NR"X"}' >> $n.stats2.txt
-bamtools coverage -in $n.ready-mem.bam | awk '{if ($3 < 1) ++b } END {print "Reference with coverage:  "((FNR-b)/FNR)*100 "%"}' >> $n.stats2.txt
+echo "***Bamtools running"
+aveCoverage=`bamtools coverage -in $n.ready-mem.bam | awk '{sum+=$3} END { print sum/NR"X"}'`
+echo "Average depth of coverage: $aveCoverage" >> $n.stats2.txt
 
-cat $n.stats2.txt | grep -v "Failed" | grep -v "Duplicates" | grep -v "Proper-pairs" >> $n.stats.txt
-rm $n.stats2.txt
+#genome coverage
+percGenomeMissing=`awk -v x="$zeroposition" -v y="$refsize" 'BEGIN { print(x/y)*100}'`
+percGenomeCoverage="$(echo "100 - $percGenomeMissing" | bc)"
+echo "Percent of reference with coverage: ${percGenomeCoverage}%" >> $n.stats2.txt
+
+#cat $n.stats2.txt | grep -v "Failed" | grep -v "Duplicates" | grep -v "Proper-pairs" >> $n.stats.txt
+cat $n.stats2.txt > $n.stats.txt
 echo "" >> $n.stats.txt
+
+rm $n.stats2.txt
 ###########################
 
 #  Add Insert_Size and Read_Length to stats.txt file
@@ -580,34 +624,34 @@ awk 'BEGIN {OFS="\t"} { print $16 }' $n.AlignmentMetrics | awk 'FNR == 10 {print
 echo "" >> $n.stats.txt
 
 #  Add SNP call numbers to stats.txt file
-echo "Number of SNPs and Map-zero in ready-mem.vcf:" >> $n.stats.txt
-egrep -v "#" $n.ready-mem.vcf | grep -c ".*" >> $n.stats.txt
+echo "SNP and zero coverage positions in $n.SNPsZeroCoverage.vcf:" >> $n.stats.txt
+egrep -v "#" $n.SNPsZeroCoverage.vcf | grep -c ".*" >> $n.stats.txt
 
-echo "SNPs of AC2 and QUAL > 150:" >> $n.stats.txt
-egrep -v "#" $n.ready-mem.vcf | egrep "AC=2" | awk '$6 > 150' | grep -c ".*" >> $n.stats.txt
+echo "SNPs of AC2 and QUAL > 300:" >> $n.stats.txt
+egrep -v "#" $n.SNPsZeroCoverage.vcf | egrep "AC=2" | awk '$6 > 300' | grep -c ".*" >> $n.stats.txt
 
 #  Show Mean Coverage at Terminal and coverageReport
 echo "Mean Coverage"
-awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}'
 
-awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}' >> /scratch/report/coverageReport.txt
+echo -e "$n \t $readcount \t ${aveCoverage} \t ${percGenomeCoverage}% "
+echo -e "$n \t $readcount \t ${aveCoverage} \t ${percGenomeCoverage}% " >> /scratch/report/coverageReport.txt
+echo -e "$n \t $readcount \t ${aveCoverage} \t ${percGenomeCoverage}% " >> /scratch/report/dailyReport.txt
 
 echo "Sample identified and ran as:  $1" >> /scratch/report/dailyReport.txt
 
-awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}' >> /scratch/report/dailyReport.txt
-
-mv $n.Metrics_summary.xls QualityValues/
-mv $n.stats.txt QualityValues/
+mv $n.Metrics_summary.xls qualityvalues/
+mv $n.stats.txt qualityvalues/
+mv $n.FilteredReads.xls qualityvalues/
 rm $n.Quality_by_cycle.insert_size_metrics
 rm $n.AlignmentMetrics
 cat ../*out1* ../*out2* > ../${n}-identification.txt
 rm ../*identifier_out1*
 rm ../*identifier_out2*
-rm -r ${startingdir}/temp
 mv ${startingdir}/fastq ${startingdir}/spoligo
+rm ${startingdir}/spoligo/*fastq
+rm -r ${startingdir}/temp
 
 cp $0 ./
-rm ${startingdir}/fastq/*fastq
 
 echo "***Sending files to the Network"
 cp -r ${startingdir} ${bioinfo}
@@ -619,9 +663,8 @@ echo "" >> /scratch/report/dailyStats.txt
 echo "ADD_MARKER" >> /scratch/report/dailyStats.txt
 echo "" >> /scratch/report/dailyStats.txt
 echo "<------- $n $1 ------->" >> /scratch/report/dailyStats.txt
-cat QualityValues/$n.stats.txt >> /scratch/report/dailyStats.txt
-cp QualityValues/$n.stats.txt /home/shared/stats
-cp QualityValues/$n.stats.txt /scratch/report/stats
+cat qualityvalues/$n.stats.txt >> /scratch/report/dailyStats.txt
+cat qualityvalues/$n.stats.txt >> /home/shared/stats
 
 echo "**************************** END $n ****************************"
 
