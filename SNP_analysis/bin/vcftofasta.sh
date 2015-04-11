@@ -1351,8 +1351,8 @@ for i in *.vcf; do
         echo "$i was not assigned a Group"
 
         #If a name was found in the tag file the name is changed
-        #And transferred to all 3 groups: All_vcfs, clade and subgroup
-        #Filtered vcf is getting renamed (from Excel file) and shuttled to All_vcfs, Clades and subclades
+        #And transferred to all 3 groups: all_vcfs, clade and subgroup
+        #Filtered vcf is getting renamed (from Excel file) and shuttled to all_vcfs, Clades and subclades
         else
         counter=1
             while [ $counter -le $loops ]; do
@@ -1381,8 +1381,8 @@ for i in *.vcf; do
         echo "$i was not assigned a Subgroup"
 
         #If a name was found in the tag file the name is changed
-        #And transferred to all 3 groups: All_vcfs, clade and subgroup
-        #Filtered vcf is getting renamed (from Excel file) and shuttled to All_vcfs, Clades and subclades
+        #And transferred to all 3 groups: all_vcfs, clade and subgroup
+        #Filtered vcf is getting renamed (from Excel file) and shuttled to all_vcfs, Clades and subclades
         else
         counter=1
             while [ $counter -le $loops ]; do
@@ -1414,8 +1414,8 @@ printf "%s\t%s\t%s\t%s\n" "${tbn}" "$groupNumbers" "$subgroupNumbers" "$cladeNum
         echo "$i was not assigned a Clade"
 
         #If a name was found in the tag file the name is changed
-        #And transferred to all 3 groups: All_vcfs, clade and subgroup
-        #Filtered vcf is getting renamed (from Excel file) and shuttled to All_vcfs, Clades and subclades
+        #And transferred to all 3 groups: all_vcfs, clade and subgroup
+        #Filtered vcf is getting renamed (from Excel file) and shuttled to all_vcfs, Clades and subclades
         else
         counter=1
             while [ $counter -le $loops ]; do
@@ -1431,8 +1431,8 @@ printf "%s\t%s\t%s\t%s\n" "${tbn}" "$groupNumbers" "$subgroupNumbers" "$cladeNum
             done
         fi
 
-    mkdir -p All_vcfs #Make All_vcfs folder if one does not exist.
-    mv $i ./All_vcfs/
+    mkdir -p all_vcfs #Make all_vcfs folder if one does not exist.
+    mv $i ./all_vcfs/
 
 done
 
@@ -1442,15 +1442,15 @@ done
 
 ################### Organize folders #####################
 
-mkdir All_Groups
-mv ./Group-*/ ./All_Groups
-mkdir All_Subgroups
-mv ./Subgroup*/ ./All_Subgroups/
-mkdir All_Clades
-mv ./Clade*/ ./All_Clades/
+mkdir all_groups
+mv ./Group-*/ ./all_groups
+mkdir all_subgroups
+mv ./Subgroup*/ ./all_subgroups/
+mkdir all_clades
+mv ./Clade*/ ./all_clades/
 
 ##################### Start: All vcf folder #####################
-cd ./All_vcfs/
+cd ./all_vcfs/
 # Make concatemer with the position and REF call.
     # Factor in possible multiple chromosomes
     echo "***Making Concatemer"
@@ -1514,8 +1514,8 @@ wait
 sleep 2
 
 # Begin the table
-awk '{print $1}' total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> All_vcfs.table.txt
-awk '{print $2}' total_pos | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> All_vcfs.table.txt
+awk '{print $1}' total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
+awk '{print $2}' total_pos | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
 echo "***grepping the .filledcut files"
 # Make the fasta files:  Fill in positions with REF if not present in .clean file
 
@@ -1527,10 +1527,10 @@ for i in *.filledcut; do
     #grep -f select $i > $n.tod
 
     # Use this cat command to skip the time intensive grep
-    # With All_vcfs this grep doesn't eliminate many snps.
+    # With all_vcfs this grep doesn't eliminate many snps.
     sed 's/chrom[0-9-]*//g' $i | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
     # Add each isolate to the table
-    awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> All_vcfs.table.txt
+    awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
     done
     wait
 
@@ -1562,7 +1562,7 @@ mv *.fas ./fasta
 rm root
 
 if [[ $2 == elite ]]; then
-	d="All_vcfs"
+	d="all_vcfs"
         cd ./fasta
         alignTable
 else
@@ -1577,22 +1577,22 @@ echo "Full Directory: ${fulDir}"
 echo "***************************************************"
 echo "***************** STARTING Groups *****************"
 echo "***************************************************"
-# Change directory to All_Groups
-cd ${fulDir}/All_Groups
+# Change directory to all_groups
+cd ${fulDir}/all_groups
 fasta_table &
 
 echo "***************************************************"
 echo "**************** STARTING SUBGROUPS ***************"
 echo "***************************************************"
-# Change directory to All_Subgroups
-cd ${fulDir}/All_Subgroups
+# Change directory to all_subgroups
+cd ${fulDir}/all_subgroups
 fasta_table &
 
 echo "***************************************************"
 echo "***************** STARTING CLADES *****************"
 echo "***************************************************"
-# Change directory to All_Clades
-cd ${fulDir}/All_Clades
+# Change directory to all_clades
+cd ${fulDir}/all_clades
 fasta_table &
 wait
 echo "At line $LINENO, sleeping 5 second"; sleep 5s
@@ -1603,17 +1603,17 @@ cp /home/shared/Table_Template.xlsx ./
 cp "$0" "$PWD"
 
 echo "***************************************************"
-echo "********** STARTING All_Clades Alignment **********"
+echo "********** STARTING all_clades Alignment **********"
 echo "***************************************************"
-cd ${fulDir}/All_Clades
+cd ${fulDir}/all_clades
 
 workingdir=`basename $PWD`
 
-if [ $workingdir == All_Clades ]
+if [ $workingdir == all_clades ]
 then
 directories=`ls`
 for d in $directories; do
-    cd ${fulDir}/All_Clades/${d}/fasta
+    cd ${fulDir}/all_clades/${d}/fasta
     echo "****************************************************"
     echo "************* Orginizing Table: $d *****************"
     echo "****************************************************"
@@ -1627,17 +1627,17 @@ echo "*** $workingdir not found ***"
 fi
 
 echo "***************************************************"
-echo "********** STARTING All_Groups Alignment **********"
+echo "********** STARTING all_groups Alignment **********"
 echo "***************************************************"
-cd ${fulDir}/All_Groups
+cd ${fulDir}/all_groups
 
 workingdir=`basename $PWD`
 
-if [ $workingdir == All_Groups ]
+if [ $workingdir == all_groups ]
 then
 directories=`ls`
 for d in $directories; do
-    cd ${fulDir}/All_Groups/${d}/fasta
+    cd ${fulDir}/all_groups/${d}/fasta
     echo "****************************************************"
     echo "************* Orginizing Table: $d *****************"
     echo "****************************************************"
@@ -1649,18 +1649,18 @@ echo "*** $workingdir not found ***"
 fi
 
 echo "***************************************************"
-echo "******** STARTING All_SubGroups Alignment *********"
+echo "******** STARTING all_subgroups Alignment *********"
 echo "***************************************************"
-cd ${fulDir}/All_Subgroups
+cd ${fulDir}/all_subgroups
 
 workingdir=`basename $PWD`
 
-if [ $workingdir == All_Subgroups ]
+if [ $workingdir == all_subgroups ]
 then
 
 directories=`ls`
 for d in $directories; do
-    cd ${fulDir}/All_Subgroups/$d/fasta
+    cd ${fulDir}/all_subgroups/$d/fasta
     echo "****************************************************"
     echo "************* Orginizing Table: $d *****************"
     echo "****************************************************"
@@ -1710,7 +1710,7 @@ cat ssection4 >> log.txt
 echo "" >> log.txt
 echo "****************************************************" >> log.txt
 echo "AC1 called SNPs"
-cat ${fulDir}/emailAC1counts.txt >> log.txt
+cat ${fulDir}/emailAC1counts.txt | sort -nk1,1 >> log.txt
 
 echo "<html>" > email_log.html
 echo "<Body>" >> email_log.html
