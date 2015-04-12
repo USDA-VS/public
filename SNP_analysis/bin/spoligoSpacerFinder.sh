@@ -7,12 +7,12 @@
 
 echo "**********************START**********************"
 
-# Starting working directory must be BWA-GATK folder with included /Zips file containing 2 zipped fastq files.
+# Starting working directory must be BWA-GATK folder with included /zips file containing 2 zipped fastq files.
 echo "directory"
 pwd
 # Make fastq directory
 mkdir ./../fastq
-cp ./../Zips/*.fastq.gz ./../fastq
+cp ./../zips/*.fastq.gz ./../fastq
 
 # change working directory to /fastq
 cd ./../fastq
