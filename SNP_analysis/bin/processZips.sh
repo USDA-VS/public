@@ -523,7 +523,8 @@ rm $revReads
 rm igv.log
 rm ${n}.allsites.vcf
 rm ${n}.allsites.vcf.idx
-
+rm ${n}.forIndelRealigner.intervals
+rm ${n}.recal_data.grp
 
 rm $n.SNPsMapzeroNoHeader.vcf
 rm $n.vcfFormated
