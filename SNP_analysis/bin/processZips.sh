@@ -42,49 +42,49 @@ COLLECTIONGCBIASMETRICS=`which CollectGcBiasMetrics.jar`
 COLLECTIONINSERTSIZEMETRICS=`which CollectInsertSizeMetrics.jar`
 
 BWA=`which bwa`
-if [[ -z BWA ]]; then
+if [[ -z $BWA ]]; then
     echo "bwa is not in PATH"
     echo "Add bwa to PATH"
     exit 1
 fi
 
 SAMTOOLS=`which samtools`
-    if [[ -z SAMTOOLS ]]; then
+    if [[ -z $SAMTOOLS ]]; then
     echo "samtools is not in PATH"
     echo "Add samtools to PATH"
     exit 1
 fi
 
 ABYSS=`which abyss-pe`
-    if [[ -z ABYSS ]]; then
+    if [[ -z $ABYSS ]]; then
     echo "abyss-pe is not in PATH"
     echo "Add abyss-pe to PATH"
     exit 1
 fi
 
 BAMTOOLS=`which bamtools`
-if [[ -z BAMTOOLS ]]; then
+if [[ -z $BAMTOOLS ]]; then
     echo "Bamtools is not in PATH"
     echo "Add Bamtools to PATH"
     exit 1
 fi
 
 GATK=`which GenomeAnalysisTK.jar`
-if [[ -z GATK ]]; then
+if [[ -z $GATK ]]; then
     echo "GenomeAnalysisTK.jar is not in PATH"
     echo "Add GenomeAnalysisTK.jar to PATH"
     exit 1
 fi
 
 IGVTOOLS=`which igvtools.jar`
-if [[ -z IGVTOOLS ]]; then
+if [[ -z $IGVTOOLS ]]; then
     echo "igvtools.jar is not in PATH"
     echo "Add igvtools.jar to PATH"
     exit 1
 fi
 
 SPOLIGOSPACERFINDER=`which spoligoSpacerFinder.sh`
-if [[ -z SPOLIGOSPACERFINDER ]]; then
+if [[ -z $SPOLIGOSPACERFINDER ]]; then
     echo "spoligoSpacerFinder.sh is not in PATH"
     echo "Add spoligoSpacerFinder.sh to PATH"
     exit 1
