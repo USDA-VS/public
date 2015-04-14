@@ -1472,9 +1472,7 @@ echo "***Creating normalized vcf using AC2, QUAL > 150"
 
 for i in *.vcf; do
 # Turned on 2014-07-29
-#(
-#m=`basename "$i"`; n=`echo $m | sed $dropEXT`; echo "$n"
-n=${i%.vcf}
+(n=${i%.vcf}
 echo $n
 #egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{if ($1 ~ /chrom1/) print "chrom1-" $2, $5; else if ($1 ~ /chrom2/) print "chrom2-" $2, $5; else print "awk script can not determine VCF input"}' > $n.cut
 egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{print $1 "-" $2, $5}' > $n.cut
@@ -1504,14 +1502,13 @@ rm ${n}-zeroCoverage
 rm ${n}-filledcutNumbers
 rm ${n}-NcatFile
 rm ${n}-duplicates
-rm $n.filledcutnoN
-#) &
-#let count+=1
-#[[ $((count%NR_CPUS)) -eq 0 ]] && wait
+rm $n.filledcutnoN) &
+let count+=1
+[[ $((count%NR_CPUS)) -eq 0 ]] && wait
 
 done
 wait
-sleep 2
+sleep 5
 
 # Begin the table
 awk '{print $1}' total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
