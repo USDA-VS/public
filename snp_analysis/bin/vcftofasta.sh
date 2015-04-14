@@ -245,7 +245,7 @@ elif [[ $1 == bovis ]]; then
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=200 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/script2/comparisons"
+    bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/comparisons"
     echo "vcftofasta.sh ran as M. bovis"
     echo "Script vcftofasta.sh ran using M. bovis variables" >> section5
     email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
@@ -494,19 +494,19 @@ echo "The number of chromosomes seen in VCF: $chromCount"
 #################################################################################
 
 # Remove selected files from comparison
-# Use file:  /bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt
+# Use file:  /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysis.txt
 
 function removeIsolates () {
 
-cat ${RemoveFromAnalysis} | tr '\r' '\n' | awk '{print $1}' > /bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysisUnixReady.txt
+cat ${RemoveFromAnalysis} | tr '\r' '\n' | awk '{print $1}' > /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt
 
-removeList=`cat /bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysisUnixReady.txt`
+removeList=`cat /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt`
 
 for i in $removeList; do
     rm *${i}*
 done
 
-rm /bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysisUnixReady.txt
+rm /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt
 
 }
 
@@ -797,7 +797,7 @@ for d in $directories; do
         	if [[  $argUsed == para ]]; then
             	unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/data/${searchname}*/BWAmem-GATK/QualityValues/*stats.txt`
         	elif [[  $argUsed == bovis ]]; then
-            	unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/mycobacterium/data/${searchname}*/BWAmem-GATK/QualityValues/*stats.txt`
+            	unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script1/${searchname}*/BWAmem-GATK/QualityValues/*stats.txt`
         	else
             contigMessage="possibly set a new contig path at script line: $LINENO"
         	fi
