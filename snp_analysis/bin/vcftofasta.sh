@@ -936,7 +936,8 @@ echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
         rm total_pos
         rm select
         rm root
-        echo "***Done"
+        cp /home/shared/Table_Template.xlsx ./${d}-Table_Template.xlsx
+	echo "***Done"
     cd ..
     done
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
