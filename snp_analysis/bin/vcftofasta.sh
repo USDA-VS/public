@@ -795,9 +795,9 @@ for d in $directories; do
 	searchname=`echo $n | sed 's/_.*//'`
 
         	if [[  $argUsed == para ]]; then
-            	unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/data/${searchname}*/BWAmem-GATK/QualityValues/*stats.txt`
+            	unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/data/${searchname}/BWAmem-GATK/QualityValues/*stats.txt`
         	elif [[  $argUsed == bovis ]]; then
-            	unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script1/${searchname}*/BWAmem-GATK/QualityValues/*stats.txt`
+            	unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script1/${searchname}/BWAmem-GATK/QualityValues/*stats.txt`
         	else
             contigMessage="possibly set a new contig path at script line: $LINENO"
         	fi
