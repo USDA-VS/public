@@ -1518,7 +1518,7 @@ echo "***grepping the .filledcut files"
 # Make the fasta files:  Fill in positions with REF if not present in .clean file
 
 for i in *.filledcut; do
-    echo " working on filled cut for $i"
+    (echo " working on filled cut for $i"
     m=`basename "$i"`
     n=`echo $m | sed $dropEXT`
     # Compare the positions in select with "isolate".cut and output position for .cut that only matched select positions
@@ -1526,11 +1526,14 @@ for i in *.filledcut; do
 
     # Use this cat command to skip the time intensive grep
     # With all_vcfs this grep doesn't eliminate many snps.
-    sed 's/chrom[0-9-]*//g' $i | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
-    # Add each isolate to the table
-    awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
-    done
-    wait
+    sed 's/chrom[0-9-]*//g' $i | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas) &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait    
+done
+wait
+
+# Add each isolate to the table
+awk '{print $2}' *.filledcut | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
 
 echo "grepping filledcut files is finished"
 #Make a reference fasta sequence
