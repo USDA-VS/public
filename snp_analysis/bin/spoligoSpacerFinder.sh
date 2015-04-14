@@ -362,7 +362,7 @@ echo "WGSpoligo:	$WGSpoligo" >> /scratch/report/spoligoCheck.txt
 
 #Make FileMaker file
 dateFile=`date "+%Y%m%d"`
-printf "%s\t%s\n" "$n" "$WGSpoligo" >> "/bioinfo11/TStuber/Results/_Mycobacterium/newFiles/${dateFile}_FileMakerSpoligoImport.txt"
+printf "%s\t%s\n" "$n" "$WGSpoligo" >> "/bioinfo11/TStuber/Results/_Mycobacterium/tbc/tbbov/newFiles/${dateFile}_FileMakerSpoligoImport.txt"
 
 # Add infor to spoligoCheck_all.txt
 echo "<----- $n ----->" >> /scratch/report/spoligoCheck_all.txt
