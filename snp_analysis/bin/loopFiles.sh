@@ -17,7 +17,7 @@ echo "Brucella MLST Check" >> /scratch/report/mlstCheck.txt
 
 #Reset file
 dateFile=`date "+%Y%m%d"`
-printf "%s\t%s\n" "TB Number" "Octal Code" > "/bioinfo11/TStuber/Results/_Mycobacterium/newFiles/${dateFile}_FileMakerSpoligoImport.txt"
+printf "%s\t%s\n" "TB Number" "Octal Code" > "/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/newFiles/${dateFile}_FileMakerSpoligoImport.txt"
 
 echo "Isolate Total_Bases AveDep %>Q15" | awk '{ printf("%-12s %-12s %-10s %-10s\n", $1, $2, $3, $4) }' >> /scratch/report/dailyReport.txt
 echo "" >> /scratch/report/dailyReport.txt
