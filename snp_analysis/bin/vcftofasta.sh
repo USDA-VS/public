@@ -487,8 +487,8 @@ fulDir=$PWD # Current working directory, do not change.
 
 # Count the number of chromosomes used in the reference when VCFs were made.
 singleFile=`ls *.vcf | head -1`
-chromCount=`grep -v "#" $singleFile | awk '{print $1}' | sort | uniq -d | awk 'END {print NR}'`
-chroms=`grep -v "#" $singleFile | awk '{print $1}' | sort -n | uniq -d`
+chromCount=`awk ' $0 !~ /^#/ {print $1}' $singleFile | sort | uniq -d | awk 'END {print NR}'`
+chroms=`awk ' $0 !~ /^#/ {print $1}' $singleFile | sort -n | uniq -d`
 echo "The number of chromosomes seen in VCF: $chromCount"
 
 #################################################################################
@@ -528,7 +528,7 @@ directorytest="${PWD##*/}"
 	fi
 
 for i in *; do
-	if [[ -s $i ]] ; then
+	(if [[ -s $i ]] ; then
         	echo "$i has data"
         	else
 		echo ""
@@ -538,8 +538,11 @@ for i in *; do
 	fi
     getbase=`basename "$i"`
     number=`echo $getbase | sed $tbNumberV | sed $tbNumberW`
-    echo $number >> list
-done
+    echo $number >> list) &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+    done
+    wait
 
 duplist=`sort list | uniq -d`
 rm list
@@ -769,7 +772,7 @@ for d in $directories; do
     # Make concatemer with the position and REF call.
     echo "***Making Concatemer"
     for i in *.vcf; do
-    egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{print $1 "-" $2, $4}' >> concatemer
+    awk -v Q="$QUAL" '$0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
     done
 
     # Get rid of duplicates in concatemer and list all the positions and REF calls
@@ -778,15 +781,17 @@ for d in $directories; do
 
 # Find AC1 positions also found in total_pos    
     awk '{print $1}' total_pos > total.list
+
     for i in *.vcf; do 
-	m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
+	(m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
 	# search for AC1 positions
-	grep -v "#" $i | awk ' $8 ~ /^AC=1/ && $6 > 0 {print $1 "-" $2}' > ${n}.list
+	awk ' $0 !~ /^#/ && $8 ~ /^AC=1/ && $6 > 0 {print $1 "-" $2}' $i > ${n}.list
 	# AC1 positions that are being found in this group
 	positionsfound=`cat ${n}.list total.list | sort -n | uniq -d`
 	countfind=`echo $positionsfound | wc -w`
 	echo "positonsfound: $positionsfound  countfind: $countfind"
-
+    rm ${n}.list
+    rm total.list
 	if [[ -z $positionsfound ]]; then
 		positionsfound="No positions found"
 	fi
@@ -817,15 +822,15 @@ for d in $directories; do
 	
 	for p in `echo $positionsfound`; do
             position=`echo $p | sed 's/chrom[0-9]*-//'`
-            echo "working on sample: $i"
-	    echo "Found position: $position"
-	    awk -v p="$position" '$2 == p {print $0}' $i
             awk -v p="$position" '$2 == p {print $0}' $i >> $d-AC1postions.txt
         done
 
-	fi
-
+    fi)  &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
     done
+    wait
+
 rm delete
     # Count the number of SNPs
 
@@ -837,41 +842,51 @@ rm delete
 
     echo "***Creating normalized vcf using AC2, QUAL > $QUAL"
         # Grab the name of the vcf file
+
+#########################################################################
 for i in *.vcf; do
-    m=`basename "$i"`; n=`echo $m | sed $dropEXT`
+    (n=${i%.vcf}
     # echo the name grabbed
     echo $n
     # Create .cut file that lists the positions and ALT calls
-    egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{print $1 "-" $2, $5}' > $n.cut
+    awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
 
     # Fill in the .cut file with REF calls at positions that were not called as SNPs
     #cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1 > $n.filledcutnoN
     cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.8n > $n.filledcutnoN
 
-    # Get the zero coverage positions.
-    awk ' $0 !~ /#/ && $10 ~ /\.\/\./ {print $1 "-" $2}' ${i} > ${n}-zeroCoverage
+    ##############################################################
+    # Change zero coverage regions
 
-    awk '{print $1}' $n.filledcutnoN > ${n}-filledcutNumbers
-    # cat the two above together
-    cat ${n}-zeroCoverage ${n}-filledcutNumbers > ${n}-NcatFile
-    # Get duplicates of the cat file
-    # This duplicats need to replace A,T,G or C to an N, Would like to make it a "." or "-" but Geneious does not recognize these characters.
-    cat ${n}-NcatFile | sort | uniq -d > ${n}-duplicates
-    echo "chrom1-1000000000" >> ${n}-duplicates
-    # Prepare duplicate regions to be used as variables in awk, to find and replace
-pos=`cat ${n}-duplicates | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`    
-#pos=`cat ${n}-duplicates | tr "\n" "|" | sed 's/|$//'`
-    echo "Zero Coverage: $pos"
-    awk -v x=$pos 'BEGIN {OFS="\t"} { if($1 ~ x ) print $1, "-"; else print $1, $2}' $n.filledcutnoN | sort -k1.6n -k1.8n > $n.filledcut
+    # get positions being used
+    awk '{print $1}' $n.filledcutnoN > ${n}.filledcutNumbers
 
-    rm ${n}-zeroCoverage
-    rm ${n}-filledcutNumbers
-    rm ${n}-NcatFile
-    rm ${n}-duplicates
-    rm $n.filledcutnoN
-    rm *list
-    rm $i
+    # Get zero coverage positions.
+    awk ' $0 !~ /^#/ && $10 ~ /\.\/\./ {print $1 "-" $2}' ${i} > ${n}.zeropositions
+
+    # zero duplicate positions will need to be kept
+    cat ${n}.filledcutNumbers ${n}.zeropositions | sort | uniq -d > ${n}.zerotokeep
+
+    # get zero position, these are only positions already in the filledcutnoN
+    if [ -s ${n}.zerotokeep ]; then
+        grep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}'> ${n}.zerotomerge
+        # merge zero updates to filledcut
+        cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > ${n}.filledcut
+        rm ${n}.filledcutnoN
+        rm ${n}.zerotomerge
+    else
+        mv $n.filledcutnoN ${n}.filledcut
+    fi
+
+    rm ${n}.filledcutNumbers
+    rm ${n}.zeropositions
+    rm ${n}.zerotokeep)  &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
+
+#########################################################################
+
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 wait
 
@@ -887,9 +902,10 @@ wait
         # This getting rid of calls that are the same for all isolates being analyzed
         echo "***grepping the total_pos file"
 
-        echo "***grepping the .filledcut files"
+        echo "***grepping the .filledcut files for $d"
 
         grep -f select total_pos | sort -k1.6n -k1.8n > clean_total_pos
+        
         # Begin the table
         awk '{print $1}' clean_total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> $d.table.txt
         awk '{print $2}' clean_total_pos | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}'>> $d.table.txt
@@ -899,15 +915,45 @@ wait
             (m=`basename "$i"`
             n=`echo $m | sed $dropEXT`
             # Compare the positions in select with "isolate".cut and output position for .cut that only matched select positions
-            egrep -f select $i | sort -k1.6n -k1.8n > $n.tod
-            
+            egrep -f select $i | sort -k1.6n -k1.8n > $n.pretod
+
+        ##############################################################
+        # Change AC1s to IUPAC
+
+            # get positions being used
+            awk '{print $1}' ${n}.pretod > ${n}.usedpostions
+            # get AC1 positions and iupac calls  that were changed to iupac
+            awk ' $0 !~ /#/ && $6 > 300 && $8 ~ /^AC=1;/ {print $1 "-" $2, $5}' ${i%filledcut}vcf > ${n}.ac
+            # get just positions of those AC1 grabbed above
+            awk '{print $1}' ${n}.ac > ${n}.acpositions
+           # AC duplicate positions will need to be kept
+            cat ${n}.usedpostions ${n}.acpositions | sort | uniq -d > ${n}.actokeep
+            # get AC1 position with iupac, these are only positions already in the pretod
+
+            if [ -s ${n}.actokeep ]; then
+                grep -f ${n}.actokeep ${n}.ac > ${n}.actomerge
+                # merge iupac updates to filledcut
+                cat ${n}.actomerge $n.pretod | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > $n.tod
+                rm ${n}.pretod
+                rm ${n}.actomerge
+            else
+                mv $n.pretod $n.tod
+            fi
+            rm ${n}.usedpostions
+            rm ${n}.ac
+            rm ${n}.acpositions
+            rm ${n}.actokeep
+            rm ${i%filledcut}vcf
+        ##############################################################
+
 	sed 's/chrom[0-9-]*//g' $n.tod | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
             # Add each isolate to the table
-            awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> $d.table.txt) &
-            let count+=1
-            [[ $((count%NR_CPUS)) -eq 0 ]] && wait
-            done
-                wait
+            awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> $d.table.txt)  &
+    		let count+=1
+    		[[ $((count%NR_CPUS)) -eq 0 ]] && wait
+	done
+wait
+
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
         #Make a reference fasta sequence
         awk '{print $2}' clean_total_pos > root
@@ -916,10 +962,6 @@ echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 
 	totalSNPs=`grep -c ".*" total_pos`
 	echo "$d informative SNPs: $totalSNPs" >> ../../section4
-
-
-        #echo "***The clean_total_pos" >> ../../section4
-        #grep -c ".*" clean_total_pos >> ../../section4
 
         # Make a file containing all fasta files.
         cat *.fas > ${dir}_alignment.fasta
@@ -936,6 +978,7 @@ echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
         rm total_pos
         rm select
         rm root
+        rm clean_total_pos
         cp /home/shared/Table_Template.xlsx ./${d}-Table_Template.xlsx
 	echo "***Done"
     cd ..
@@ -1210,11 +1253,13 @@ rm outfile
 #Do NOT make this a child process.  It messes changing column 1 to chrom
 echo "Making Files Unix Compatiable"
 for v in *.vcf; do
-    dos2unix $v #Fixes files opened and saved in Excel
+    (dos2unix $v #Fixes files opened and saved in Excel
     cat $v | tr '\r' '\n' | awk -F '\t' 'BEGIN{OFS="\t";} {gsub("\"","",$5);print;}' | sed 's/\"##/##/' > $v.temp
-    mv $v.temp $v
-
+    mv $v.temp $v) &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
+wait
 
 ############## Capture the number of chromosomes and their name from a single VCF ##############
 
@@ -1230,16 +1275,14 @@ fi
 # Change chromosome identification to general chrom1 and/or chrom2
 
 for f in *.vcf; do
-echo "echoing f: $f"
+    echo "echoing f: $f"
     num=1
     for i in $chroms; do
         sed "s/$i/chrom${num}/g" $f > temp.vcf
         mv temp.vcf $f
         echo "$i was marked as chrom${num}"
-        num=$(( $num + 1 ))
-   
- done
-
+    num=$(( $num + 1 ))
+    done
 done
 
 ########################################################################
@@ -1253,6 +1296,46 @@ wait
 changeLowCalls
 wait
 
+######################## Change AC1s to IUPAC ########################
+
+for i in *vcf; do
+
+(echo "Changing AC=1 to IUPAC: $i"
+awk '
+BEGIN { OFS = "\t"}
+
+{ if ($6 > 300 && $8 ~ /^AC=1;/ && $4$5 ~ /AG/ )
+	 	print $1, $2, $3, $4, "R", $6, $7, $8, $9, $10
+else if ($6 > 300 && $8 ~ /^AC=1;/ && $4$5 ~ /CT/ )
+	 	print $1, $2, $3, $4, "Y", $6, $7, $8, $9, $10
+else if ($6 > 300 && $8 ~ /^AC=1;/ && $4$5 ~ /GC/ )
+	 	print $1, $2, $3, $4, "S", $6, $7, $8, $9, $10
+else if ($6 > 300 && $8 ~ /^AC=1;/ && $4$5 ~ /AT/ )
+	 	print $1, $2, $3, $4, "W", $6, $7, $8, $9, $10
+else if ($6 > 300 && $8 ~ /^AC=1;/ && $4$5 ~ /GT/ )
+	 	print $1, $2, $3, $4, "K", $6, $7, $8, $9, $10	 	
+else if ($6 > 300 && $8 ~ /^AC=1;/ && $4$5 ~ /AC/ )
+	 	print $1, $2, $3, $4, "M", $6, $7, $8, $9, $10	 	
+else if ($6 > 300 && $8 ~ /^AC=1;/ && $4$5 ~ /GA/ )
+	 	print $1, $2, $3, $4, "R", $6, $7, $8, $9, $10	 	
+else if ($6 > 300 && $8 ~ /^AC=1;/ && $4$5 ~ /TC/ )
+	 	print $1, $2, $3, $4, "Y", $6, $7, $8, $9, $10	 	
+else if ($6 > 300 && $8 ~ /^AC=1;/ && $4$5 ~ /CG/ )
+	 	print $1, $2, $3, $4, "S", $6, $7, $8, $9, $10	 	
+else if ($6 > 300 && $8 ~ /^AC=1;/ && $4$5 ~ /TA/ )
+	 	print $1, $2, $3, $4, "W", $6, $7, $8, $9, $10	 	
+else if ($6 > 300 && $8 ~ /^AC=1;/ && $4$5 ~ /TG/ )
+	 	print $1, $2, $3, $4, "K", $6, $7, $8, $9, $10	 	
+else if ($6 > 300 && $8 ~ /^AC=1;/ && $4$5 ~ /CA/ )
+	 	print $1, $2, $3, $4, "M", $6, $7, $8, $9, $10	 	
+else
+	print $0	 
+}' $i > ${i%vcf}temp
+mv ${i%vcf}temp $i) &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+done
+wait
 ######################## Mark Files and Remove Marked Regions ########################
 
 if [ $FilterAllVCFs == yes ]; then
@@ -1336,7 +1419,7 @@ echo "" >> section3
 for i in *.vcf; do
 
     # Get quality positions in VCF
-    formatedpos=`grep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{print $2}' | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+    formatedpos=`awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/{print $2}' $i | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
     
     # If a group number matches a quality position in the VCF (formatedpos) then print the position
     groupNumbers=`grep "Group" "${DefiningSNPs}" | awk -v x=$formatedpos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1}'`
@@ -1437,10 +1520,6 @@ printf "%s\t%s\t%s\t%s\n" "${tbn}" "$groupNumbers" "$subgroupNumbers" "$cladeNum
 
 done
 
-#echo "" >> log
-#echo "*********************************************************************" >> log
-#echo "" >> log
-
 ################### Organize folders #####################
 
 mkdir all_groups
@@ -1456,8 +1535,7 @@ cd ./all_vcfs/
     # Factor in possible multiple chromosomes
     echo "***Making Concatemer"
     for i in *.vcf; do
-#egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{if ($1 ~ /chrom1/) print "chrom1-" $2, $4; else if ($1 ~ /chrom2/) print "chrom2-" $2, $4; else print "awk script can not determine VCF input"}' >> concatemer
-egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{print $1 "-" $2, $4}' >> concatemer
+awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
     done
 
 # Get rid of duplicates in concatemer and list all the positions and REF calls
@@ -1472,44 +1550,48 @@ echo "***Creating normalized vcf using AC2, QUAL > 150"
 # Grab the name of the vcf file
 
 for i in *.vcf; do
-# Turned on 2014-07-29
-(n=${i%.vcf}
-echo $n
-#egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{if ($1 ~ /chrom1/) print "chrom1-" $2, $5; else if ($1 ~ /chrom2/) print "chrom2-" $2, $5; else print "awk script can not determine VCF input"}' > $n.cut
-egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{print $1 "-" $2, $5}' > $n.cut
+    (n=${i%.vcf}
+    echo $n
+    awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' > $n.cut
 
-#cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1 > $n.filledcutnoN
-cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.8n > $n.filledcutnoN
+    #cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1 > $n.filledcutnoN
+    cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.8n > $n.filledcutnoN
 
-# Get the zero coverage positions.
-awk ' $0 !~ /#/ && $10 ~ /\.\/\./ {print $1 "-" $2}' ${i} > ${n}-zeroCoverage
+    ##############################################################
+    # Change zero coverage regions
+    echo "Change zero coverage regions"
+    # get positions being used
+    awk '{print $1}' $n.filledcutnoN > ${n}.filledcutNumbers
 
-# Get the position of the .filledcut file
-awk '{print $1}' $n.filledcutnoN > ${n}-filledcutNumbers
-# cat the two above together
-cat ${n}-zeroCoverage ${n}-filledcutNumbers > ${n}-NcatFile
-# Get duplicates of the cat file
-# This duplicats need to replace A,T,G or C to an N, Would like to make it a "." or "-" but Geneious does not recognize these characters.
-cat ${n}-NcatFile | sort | uniq -d > ${n}-duplicates
-echo "chrom1-1000000000" >> ${n}-duplicates
-# Prepare duplicate regions to be used as variables in awk, to find and replace
-pos=`cat ${n}-duplicates | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-#pos=`cat ${n}-duplicates | tr "\n" "|" | sed 's/|$//'`
-echo "Zero Coverage: $pos"
-#awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ x ) print $1, "-"; else print $0}' $n.filledcutnoN | sort -nk1 > $n.filledcut
-awk -v x=$pos 'BEGIN {OFS="\t"} { if($1 ~ x ) print $1, "-"; else print $1, $2}' $n.filledcutnoN | sort -k1.6n -k1.8n > $n.filledcut
+    # Get zero coverage positions.
+    awk ' $0 !~ /^#/ && $10 ~ /\.\/\./ {print $1 "-" $2}' ${i} > ${n}.zeropositions
 
-rm ${n}-zeroCoverage
-rm ${n}-filledcutNumbers
-rm ${n}-NcatFile
-rm ${n}-duplicates
-rm $n.filledcutnoN) &
-let count+=1
-[[ $((count%NR_CPUS)) -eq 0 ]] && wait
+    # zero duplicate positions will need to be kept
+    cat ${n}.filledcutNumbers ${n}.zeropositions | sort | uniq -d > ${n}.zerotokeep
+
+    # get zero position, these are only positions already in the filledcutnoN
+    if [ -s ${n}.zerotokeep ]; then
+    grep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}'> ${n}.zerotomerge
+    # merge zero updates to filledcut
+    cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > ${n}.filledcut
+    rm ${n}.filledcutnoN
+    rm ${n}.zerotomerge
+    else
+    mv $n.filledcutnoN ${n}.filledcut
+    fi
+    
+    rm ${n}.filledcutNumbers
+    rm ${n}.zeropositions
+    rm ${n}.zerotokeep)  &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 
 done
+
+#########################################################################
+
+echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 wait
-sleep 5
 
 # Begin the table
 awk '{print $1}' total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
@@ -1526,14 +1608,14 @@ for i in *.filledcut; do
 
     # Use this cat command to skip the time intensive grep
     # With all_vcfs this grep doesn't eliminate many snps.
-    sed 's/chrom[0-9-]*//g' $i | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas) &
-    let count+=1
-    [[ $((count%NR_CPUS)) -eq 0 ]] && wait    
-done
-wait
+    sed 's/chrom[0-9-]*//g' $i | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
 
 # Add each isolate to the table
-awk '{print $2}' *.filledcut | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
+awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt) &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+done
+wait
 
 echo "grepping filledcut files is finished"
 #Make a reference fasta sequence
@@ -1543,9 +1625,6 @@ echo "" >> root.fas
 
 totalSNPs=`grep -c ".*" total_pos`
 echo "Total informative SNPs: $totalSNPs" >> ../section4
-
-#echo "***The clean_total_pos $d" >> ../section4
-#grep -c ".*" total_pos >> ../section4
 
 #Clean-up
 mkdir starting_files
@@ -1754,12 +1833,14 @@ rm sectiontime
 rm ssection4
 rm csection1
 
+echo "Copying to ${bioinfoVCF}"
 cp -r $PWD ${bioinfoVCF}
 echo "******* $LINENO, $PWD"
 fileName=`basename $0`
 
 if [[ $3 == me ]]; then
-	echo "Only Tod received this e-mail! $fileName $@ completed, See attachment" > mytempfile; cat mytempfile | mutt -s "$fileName $@ completed" -a email_log.html -- "tod.p.stuber@usda.gov"
+    email_list="Tod.P.Stuber@aphis.usda.gov"
+	echo "vcftofasta.sh completed" > mytempfile; cat mytempfile | mutt -s "vcftofasta.sh completed subject" -a email_log.html -- $email_list
 	else
 	echo "$fileName $@ completed, See attachment" > mytempfile; cat mytempfile | mutt -s "$fileName $@ completed" -a email_log.html -- $email_list
 fi
@@ -1771,4 +1852,4 @@ pwd
 
 #
 #  Created by Stuber, Tod P - APHIS on 5/3/2014.
-#2014-11-26#
+#2015-04-20#
