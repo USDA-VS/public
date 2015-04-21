@@ -63,7 +63,7 @@ if [[ $1 == ab1 ]]; then
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/abortus1/_VCFs"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/abortus1/vcfs"
     echo "vcftofasta.sh ran as Brucella abortus bv 1, 2 or 4"
     echo "Script vcftofasta.sh ran using Brucella abortus bv 1, 2 or 4 variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
@@ -81,7 +81,7 @@ elif [[ $1 == mel ]]; then
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Melitensis/_VCFs"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Melitensis/vcfs"
     echo "vcftofasta.sh ran as B. melitensis"
     echo "Script vcftofasta.sh ran using B. melitensis variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
@@ -99,7 +99,7 @@ elif [[ $1 == suis1 ]]; then
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Suis1/_VCFs"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Suis1/vcfs"
     echo "vcftofasta.sh ran as B. suis bv1"
     echo "Script vcftofasta.sh ran using B. suis bv1 variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
@@ -117,7 +117,7 @@ elif [[ $1 == suis2 ]]; then
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Suis2/_VCFs/"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Suis2/vcfs/"
     echo "vcftofasta.sh ran as B. suis bv2"
     echo "Script vcftofasta.sh ran using B. suis bv2 variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
@@ -135,7 +135,7 @@ elif [[ $1 == suis3 ]]; then
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Suis3/_VCFs"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Suis3/vcfs"
     echo "vcftofasta.sh ran as B. suis bv3"
     echo "Script vcftofasta.sh ran using B. suis bv3 variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
@@ -228,7 +228,7 @@ elif [[ $1 == ovis ]]; then
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Ovis/_VCFs"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/Ovis/vcfs"
     echo "vcftofasta.sh ran as B. ovis"
     echo "Script vcftofasta.sh ran using B. ovis variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
