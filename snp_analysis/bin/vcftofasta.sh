@@ -1570,7 +1570,7 @@ for i in *.vcf; do
 
     # get zero position, these are only positions already in the filledcutnoN
     if [ -s ${n}.zerotokeep ]; then
-    grep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}'> ${n}.zerotomerge
+    grep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}' > ${n}.zerotomerge
     # merge zero updates to filledcut
     cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > ${n}.filledcut
     rm ${n}.filledcutnoN
@@ -1586,6 +1586,7 @@ for i in *.vcf; do
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 
 done
+wait
 
 #########################################################################
 
@@ -1609,12 +1610,17 @@ for i in *.filledcut; do
     # With all_vcfs this grep doesn't eliminate many snps.
     sed 's/chrom[0-9-]*//g' $i | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
 
-# Add each isolate to the table
-awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt) &
+    # Add each isolate to the table
+    awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt) &
     let count+=1
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+wait
+sleep 1
+wait
+
 done
 wait
+echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 
 echo "grepping filledcut files is finished"
 #Make a reference fasta sequence
