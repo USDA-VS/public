@@ -790,8 +790,7 @@ for d in $directories; do
 	positionsfound=`cat ${n}.list total.list | sort -n | uniq -d`
 	countfind=`echo $positionsfound | wc -w`
 	echo "positonsfound: $positionsfound  countfind: $countfind"
-    rm ${n}.list
-    rm total.list
+    	rm ${n}.list
 	if [[ -z $positionsfound ]]; then
 		positionsfound="No positions found"
 	fi
@@ -830,7 +829,7 @@ for d in $directories; do
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
     done
     wait
-
+rm total.list
 rm delete
     # Count the number of SNPs
 
