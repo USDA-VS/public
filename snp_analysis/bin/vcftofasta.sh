@@ -59,7 +59,9 @@ if [[ $1 == ab1 ]]; then
     #coverageFiles="/bioinfo11/TStuber/Results/brucella/Abortus1/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/abortus1/script_dependents/FilterFiles" #Files containing positions to filter
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/abortus1/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -77,7 +79,9 @@ elif [[ $1 == mel ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/Melitensis/script_dependents/FilterFiles" #Files containing positions to filter
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Melitensis/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -95,7 +99,9 @@ elif [[ $1 == suis1 ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/Suis1/script_dependents/FilterFiles" #Files containing positions to filter
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Suis1/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -113,7 +119,9 @@ elif [[ $1 == suis2 ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/Suis2/script_dependents/FilterFiles" #Files containing positions to filter
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Suis2/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -131,7 +139,9 @@ elif [[ $1 == suis3 ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/Suis3/script_dependents/FilterFiles" #Files containing positions to filter
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Suis3/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -149,7 +159,9 @@ elif [[ $1 == suis4 ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/Suis4/script_dependents/FilterFiles" #Files containing positions to filter
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucela/Suis4/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -167,7 +179,9 @@ elif [[ $1 == canis ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/Canis/script_dependents/FilterFiles" #Files containing positions to filter
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Canis/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -186,7 +200,9 @@ elif [[ $1 == ceti1 ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/ceti1/script_dependents/FilterFiles" #Files containing positions to filter
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/ceti1/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -205,7 +221,9 @@ elif [[ $1 == ceti2 ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/ceti2/script_dependents/FilterFiles" #Files containing positions to filter
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/ceti2/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -224,7 +242,9 @@ elif [[ $1 == ovis ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/Ovis/script_dependents/FilterFiles" #Files containing positions to filter
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Ovis/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -240,8 +260,9 @@ elif [[ $1 == bovis ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
-    rm ${FilterDirectory}/*
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -274,8 +295,9 @@ elif [[ $1 == tb1 ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb1/tb1DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
-    rm ${FilterDirectory}/*
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -298,8 +320,9 @@ elif [[ $1 == tb2 ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb2/tb2DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
-    rm ${FilterDirectory}/*
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -322,8 +345,9 @@ elif [[ $1 == tb3 ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/tb3DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
-    rm ${FilterDirectory}/*
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -346,8 +370,9 @@ elif [[ $1 == tb4a ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4a/tb4aDefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
-    rm ${FilterDirectory}/*
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -370,8 +395,9 @@ elif [[ $1 == tb4b ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/tb4bDefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
-    rm ${FilterDirectory}/*
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -394,8 +420,9 @@ elif [[ $1 == tb5 ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb5/tb5DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
-    rm ${FilterDirectory}/*
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -418,8 +445,9 @@ elif [[ $1 == tb6 ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb6/tb6DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
-    rm ${FilterDirectory}/*
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -442,7 +470,9 @@ elif [[ $1 == para ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/home/shared/mycobacterium/bovis/scriptDependents/bovisGroups" #Files containing positions to filter
+    filterdir="/home/shared/${uniqdate}-FilterFiles"
+    mkdir ${filterdir}
+    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -1837,6 +1867,7 @@ rm section5
 rm sectiontime
 rm ssection4
 rm csection1
+rm -r ${FilterDirectory}
 
 echo "Copying to ${bioinfoVCF}"
 cp -r $PWD ${bioinfoVCF}
