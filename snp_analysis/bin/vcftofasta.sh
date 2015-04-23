@@ -346,7 +346,7 @@ elif [[ $1 == bovis ]]; then
     # Excel tab label "New groupings"
 
     excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/Filtered_Regions.xlsx"
-    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
     filterFileCreations
 
 elif [[ $1 == tb1 ]]; then
