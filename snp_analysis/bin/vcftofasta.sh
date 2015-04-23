@@ -28,6 +28,7 @@ FilterDirectory=${filterdir} #Files containing positions to filter
 ####################################################
 function filterFileCreations () {
 # Create "here-document"
+echo "Starting to make the here-document"
 cat >./FilterFileCreations.sh <<EOL
 
 #!/bin/sh
@@ -104,7 +105,7 @@ rm ${output}/*.list
 
 
 EOL
-
+echo "Finished making the here-document"
 chmod 755 ./FilterFileCreations.sh
 
 ./FilterFileCreations.sh
