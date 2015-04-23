@@ -19,6 +19,99 @@ starttime=`date +%s`
 argUsed="$1"
 uniqdate=`date "+%Y-%m-%dat%Hh%Mm%Ss"`
 echo "start time: $uniqdate"
+
+####################################################
+filterdir="/home/shared/${uniqdate}-FilterFiles"
+mkdir ${filterdir}
+FilterDirectory=${filterdir} #Files containing positions to filter
+
+####################################################
+function filterFileCreations () {
+# Create "here-document"
+cat >./FilterFileCreations.sh <<EOL
+
+#!/bin/sh
+
+# Use to make filter files from the text pasted from the Excel worksheet.
+# working directory does not need to be set.
+#################################################################################
+#   Set variables:
+
+# Path to txt file containing paste from Excel worksheet.
+filterFile="${filterdir}/filterFile.txt"
+
+# Number of columns in Excel worksheet
+columns=`head $filterFile | awk 'BEGIN{ FS="\t"; OFS="\t" }  END {print NF}'`
+
+# Location filter files are output to.
+output="${filterdir}"
+
+#################################################################################
+
+
+let columns=columns+1
+rm ${output}*
+echo "Number of columns: $columns"
+
+count=1
+while [ $count -lt ${columns} ]; do
+    echo ${count}
+    filename=`awk -v x=$count 'BEGIN{FS=OFS="\t"}{print $x}' $filterFile | head -n1`
+    echo "Filename: $filename"
+    awk -v x=$count 'BEGIN{FS=OFS="\t"} FNR>1 {print $x}' $filterFile | grep -v "^$" > ${output}/${filename}.list
+    let count=count+1
+done
+rm $filterFile
+for i in ${output}/*.list; do
+    (base=`basename "$i"`
+    readyfile=`echo $base | sed 's/\..*//'`
+
+    touch ${output}/${readyfile}.txt
+
+    mylist=`cat $i`
+
+    for l in $mylist; do
+        pos1=`echo $l | sed 's/-/ /g' | awk '{print $1}'`
+        pos2=`echo $l | sed 's/-/ /g' | awk '{print $2}'`
+        #echo $pos2
+            if [[ -z "$pos2" ]]
+            then
+            let pos2=pos1+1
+                while [ $pos1 -lt $pos2 ]; do
+                #echo $pos1
+                echo $pos1 >> ${output}/${readyfile}.txt
+                let pos1=pos1+1
+                done
+            else
+            let pos2=pos2+1
+                while [ $pos1 -lt $pos2 ]; do
+                #echo $pos1
+                echo $pos1 >> ${output}/${readyfile}.txt
+                let pos1=pos1+1
+                done
+            fi
+        done) &
+        let count+=1
+        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+done
+wait
+
+rm ${output}/*.list
+
+#
+#  Created by Stuber, Tod P - APHIS on 12/16/2013.
+#
+
+
+EOL
+
+chmod 755 ./FilterFileCreations.sh
+
+./FilterFileCreations.sh
+
+rm ./FilterFileCreations.sh
+
+}
 ####################################################
 function parseXLS () {
 # Create "here-document"
@@ -59,9 +152,6 @@ if [[ $1 == ab1 ]]; then
     #coverageFiles="/bioinfo11/TStuber/Results/brucella/Abortus1/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/abortus1/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -79,9 +169,6 @@ elif [[ $1 == mel ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Melitensis/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -99,9 +186,6 @@ elif [[ $1 == suis1 ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Suis1/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -119,9 +203,6 @@ elif [[ $1 == suis2 ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Suis2/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -139,9 +220,6 @@ elif [[ $1 == suis3 ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Suis3/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -159,9 +237,6 @@ elif [[ $1 == suis4 ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucela/Suis4/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -179,9 +254,6 @@ elif [[ $1 == canis ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Canis/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -200,9 +272,6 @@ elif [[ $1 == ceti1 ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/ceti1/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -221,9 +290,6 @@ elif [[ $1 == ceti2 ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/ceti2/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -242,9 +308,6 @@ elif [[ $1 == ovis ]]; then
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/Ovis/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
@@ -260,9 +323,6 @@ elif [[ $1 == bovis ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -287,7 +347,7 @@ elif [[ $1 == bovis ]]; then
 
     excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/Filtered_Regions.xlsx"
     parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
-    FilterFileCreations.sh
+    filterFileCreations
 
 elif [[ $1 == tb1 ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
@@ -295,9 +355,6 @@ elif [[ $1 == tb1 ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb1/tb1DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -312,7 +369,7 @@ elif [[ $1 == tb1 ]]; then
     # Excel tab label "New groupings"
     excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb1/tb1Filtered_Regions.xlsx"
     parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
-    FilterFileCreations.sh
+    filterFileCreations
 
 elif [[ $1 == tb2 ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
@@ -320,9 +377,6 @@ elif [[ $1 == tb2 ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb2/tb2DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -337,7 +391,7 @@ elif [[ $1 == tb2 ]]; then
     # Excel tab label "New groupings"
     excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb2/tb2Filtered_Regions.xlsx"
     parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
-    FilterFileCreations.sh
+    filterFileCreations
 
 elif [[ $1 == tb3 ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
@@ -345,9 +399,6 @@ elif [[ $1 == tb3 ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/tb3DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -362,7 +413,7 @@ elif [[ $1 == tb3 ]]; then
     # Excel tab label "New groupings"
     excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/tb3Filtered_Regions.xlsx"
     parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
-    FilterFileCreations.sh
+    filterFileCreations
 
 elif [[ $1 == tb4a ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
@@ -370,9 +421,6 @@ elif [[ $1 == tb4a ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4a/tb4aDefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -387,7 +435,7 @@ elif [[ $1 == tb4a ]]; then
     # Excel tab label "New groupings"
     excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4a/tb4aFiltered_Regions.xlsx"
     parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
-    FilterFileCreations.sh
+    filterFileCreations
 
 elif [[ $1 == tb4b ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
@@ -395,9 +443,6 @@ elif [[ $1 == tb4b ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/tb4bDefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -412,7 +457,7 @@ elif [[ $1 == tb4b ]]; then
     # Excel tab label "New groupings"
     excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/tb4bFiltered_Regions.xlsx"
     parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
-    FilterFileCreations.sh
+    filterFileCreations
 
 elif [[ $1 == tb5 ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
@@ -420,9 +465,6 @@ elif [[ $1 == tb5 ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb5/tb5DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -437,7 +479,7 @@ elif [[ $1 == tb5 ]]; then
     # Excel tab label "New groupings"
     excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb5/tb5Filtered_Regions.xlsx"
     parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
-    FilterFileCreations.sh
+    filterFileCreations
 
 elif [[ $1 == tb6 ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
@@ -445,9 +487,6 @@ elif [[ $1 == tb6 ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb6/tb6DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -462,7 +501,7 @@ elif [[ $1 == tb6 ]]; then
     # Excel tab label "New groupings"
     excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb6/tb6Filtered_Regions.xlsx"
     parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
-    FilterFileCreations.sh
+    filterFileCreations
 
 elif [[ $1 == para ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/mac/tags.txt"
@@ -470,9 +509,6 @@ elif [[ $1 == para ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    filterdir="/home/shared/${uniqdate}-FilterFiles"
-    mkdir ${filterdir}
-    FilterDirectory=${filterdir} #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
@@ -487,8 +523,8 @@ elif [[ $1 == para ]]; then
     # Excel tab label "New groupings"
 
     excelinfile="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/vcfs/Filtered_Regions.xlsx"
-    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > /home/shared/mycobacterium/bovis/scriptDependents/filterFile.txt
-    FilterFileCreations.sh
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
+    filterFileCreations
 
 else
 
@@ -626,7 +662,7 @@ function filterFilespreparation () {
 #python -u /home/tstuber/workspace/scripts/python_scripts/inputXLS.py | sed 's/ u//g' | tr "," "\t" | sed "s/\'//g" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' > ${FilterDirectory}/filterFile.txt
 
 echo "Waiting for filter file creation to complete"
-#FilterFileCreations.sh
+#filterFileCreations
 wait
 curdr=`pwd`
 
