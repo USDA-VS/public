@@ -27,15 +27,9 @@ FilterDirectory=${filterdir} #Files containing positions to filter
 
 ####################################################
 function filterFileCreations () {
-# Create "here-document"
-echo "Starting to make the here-document"
-cat >./FilterFileCreations.sh <<EOL
-
-#!/bin/sh
 
 # Use to make filter files from the text pasted from the Excel worksheet.
 # working directory does not need to be set.
-#################################################################################
 #   Set variables:
 
 # Path to txt file containing paste from Excel worksheet.
@@ -46,9 +40,6 @@ columns=`head $filterFile | awk 'BEGIN{ FS="\t"; OFS="\t" }  END {print NF}'`
 
 # Location filter files are output to.
 output="${filterdir}"
-
-#################################################################################
-
 
 let columns=columns+1
 rm ${output}*
@@ -98,20 +89,6 @@ done
 wait
 
 rm ${output}/*.list
-
-#
-#  Created by Stuber, Tod P - APHIS on 12/16/2013.
-#
-
-EOL
-
-echo "Finished making the here-document"
-chmod 755 ./FilterFileCreations.sh
-
-./FilterFileCreations.sh
-
-rm ./FilterFileCreations.sh
-
 }
 ####################################################
 function parseXLS () {
