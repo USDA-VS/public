@@ -17,7 +17,8 @@ END
 echo "Start Time: `date`" > sectiontime
 starttime=`date +%s`
 argUsed="$1"
-
+uniqdate=`date "+%Y-%m-%dat%Hh%Mm%Ss"`
+echo "start time: $uniqdate"
 ####################################################
 function parseXLS () {
 # Create "here-document"
@@ -947,7 +948,7 @@ wait
 
 	sed 's/chrom[0-9-]*//g' $n.tod | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
             # Add each isolate to the table
-            awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> $d.table.txt)  &
+            awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> $d.table.txt) &
     		let count+=1
     		[[ $((count%NR_CPUS)) -eq 0 ]] && wait
 	done
@@ -1615,7 +1616,6 @@ for i in *.filledcut; do
     let count+=1
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 wait
-sleep 1
 wait
 
 done
