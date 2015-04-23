@@ -103,8 +103,8 @@ rm ${output}/*.list
 #  Created by Stuber, Tod P - APHIS on 12/16/2013.
 #
 
-
 EOL
+
 echo "Finished making the here-document"
 chmod 755 ./FilterFileCreations.sh
 
