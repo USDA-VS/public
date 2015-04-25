@@ -1891,7 +1891,7 @@ rm section5
 rm sectiontime
 rm ssection4
 rm csection1
-rm -r ${FilterDirectory}
+#rm -r ${FilterDirectory}
 
 echo "Copying to ${bioinfoVCF}"
 cp -r $PWD ${bioinfoVCF}
