@@ -827,7 +827,7 @@ for d in $directories; do
     # Make concatemer with the position and REF call.
     echo "***Making Concatemer"
     for i in *.vcf; do
-    awk -v Q="$QUAL" '$0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
+    	awk -v Q="$QUAL" '$0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
     done
 
     # Get rid of duplicates in concatemer and list all the positions and REF calls
@@ -1600,7 +1600,7 @@ echo "***Creating normalized vcf using AC2, QUAL > 150"
 for i in *.vcf; do
     n=${i%.vcf}
     echo $n
-    awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' > $n.cut
+    awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
 
     #cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1 > $n.filledcutnoN
     cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.8n > $n.filledcutnoN
@@ -1633,7 +1633,6 @@ for i in *.vcf; do
     rm ${n}.zerotokeep
 
 done
-wait
 
 #########################################################################
 
