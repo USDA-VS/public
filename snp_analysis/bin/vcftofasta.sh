@@ -783,11 +783,11 @@ for d in $directories; do
                 rm $i.catFile
                 rm $i.txt
                 grep -v "Not_Included" $n.subfilter.vcf > $n.nomisfits.vcf
-                mv $n.nomisfits.vcf $i
-		)  &
+                mv $n.nomisfits.vcf $i)  &
                 let count+=1
                 [[ $((count%NR_CPUS)) -eq 0 ]] && wait
             done
+            wait
         elif [ $((chromCount)) -eq 2 ]; then
             #Mark vcf allowing areas of the genome to be removed from the SNP analysis
                 for i in *.vcf; do m=`basename "$i"`; n=`echo $m | sed $dropEXT` # n is name with all right of "_" and "." removed.
@@ -899,7 +899,7 @@ rm delete
 
 #########################################################################
 for i in *.vcf; do
-    n=${i%.vcf}
+    (n=${i%.vcf}
     # echo the name grabbed
     echo $n
     # Create .cut file that lists the positions and ALT calls
@@ -934,7 +934,9 @@ for i in *.vcf; do
 
     rm ${n}.filledcutNumbers
     rm ${n}.zeropositions
-    rm ${n}.zerotokeep
+    rm ${n}.zerotokeep)  &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
 
 #########################################################################
@@ -964,7 +966,7 @@ wait
                     # Make the fasta files:  Fill in positions with REF if not present in .clean file
 
         for i in *.filledcut; do
-            m=`basename "$i"`
+            (m=`basename "$i"`
             n=`echo $m | sed $dropEXT`
             # Compare the positions in select with "isolate".cut and output position for .cut that only matched select positions
             egrep -w -f select $i | sort -k1.6n -k1.8n > $n.pretod
@@ -1000,8 +1002,10 @@ wait
 
 	sed 's/chrom[0-9-]*//g' $n.tod | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
             # Add each isolate to the table
-            awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> $d.table.txt
-done
+            awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> $d.table.txt) &
+    		let count+=1
+    		[[ $((count%NR_CPUS)) -eq 0 ]] && wait
+	done
 wait
 
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
@@ -1210,10 +1214,10 @@ echo "Only samples in this file will be ran when elite is used as the secound ar
 
 # Test for duplicate VCFs
 testDuplicates
-
+wait
 #Prepare Filter files.
 filterFilespreparation
-
+wait
 #Test for match coverage file
 #checkMatchingCoverageFile
 
@@ -1303,11 +1307,13 @@ rm outfile
 #Do NOT make this a child process.  It messes changing column 1 to chrom
 echo "Making Files Unix Compatiable"
 for v in *.vcf; do
-    dos2unix $v #Fixes files opened and saved in Excel
+    (dos2unix $v #Fixes files opened and saved in Excel
     cat $v | tr '\r' '\n' | awk -F '\t' 'BEGIN{OFS="\t";} {gsub("\"","",$5);print;}' | sed 's/\"##/##/' > $v.temp
-    mv $v.temp $v
-
+    mv $v.temp $v) &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
+wait
 
 ############## Capture the number of chromosomes and their name from a single VCF ##############
 
@@ -1415,6 +1421,7 @@ echo "***Marking all VCFs and removing filtering regions"
      	let count+=1
       	[[ $((count%NR_CPUS)) -eq 0 ]] && wait
         done
+        wait
 
         elif [ $((chromCount)) -eq 2 ]; then
         for i in *.vcf; do
@@ -1598,7 +1605,7 @@ echo "***Creating normalized vcf using AC2, QUAL > 150"
 # Grab the name of the vcf file
 
 for i in *.vcf; do
-    n=${i%.vcf}
+    (n=${i%.vcf}
     echo $n
     awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
 
@@ -1630,13 +1637,16 @@ for i in *.vcf; do
     
     rm ${n}.filledcutNumbers
     rm ${n}.zeropositions
-    rm ${n}.zerotokeep
+    rm ${n}.zerotokeep)  &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 
 done
+wait
 
 #########################################################################
 
-echo "sleeping 2 seconds at line number: $LINENO"; sleep 2
+echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 wait
 
 # Begin the table
@@ -1646,7 +1656,7 @@ echo "***grepping the .filledcut files"
 # Make the fasta files:  Fill in positions with REF if not present in .clean file
 
 for i in *.filledcut; do
-    echo " working on filled cut for $i"
+    (echo " working on filled cut for $i"
     m=`basename "$i"`
     n=`echo $m | sed $dropEXT`
     # Compare the positions in select with "isolate".cut and output position for .cut that only matched select positions
@@ -1657,9 +1667,12 @@ for i in *.filledcut; do
     sed 's/chrom[0-9-]*//g' $i | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
 
     # Add each isolate to the table
-    awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
+    awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt) &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
 wait
+echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 
 echo "grepping filledcut files is finished"
 #Make a reference fasta sequence
