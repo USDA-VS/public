@@ -923,7 +923,7 @@ for i in *.vcf; do
 
     # get zero position, these are only positions already in the filledcutnoN
     if [ -s ${n}.zerotokeep ]; then
-        grep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}'> ${n}.zerotomerge
+        grep -w -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}'> ${n}.zerotomerge
         # merge zero updates to filledcut
         cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > ${n}.filledcut
         rm ${n}.filledcutnoN
@@ -956,7 +956,7 @@ wait
 
         echo "***grepping the .filledcut files for $d"
 
-        grep -f select total_pos | sort -k1.6n -k1.8n > clean_total_pos
+        grep -w -f select total_pos | sort -k1.6n -k1.8n > clean_total_pos
         
         # Begin the table
         awk '{print $1}' clean_total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> $d.table.txt
@@ -967,7 +967,7 @@ wait
             m=`basename "$i"`
             n=`echo $m | sed $dropEXT`
             # Compare the positions in select with "isolate".cut and output position for .cut that only matched select positions
-            egrep -f select $i | sort -k1.6n -k1.8n > $n.pretod
+            egrep -w -f select $i | sort -k1.6n -k1.8n > $n.pretod
 
         ##############################################################
         # Change AC1s to IUPAC
@@ -983,7 +983,7 @@ wait
             # get AC1 position with iupac, these are only positions already in the pretod
 
             if [ -s ${n}.actokeep ]; then
-                grep -f ${n}.actokeep ${n}.ac > ${n}.actomerge
+                grep -w -f ${n}.actokeep ${n}.ac > ${n}.actomerge
                 # merge iupac updates to filledcut
                 cat ${n}.actomerge $n.pretod | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > $n.tod
                 rm ${n}.pretod
@@ -1619,7 +1619,7 @@ for i in *.vcf; do
 
     # get zero position, these are only positions already in the filledcutnoN
     if [ -s ${n}.zerotokeep ]; then
-    grep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}' > ${n}.zerotomerge
+    grep -w -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}' > ${n}.zerotomerge
     # merge zero updates to filledcut
     cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > ${n}.filledcut
     rm ${n}.filledcutnoN
