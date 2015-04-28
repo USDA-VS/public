@@ -21,10 +21,10 @@ uniqdate=`date "+%Y-%m-%dat%Hh%Mm%Ss"`
 echo "start time: $uniqdate"
 
 # Set flags
-# -c with look for positions to filter.  By default, with no -c, this will not be done.
-# -m will email just "M"e
-# -e will run the bovis "E"lite representative samples
-# -a get "a"ll_vcf alignment table
+# flag -c with look for positions to filter.  By default, with no -c, this will not be done.
+# flag -m will email just "M"e
+# flag -e will run the bovis "E"lite representative samples
+# flag -a get "a"ll_vcf alignment table
 
 cflag=
 mflag=
