@@ -20,6 +20,19 @@ argUsed="$1"
 uniqdate=`date "+%Y-%m-%dat%Hh%Mm%Ss"`
 echo "start time: $uniqdate"
 
+# Set flags
+# -c with look for positions to filter.  By default, with no -c, this will not be done.
+cflag=
+while getopts 'c' OPTION; do
+case $OPTION in
+c) cflag=1
+;;
+?) echo "Invalid option: -$OPTARG" >&2
+;;
+esac
+done
+shift $(($OPTIND - 1))
+
 ####################################################
 filterdir="/home/shared/${uniqdate}-FilterFiles"
 mkdir ${filterdir}
@@ -960,7 +973,51 @@ wait
 
         grep -w -f select total_pos | sort -k1.6n -k1.8n > clean_total_pos
         
-        # Begin the table
+########################################################################
+######################## FILTER FILE CREATOR ###########################
+########################################################################
+if [ "$cflag" ]; then
+sed 's/chrom[0-9]-//' clean_total_pos | awk '{print $1}' > prepositionlist
+
+for n  in `cat prepositionlist`; do
+
+(positioncount=`awk -v n=$n ' $2 == n {count++} END {print count}' ./starting_files/*vcf`
+echo "position count: $positioncount"        
+if [ $positioncount -gt 2 ]; then 
+	echo "$n" >> positionlist
+fi) &
+        let count+=1
+        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+done
+
+
+for p in `cat positionlist`; do
+
+(maxqual=`awk -v p=$p 'BEGIN{max=0} $2 == p {if ($6>max) max=$6} END {print max}' ./starting_files/*vcf | sed 's/\..*//'`
+
+        maxmap=`awk -v p=$p ' $2 == p {print $8}' ./starting_files/*vcf | sed 's/.*;MQ=\(.*\);MQ.*/\1/' | sed 's/;MQ.*//' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'`
+
+        if [ $maxqual -lt 800  ] || [ $maxmap -lt 52  ]; then
+                echo "maxqual $maxqual" >> filterpositiondetail
+                echo "maxmap $maxmap" >> filterpositiondetail
+                echo "position $p" >> filterpositiondetail
+                echo ""  >> filterpositiondetail
+                echo "$p" >> ${d}-filtertheseposition
+
+                echo "maxqual $maxqual"
+                echo "maxmap $maxmap"
+                echo "position $p"
+                echo ""
+        fi) &
+    	let count+=1
+    	[[ $((count%NR_CPUS)) -eq 0 ]] && wait
+done
+fi
+########################################################################
+########################################################################
+########################################################################
+
+	# Begin the table
         awk '{print $1}' clean_total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> $d.table.txt
         awk '{print $2}' clean_total_pos | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}'>> $d.table.txt
                     # Make the fasta files:  Fill in positions with REF if not present in .clean file
@@ -1648,6 +1705,50 @@ wait
 
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 wait
+
+########################################################################
+######################## FILTER FILE CREATOR ###########################
+########################################################################
+if [ "$cflag" ]; then
+sed 's/chrom[0-9]-//' total_pos | awk '{print $1}' > prepositionlist
+
+for n  in `cat prepositionlist`; do
+
+    (positioncount=`awk -v n=$n ' $2 == n {count++} END {print count}' ./starting_files/*vcf`
+    echo "position count: $positioncount"
+    if [ $positioncount -gt 2 ]; then
+    echo "$n" >> positionlist
+    fi) &
+        let count+=1
+        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+done
+
+
+for p in `cat positionlist`; do
+
+    (maxqual=`awk -v p=$p 'BEGIN{max=0} $2 == p {if ($6>max) max=$6} END {print max}' ./starting_files/*vcf | sed 's/\..*//'`
+
+    maxmap=`awk -v p=$p ' $2 == p {print $8}' ./starting_files/*vcf | sed 's/.*;MQ=\(.*\);MQ.*/\1/' | sed 's/;MQ.*//' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'`
+
+    if [ $maxqual -lt 800  ] || [ $maxmap -lt 52  ]; then
+        echo "maxqual $maxqual" >> filterpositiondetail
+        echo "maxmap $maxmap" >> filterpositiondetail
+        echo "position $p" >> filterpositiondetail
+        echo ""  >> filterpositiondetail
+        echo "$p" >> ${d}-filtertheseposition
+
+        echo "maxqual $maxqual"
+        echo "maxmap $maxmap"
+        echo "position $p"
+        echo ""
+    fi) &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+done
+fi
+########################################################################
+########################################################################
+########################################################################
 
 # Begin the table
 awk '{print $1}' total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
