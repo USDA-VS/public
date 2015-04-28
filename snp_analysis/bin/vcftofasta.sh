@@ -977,6 +977,7 @@ wait
 ######################## FILTER FILE CREATOR ###########################
 ########################################################################
 if [ "$cflag" ]; then
+echo "Finding positions to filter, At line $LINENO"
 sed 's/chrom[0-9]-//' clean_total_pos | awk '{print $1}' > prepositionlist
 
 for n  in `cat prepositionlist`; do
@@ -1710,6 +1711,7 @@ wait
 ######################## FILTER FILE CREATOR ###########################
 ########################################################################
 if [ "$cflag" ]; then
+echo "Finding positions to filter, At line $LINENO"
 sed 's/chrom[0-9]-//' total_pos | awk '{print $1}' > prepositionlist
 
 for n  in `cat prepositionlist`; do
