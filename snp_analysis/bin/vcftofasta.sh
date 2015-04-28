@@ -23,17 +23,26 @@ echo "start time: $uniqdate"
 # Set flags
 # -c with look for positions to filter.  By default, with no -c, this will not be done.
 # -m will email just "M"e
+# -e will run the bovis "E"lite representative samples
+# -a get "a"ll_vcf alignment table
+
 cflag=
 mflag=
-while getopts 'cm' OPTION; do
-case $OPTION in
-c) cflag=1
-;;
-m) mflag=1
-;;
-?) echo "Invalid option: -$OPTARG" >&2
-;;
-esac
+eflag=
+aflag=
+while getopts 'cmea' OPTION; do
+    case $OPTION in
+        c) cflag=1
+        ;;
+        m) mflag=1
+        ;;
+        e) eflag=1
+        ;;
+        a) aflag=1
+        ;;
+        ?) echo "Invalid option: -$OPTARG" >&2
+        ;;
+    esac
 done
 shift $(($OPTIND - 1))
 
@@ -337,13 +346,11 @@ elif [[ $1 == bovis ]]; then
     echo "Script vcftofasta.sh ran using M. bovis variables" >> section5
     email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
-    if [[ $2 == elite ]]; then
+    if [ "$eflag" ]; then
         echo "Only the "elite" bovis isolates are being ran"
-        sleep 5
     else
         echo "All bovis are being ran"
-        echo "Like to run selected isolates? Use... vcftofasta.sh bovis elite"
-        sleep 5
+        echo "Like to run selected isolates? Use... vcftofasta.sh -e bovis"
     fi
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
@@ -1291,7 +1298,7 @@ mv *.* ./starting_files
 # If bovis are ran default will only run with files check "misc" in FileMaker
 # Untitled.tab exported from FileMaker must contain "isolate names" followed by "Misc".
 
-	if [[ $2 == elite ]]; then
+	if [ "$eflag" ]; then
         echo "Only analyzing elite files"
 
         for i in `cat elite`; do
@@ -1806,12 +1813,12 @@ mv *.fas ./fasta
 #rm total_pos
 rm root
 
-if [[ $2 == elite ]]; then
+if [ "$eflag" -o "aflag" ]; then
 	d="all_vcfs"
         cd ./fasta
         alignTable
 else
-	echo "Tree not made when all samples are ran"	
+	echo "Tree not for all_vcf not ran"
 fi
 
 echo "***Done"
