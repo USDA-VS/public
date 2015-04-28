@@ -22,10 +22,14 @@ echo "start time: $uniqdate"
 
 # Set flags
 # -c with look for positions to filter.  By default, with no -c, this will not be done.
+# -m will email just "M"e
 cflag=
-while getopts 'c' OPTION; do
+mflag=
+while getopts 'cm' OPTION; do
 case $OPTION in
 c) cflag=1
+;;
+m) mflag=1
 ;;
 ?) echo "Invalid option: -$OPTARG" >&2
 ;;
@@ -978,6 +982,7 @@ wait
 ########################################################################
 if [ "$cflag" ]; then
 echo "Finding positions to filter, At line $LINENO"
+
 sed 's/chrom[0-9]-//' clean_total_pos | awk '{print $1}' > prepositionlist
 
 for n  in `cat prepositionlist`; do
@@ -1003,7 +1008,7 @@ for p in `cat positionlist`; do
                 echo "maxmap $maxmap" >> filterpositiondetail
                 echo "position $p" >> filterpositiondetail
                 echo ""  >> filterpositiondetail
-                echo "$p" >> ${d}-filtertheseposition
+                echo "$p" >> ${d}-filtertheseposition.txt
 
                 echo "maxqual $maxqual"
                 echo "maxmap $maxmap"
@@ -1716,7 +1721,7 @@ sed 's/chrom[0-9]-//' total_pos | awk '{print $1}' > prepositionlist
 
 for n  in `cat prepositionlist`; do
 
-    (positioncount=`awk -v n=$n ' $2 == n {count++} END {print count}' ./starting_files/*vcf`
+    (positioncount=`awk -v n=$n ' $2 == n {count++} END {print count}' ./*vcf`
     echo "position count: $positioncount"
     if [ $positioncount -gt 2 ]; then
     echo "$n" >> positionlist
@@ -1728,16 +1733,16 @@ done
 
 for p in `cat positionlist`; do
 
-    (maxqual=`awk -v p=$p 'BEGIN{max=0} $2 == p {if ($6>max) max=$6} END {print max}' ./starting_files/*vcf | sed 's/\..*//'`
+    (maxqual=`awk -v p=$p 'BEGIN{max=0} $2 == p {if ($6>max) max=$6} END {print max}' ./*vcf | sed 's/\..*//'`
 
-    maxmap=`awk -v p=$p ' $2 == p {print $8}' ./starting_files/*vcf | sed 's/.*;MQ=\(.*\);MQ.*/\1/' | sed 's/;MQ.*//' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'`
+    maxmap=`awk -v p=$p ' $2 == p {print $8}' ./*vcf | sed 's/.*;MQ=\(.*\);MQ.*/\1/' | sed 's/;MQ.*//' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'`
 
     if [ $maxqual -lt 800  ] || [ $maxmap -lt 52  ]; then
         echo "maxqual $maxqual" >> filterpositiondetail
         echo "maxmap $maxmap" >> filterpositiondetail
         echo "position $p" >> filterpositiondetail
         echo ""  >> filterpositiondetail
-        echo "$p" >> ${d}-filtertheseposition
+        echo "$p" >> all_vcf-filtertheseposition.txt
 
         echo "maxqual $maxqual"
         echo "maxmap $maxmap"
@@ -1819,7 +1824,7 @@ echo "***************** STARTING Groups *****************"
 echo "***************************************************"
 # Change directory to all_groups
 cd ${fulDir}/all_groups
-fasta_table &
+fasta_table &  
 
 echo "***************************************************"
 echo "**************** STARTING SUBGROUPS ***************"
@@ -1999,7 +2004,7 @@ cp -r $PWD ${bioinfoVCF}
 echo "******* $LINENO, $PWD"
 fileName=`basename $0`
 
-if [[ $3 == me ]]; then
+if [ "$mflag" ]; then
     email_list="Tod.P.Stuber@aphis.usda.gov"
 	echo "vcftofasta.sh completed" > mytempfile; cat mytempfile | mutt -s "vcftofasta.sh completed subject" -a email_log.html -- $email_list
 	else
