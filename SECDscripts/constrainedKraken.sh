@@ -392,7 +392,7 @@ data2 <- ddply(data, .(species), summarise, med = median(coverage))
 ggplot(data, aes(x = species, y = coverage)) + geom_boxplot() + geom_text(data = data2, aes(x = species, y = med, label = med), size =3, vjust = -1.0)
 
 #ggplot (data, aes(x=species, y=coverage)) + geom_boxplot(outlier.size=0.2) + ggtitle(arg[2])
-ggplot(data, aes(x=position, y=coverage, colour=species, group=species)) + geom_point(size=0.5) + stat_smooth(method="auto", se=FALSE, size=3) + ggtitle(arg[2])
+ggplot(data, aes(x=position, y=log(coverage), colour=species, group=species)) + geom_point(size=0.5) + stat_smooth(method="auto", se=FALSE, size=3) + ggtitle(arg[2])
 
 scatterplot3d(data\$species, data\$position, data\$coverage, highlight.3d = TRUE)
 
