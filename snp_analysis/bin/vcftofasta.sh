@@ -551,6 +551,7 @@ else
     echo ""
     echo "Example: [prompt]$ vcftofasta.sh -mea bovis"
     echo ""
+    rm sectiontime
     exit 1
 
 fi
