@@ -542,7 +542,14 @@ else
 
     echo ""
     echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis, tb1, tb2, tb3, tb4a, tb4b, tb5, tb6, para"
-    echo "For example, type ~$ vcftofasta.sh bovis"
+    echo ""
+    echo "Set optional flags"
+    echo "flag -c with look for positions to filter.  By default, with no -c, this will not be done."
+    echo "flag -m will email just "M"e"
+    echo "flag -e will run the bovis "E"lite representative samples"
+    echo "flag -a get "a"ll_vcf alignment table"
+    echo ""
+    echo "Example: [prompt]$ vcftofasta.sh -mea bovis"
     echo ""
     exit 1
 
@@ -1306,7 +1313,7 @@ mv *.* ./starting_files
         cp ./starting_files/$name ./
         done
 
-        for i in `find ./starting_files/ -mtime -30`; do
+        for i in `find ./starting_files/ -mtime -1`; do
         cp $i ./
         done
 
