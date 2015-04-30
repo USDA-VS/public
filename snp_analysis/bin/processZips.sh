@@ -217,23 +217,10 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 
 ###################################################################
 # Lineage 2
-elif [ $1 == TB2ignore ]; then
+elif [ $1 == TB2]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb2/NC_021251.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tb2/HQ-NC021251.vcf"
 bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb2-H37/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
-
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
-
-###################################################################
-# Lineage 2 using H37Rv as the reference
-elif [ $1 == TB2 ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb2-H37/NC000962.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb2-H37/HQ-tb2NC000962.vcf"
-bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb2/newFiles"
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 # Run spoligoSpacerFinder.sh
