@@ -251,7 +251,7 @@ elif [[ $1 == suis4 ]]; then
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/suis4/_VCF"
+    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/suis4/vcfs"
     echo "vcftofasta.sh ran as B. suis bv4"
     echo "Script vcftofasta.sh ran using B. suis bv4 variables" > section5
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"

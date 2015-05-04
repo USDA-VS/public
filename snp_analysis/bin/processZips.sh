@@ -481,7 +481,7 @@ refsize=`wc -m $ref | awk '{print $1}'`
 
 #Fromat $n.keepTheseZeroCovPositions to VCF
 sed 's/%/ /' $n.keepTheseZeroCovPositions | awk 'BEGIN{OFS="\t"}{print $1, $2, ".", ".", ".", ".", ".", ".", "GT", "./."}' > $n.vcfFormated
-cat $n.body $n.vcfFormated | awk 'BEGIN{OFS="\t"}{if ($4 == ".") print $1, $2, $3, "N", $5, $6, $7, $8, $9, $10; else print $0}' > $n.tSNPsMapzeroNoHeader.vcf
+cat $n.body $n.vcfFormated | awk 'BEGIN{OFS="\t"}{if ($4 == ".") print $1, $2, $3, "N", $5, $6, $7, $8, $9, $10; else print $0}' > $n.SNPsMapzeroNoHeader.vcf
 cat $n.header $n.SNPsMapzeroNoHeader.vcf > $n.unsortSNPsZeroCoverage.vcf
 java -Xmx4g -jar ${igvtools} sort $n.unsortSNPsZeroCoverage.vcf $n.SNPsZeroCoverage.vcf
 java -Xmx4g -jar ${igvtools} index $n.SNPsZeroCoverage.vcf
