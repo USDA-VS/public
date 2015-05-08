@@ -1821,7 +1821,7 @@ mv *.fas ./fasta
 #rm total_pos
 rm root
 
-if [ "$eflag" -o "aflag" ]; then
+if [ "$eflag" -o "$aflag" ]; then
 	d="all_vcfs"
         cd ./fasta
         alignTable

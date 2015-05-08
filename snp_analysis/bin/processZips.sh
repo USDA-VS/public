@@ -260,7 +260,7 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 elif [ $1 == TB4b ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb4b/NC018143.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4b/HQ-NC018143.vcf"
-bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b-hap/newfiles"
+bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/newFiles"
 
 # Run spoligoSpacerFinder.sh
 echo "Starting spoligoSpacerFinder.sh"
