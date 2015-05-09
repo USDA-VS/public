@@ -1071,11 +1071,11 @@ fi
             else
                 mv $n.pretod $n.tod
             fi
-            rm ${n}.usedpostions
-            rm ${n}.ac
-            rm ${n}.acpositions
-            rm ${n}.actokeep
-            rm ${i%filledcut}vcf
+#            rm ${n}.usedpostions
+#            rm ${n}.ac
+#            rm ${n}.acpositions
+#            rm ${n}.actokeep
+#            rm ${i%filledcut}vcf
         ##############################################################
 
 	sed 's/chrom[0-9-]*//g' $n.tod | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
@@ -1810,16 +1810,16 @@ echo "Total informative SNPs: $totalSNPs" >> ../section4
 mkdir starting_files
 echo "***Cleaning folder"
 mv *.vcf ./starting_files
-rm *.cut
-rm *.filledcut
-rm *.filledcutnoN
-rm concatemer
-rm cutConcatemer
-rm *.tod
-mkdir fasta
-mv *.fas ./fasta
-#rm total_pos
-rm root
+#rm *.cut
+#rm *.filledcut
+#rm *.filledcutnoN
+#rm concatemer
+#rm cutConcatemer
+#rm *.tod
+#mkdir fasta
+#mv *.fas ./fasta
+##rm total_pos
+#rm root
 
 if [ "$eflag" -o "$aflag" ]; then
 	d="all_vcfs"
