@@ -1104,7 +1104,7 @@ echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
         rm *.filledcut
         rm concatemer
         rm cutConcatemer
-        rm *.tod
+#rm *.tod
         mkdir fasta
         mv *.fas ./fasta
         rm total_pos
