@@ -1071,11 +1071,11 @@ fi
             else
                 mv $n.pretod $n.tod
             fi
-#            rm ${n}.usedpostions
-#            rm ${n}.ac
-#            rm ${n}.acpositions
-#            rm ${n}.actokeep
-#            rm ${i%filledcut}vcf
+            rm ${n}.usedpostions
+            rm ${n}.ac
+            rm ${n}.acpositions
+            rm ${n}.actokeep
+            rm ${i%filledcut}vcf
         ##############################################################
 
 	sed 's/chrom[0-9-]*//g' $n.tod | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
@@ -1104,7 +1104,7 @@ echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
         rm *.filledcut
         rm concatemer
         rm cutConcatemer
-#rm *.tod
+	rm *.tod
         mkdir fasta
         mv *.fas ./fasta
         rm total_pos
@@ -1779,7 +1779,8 @@ echo "***grepping the .filledcut files"
 # Make the fasta files:  Fill in positions with REF if not present in .clean file
 
 for i in *.filledcut; do
-    (echo " working on filled cut for $i"
+    #(
+    echo " working on filled cut for $i"
     m=`basename "$i"`
     n=`echo $m | sed $dropEXT`
     # Compare the positions in select with "isolate".cut and output position for .cut that only matched select positions
@@ -1790,9 +1791,10 @@ for i in *.filledcut; do
     sed 's/chrom[0-9-]*//g' $i | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
 
     # Add each isolate to the table
-    awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt) &
-    let count+=1
-    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+    awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
+#) &
+ #   let count+=1
+  #  [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
 wait
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
@@ -1810,16 +1812,16 @@ echo "Total informative SNPs: $totalSNPs" >> ../section4
 mkdir starting_files
 echo "***Cleaning folder"
 mv *.vcf ./starting_files
-#rm *.cut
-#rm *.filledcut
-#rm *.filledcutnoN
-#rm concatemer
-#rm cutConcatemer
-#rm *.tod
-#mkdir fasta
-#mv *.fas ./fasta
-##rm total_pos
-#rm root
+rm *.cut
+rm *.filledcut
+rm *.filledcutnoN
+rm concatemer
+rm cutConcatemer
+rm *.tod
+mkdir fasta
+mv *.fas ./fasta
+#rm total_pos
+rm root
 
 if [ "$eflag" -o "$aflag" ]; then
 	d="all_vcfs"
