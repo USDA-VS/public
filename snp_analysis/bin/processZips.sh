@@ -323,7 +323,7 @@ elif [ $1 == para ]; then
 
 else
     echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, s
-uis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis, para"
+uis2, suis3, suis4, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para"
     exit 1
 fi
 
@@ -458,7 +458,8 @@ java -jar ${gatk} -T DepthOfCoverage -R $ref -I $n.ready-mem.bam -o $n.coverage 
 # In group tb4b position 3336835 was not being found in some isolates.  Adding this advance flag allowed these positions to be found.
 # ploidy 2 is default
 echo "***HaplotypeCaller, aka calling SNPs"
-java -Xmx4g -jar ${gatk} -R $ref -T HaplotypeCaller -I $n.ready-mem.bam -o $n.hapreadyAll.vcf -allowNonUniqueKmersInRef -nct 8
+#-allowNonUniqueKmersInRef
+java -Xmx4g -jar ${gatk} -R $ref -T HaplotypeCaller -I $n.ready-mem.bam -o $n.hapreadyAll.vcf -nct 8
 java -Xmx4g -jar ${igvtools} index $n.hapreadyAll.vcf
 
 echo "******Awk VCF leaving just SNPs******"
