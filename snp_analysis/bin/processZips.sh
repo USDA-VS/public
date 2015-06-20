@@ -105,7 +105,7 @@ elif [ $1 == suis2 ]; then
     ###################################################################
 
 elif [ $1 == suis3 ]; then
-    cp /home/shared/brucella/suis3/script_dependents/polished_assembly.fasta ./
+    cp /home/shared/brucella/suis3/script_dependents/polished2chrom.fasta ./
     hqs="/home/shared/brucella/suis3/script_dependents/suis3HighestQualitySNPs.vcf"
     bioinfo="/bioinfo11/TStuber/Results/brucella/suis3/newFiles"
     sharedSAN="/home/shared/brucella/suis3/newFiles"
@@ -459,7 +459,7 @@ java -jar ${gatk} -T DepthOfCoverage -R $ref -I $n.ready-mem.bam -o $n.coverage 
 # ploidy 2 is default
 echo "***HaplotypeCaller, aka calling SNPs"
 #-allowNonUniqueKmersInRef
-java -Xmx4g -jar ${gatk} -R $ref -T HaplotypeCaller -I $n.ready-mem.bam -o $n.hapreadyAll.vcf -dontUseSoftClippedBases -allowNonUniqueKmersInRef -nct 8
+java -Xmx4g -jar ${gatk} -R $ref -T HaplotypeCaller -I $n.ready-mem.bam -o $n.hapreadyAll.vcf -bamout $n.bamout.bam -dontUseSoftClippedBases -allowNonUniqueKmersInRef -nct 8
 java -Xmx4g -jar ${igvtools} index $n.hapreadyAll.vcf
 
 echo "******Awk VCF leaving just SNPs******"
