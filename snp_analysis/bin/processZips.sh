@@ -459,7 +459,7 @@ java -jar ${gatk} -T DepthOfCoverage -R $ref -I $n.ready-mem.bam -o $n.coverage 
 # ploidy 2 is default
 echo "***HaplotypeCaller, aka calling SNPs"
 #-allowNonUniqueKmersInRef
-java -Xmx4g -jar ${gatk} -R $ref -T HaplotypeCaller -I $n.ready-mem.bam -o $n.hapreadyAll.vcf -bamout $n.bamout.bam -dontUseSoftClippedBases -allowNonUniqueKmersInRef -nct 8
+java -Xmx4g -jar ${gatk} -R $ref -T HaplotypeCaller -I $n.ready-mem.bam -o $n.hapreadyAll.vcf -bamout $n.bamout.bam -dontUseSoftClippedBases -allowNonUniqueKmersInRef
 java -Xmx4g -jar ${igvtools} index $n.hapreadyAll.vcf
 
 echo "******Awk VCF leaving just SNPs******"
