@@ -1003,7 +1003,7 @@ fi
 
 ###########################
 cd $root
-rm *fastq*
+#rm *fastq*
 echo "" >> ${summaryfile}
 echo "" >> ${summaryfile}
 echo "Files copied to: $bioinfoVCF" >> ${summaryfile}
@@ -1046,12 +1046,27 @@ if [ -e $sampleName-Krona_identification_graphic.html ]; then
 	ls $sampleName-Krona_identification_graphic.html >> emailfiles
 fi
 
-Cleanup
-rm -r `ls | egrep -v "emailfiles|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
+if [[ $sampleType == "paired" ]]; then
+	echo "paried data, not checking for C insert"
+else
+	if [ $pingyrdb == yes ]; then
+		noc=`egrep -c "GAGTTGACATAAACCAGGCCACGC|GCGTGGCCTGGTTTATGTCAACTC" $forReads`
+		cinsert=`egrep -c "GAGTTGACATAAACCCAGGCCACGC|GCGTGGCCTGGGTTTATGTCAACTC" $forReads`
+		echo "" >> ${emailbody}
+		echo "Read count with no C insert: $noc" >> ${emailbody}
+		echo "Read count with C insert: $cinsert" >> ${emailbody}	
+		echo "" >> ${emailbody}
+	else
+		echo "pingyrdb not being referenced, therefore not checking for C insert"
+	fi
+fi
+rm *fastq*
 
-#dev placement, prevents emailing everyone
-#email_list="Tod.P.Stuber@aphis.usda.gov"
+Cleanup
+rm -r `ls | egrep -v "emailfile|emailfiles|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
+
 if [ "$mflag" ]; then
+    email_list="tod.p.stuber@usda.gov"
     cat ${emailbody} | mutt -s "Sample: ${sampleName}, Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
     rm emailfiles
 else
