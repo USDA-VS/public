@@ -1119,7 +1119,6 @@ else
 	fi
 fi
 rm *fastq*
-read -p "$LINENO Enter"
 
 Cleanup
 rm -r `ls | egrep -v "emailfile|emailfiles|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
