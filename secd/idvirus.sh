@@ -1096,13 +1096,23 @@ else
 		noc=`egrep -c "GAGTTGACATAAACCAGGCCACGC|GCGTGGCCTGGTTTATGTCAACTC" $forReads`
 		cinsert=`egrep -c "GAGTTGACATAAACCCAGGCCACGC|GCGTGGCCTGGGTTTATGTCAACTC" $forReads`
         insert1=`egrep -c "GAGTTGACATAAA[AGT]CCAGGCCACGC|GCGTGGCCTGG[ACT]TTTATGTCAACTC" $forReads`
-        insert2=`egrep -c "GAGTTGACATAAAC[AGT]CAGGCCACGC|GCGTGGCCTG[ACT]GTTTATGTCAACTC" $forReads`
+        	insertA=`egrep -c "GAGTTGACATAAAACCAGGCCACGC|GCGTGGCCTGGTTTTATGTCAACTC" $forReads`
+		insertT=`egrep -c "GAGTTGACATAAATCCAGGCCACGC|GCGTGGCCTGGATTTATGTCAACTC" $forReads`
+		insertG=`egrep -c "GAGTTGACATAAAGCCAGGCCACGC|GCGTGGCCTGGCTTTATGTCAACTC" $forReads`
+
+	insert2=`egrep -c "GAGTTGACATAAAC[AGT]CAGGCCACGC|GCGTGGCCTG[ACT]GTTTATGTCAACTC" $forReads`
         insert3=`egrep -c "GAGTTGACATAAACC[AGT]AGGCCACGC|GCGTGGCCT[ACT]GGTTTATGTCAACTC" $forReads`
 		echo "" >> ${emailbody}
+		echo "POSITION 446:" >> ${emailbody}
 		echo "(-CC) No insert count: $noc" >> ${emailbody}
 		echo "(CCC) C insert count: $cinsert" >> ${emailbody}
-        echo "([AGT]CC) Non-C insert count at position 1: $insert1" >> ${emailbody}
-        echo "(C[AGT]C) Non-C insert count at position 2: $insert2" >> ${emailbody}
+        echo "" >> ${emailbody}
+	echo "([AGT]CC) Non-C insert count at position 1: $insert1" >> ${emailbody}
+        	echo "           (ACC) Non-C insert count at position 1: $insertA" >> ${emailbody}
+		echo "           (TCC) Non-C insert count at position 1: $insertT" >> ${emailbody}
+		echo "           (GCC) Non-C insert count at position 1: $insertG" >> ${emailbody}	
+	echo "" >> ${emailbody}
+	echo "(C[AGT]C) Non-C insert count at position 2: $insert2" >> ${emailbody}
         echo "(CC[AGT]) Non-C insert count at position 3: $insert3" >> ${emailbody}
 		echo "" >> ${emailbody}
 	else
