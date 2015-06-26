@@ -507,8 +507,6 @@ echo "${perc}% genome coverage, $depthcov"
 
 awk -v x=${orgref}-${refname} 'BEGIN {OFS="\t"} {print x, $2, $3}' ${orgref}-${refname}-coveragefile | grep -v "segment_all" > ${orgref}-${refname}-samplecoveragefile
 
-plotR ${orgref}-${refname}-samplecoveragefile $sampleName
-mv myplot.pdf ${orgref}-${refname}.Rgraph.pdf
 rm *sorted.bam*
 rm *dup.bam*
 rm *mappedReads.bam
@@ -532,6 +530,8 @@ mv *coveragefile alignment
 
 }
 
+
+#######################################################################################
 function lastalign () {
 # Align Last Time
 bwa index $ref
@@ -866,7 +866,7 @@ done
 cd ${root}/${sampleName}-reference_guided_assemblies
 pwd
 
-for i in `ls *[0-9]*fasta | sort -k1,1`; do
+for i in `ls *fasta | sort -k1,1`; do
     echo ">${i%.reference_guided.fasta}" >> ${sampleName}.consensus.reads.fasta
     awk '/^>/ {printf("\n%s\n",$0);next; } { printf("%s",$0);}  END {printf("\n");}' $i | awk 'length > x { x = length; y = $0 } END { print y }' >> ${sampleName}.consensus.reads.fasta
 done
@@ -889,10 +889,53 @@ echo "Reference Input:  $ref"
 refname=${ref%.fasta}
 orgref="igvalignment"
 
-lastalign
+#############################
 
-plotR ${orgref}-${refname}-samplecoveragefile $sampleName
-mv myplot.pdf ${orgref}-${refname}.Rgraph.pdf
+bwa index $ref
+samtools faidx $ref
+java -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+
+if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
+echo "Index and dict are present, continue script"
+else
+sleep 5
+echo "Either index or dict for reference is missing, try making again"
+samtools faidx $ref
+java -jar ${picardPath}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
+if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
+read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
+fi
+fi
+
+#${orgref}-${refname}.sam
+
+#adding -B 8 will require reads to have few mismatches to align to reference.  -B 1 will allow the most mismatch per read. -A [1] may be increased to increase the number of mismatches allow
+if [[ $sampleType == "paired" ]]; then
+bwa mem -M -B 1 -t 10 -T 20 -P -a -R @RG"\t"ID:"${orgref}-${refname}""\t"PL:ILLUMINA"\t"PU:"${orgref}-${refname}"_RG1_UNIT1"\t"LB:"${orgref}-${refname}"_LIB1"\t"SM:"${orgref}-${refname}" $ref $forReads $revReads > ${orgref}-${refname}.sam
+else
+bwa mem -M -B 1 -t 10 -T 20 -P -a -R @RG"\t"ID:"${orgref}-${refname}""\t"PL:ILLUMINA"\t"PU:"${orgref}-${refname}"_RG1_UNIT1"\t"LB:"${orgref}-${refname}"_LIB1"\t"SM:"${orgref}-${refname}" $ref $forReads > ${orgref}-${refname}.sam
+fi
+
+samtools view -bh -F4 -T $ref ${orgref}-${refname}.sam > ${orgref}-${refname}.raw.bam
+echo "Sorting Bam"
+samtools sort ${orgref}-${refname}.raw.bam ${orgref}-${refname}.sorted
+echo "****Indexing Bam"
+samtools index ${orgref}-${refname}.sorted.bam
+rm ${orgref}-${refname}.sam
+rm ${orgref}-${refname}.raw.bam
+samtools view -h -b -F4 ${orgref}-${refname}.sorted.bam > ./${orgref}-${refname}.mappedReads.bam
+samtools index ./${orgref}-${refname}.mappedReads.bam
+
+echo "***Marking Duplicates"
+java -Xmx4g -jar  ${picardPath}/MarkDuplicates.jar INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
+
+echo "***Index ${orgref}-${refname}.dup.bam"
+samtools index ${orgref}-${refname}.dup.bam
+java -jar ${GATKPath} -T ClipReads -R $ref -I ${orgref}-${refname}.dup.bam -o ${orgref}-${refname}.downsample.bam -filterNoBases -dcov 10
+samtools index ${orgref}-${refname}.downsample.bam
+
+#############################
+
 rm *sorted.bam*
 rm *dup.bam*
 rm *mappedReads.bam
@@ -1052,9 +1095,15 @@ else
 	if [ $pingyrdb == yes ]; then
 		noc=`egrep -c "GAGTTGACATAAACCAGGCCACGC|GCGTGGCCTGGTTTATGTCAACTC" $forReads`
 		cinsert=`egrep -c "GAGTTGACATAAACCCAGGCCACGC|GCGTGGCCTGGGTTTATGTCAACTC" $forReads`
+        insert1=`egrep -c "GAGTTGACATAAA[AGT]CCAGGCCACGC|GCGTGGCCTGG[ACT]TTTATGTCAACTC" $forReads`
+        insert2=`egrep -c "GAGTTGACATAAAC[AGT]CAGGCCACGC|GCGTGGCCTG[ACT]GTTTATGTCAACTC" $forReads`
+        insert3=`egrep -c "GAGTTGACATAAACC[AGT]AGGCCACGC|GCGTGGCCT[ACT]GGTTTATGTCAACTC" $forReads`
 		echo "" >> ${emailbody}
-		echo "Read count with no C insert: $noc" >> ${emailbody}
-		echo "Read count with C insert: $cinsert" >> ${emailbody}	
+		echo "(-CC) No insert count: $noc" >> ${emailbody}
+		echo "(CCC) C insert count: $cinsert" >> ${emailbody}
+        echo "([AGT]CC) Non-C insert count at position 1: $insert1" >> ${emailbody}
+        echo "(C[AGT]C) Non-C insert count at position 2: $insert2" >> ${emailbody}
+        echo "(CC[AGT]) Non-C insert count at position 3: $insert3" >> ${emailbody}
 		echo "" >> ${emailbody}
 	else
 		echo "pingyrdb not being referenced, therefore not checking for C insert"
