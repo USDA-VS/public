@@ -1031,11 +1031,11 @@ cat >./param.txt <<EOL
 
 EOL
 
-        awk 'NR==FNR{a[$1]=$0;next} ($1 in a){ print a[$1]; next}1' param.txt ${sampleName}.temp > ${sampleName}-submissionfile.fasta
+        awk 'NR==FNR{a[$1]=$0;next} ($1 in a){ print a[$1]; next}1' param.txt ${sampleName}.temp > ${root}/${sampleName}-submissionfile.fasta
 
     else
         echo "metadata not available"
-        cp ${root}/${sampleName}-reference_guided_assemblies/${sampleName}.consensus.reads.fasta ${root}/share_folder/${sampleName}-submissionfile.fasta
+        cp ${root}/${sampleName}-reference_guided_assemblies/${sampleName}.consensus.reads.fasta ${root}/${sampleName}-submissionfile.fasta
     fi
 
 rm *temp
@@ -1064,7 +1064,6 @@ mv *report.txt kraken
 cp $0 ${root}
 echo "******* $LINENO, $PWD"
 fileName=`basename $0`
-cp ${root}/share_folder/${sampleName}-submissionfile.fasta ${root}
 cp ${sampleName}-reference_guided_assemblies/${sampleName}-consensus-blast_alignment-pintail-gyrfalcon.txt ${root}
 
 enscript ${summaryfile} -B -j -r -f "Courier5" -o - | ps2pdf - ${sampleName}-report.pdf
@@ -1120,6 +1119,7 @@ else
 	fi
 fi
 rm *fastq*
+read -p "$LINENO Enter"
 
 Cleanup
 rm -r `ls | egrep -v "emailfile|emailfiles|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
