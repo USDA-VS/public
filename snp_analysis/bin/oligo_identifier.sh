@@ -278,7 +278,7 @@ if [[ $check > 1 ]]; then
         echo "$tbbinary" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbcounts" >> tee_tb_oligo_identifier_out2.txt
 
-        elif [ $i == 11001110 ] || [ $i == 11011110 ]
+        elif [ $i == 11001110 ] || [ $i == 11011110 ] || [ $i == 11001100 ]
         then
         catch="TBBOV"
         `processZips.sh TBBOV $catch | tee tee_processZips_out.txt` &

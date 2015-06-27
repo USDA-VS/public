@@ -124,7 +124,7 @@ mkdir originalreads
 cp *fastq* originalreads
 
 # Unzip files if needed, else put std error to null
-find . -name "*gz" -type f -print0 | xargs -0 -n 1 -P $NR_CPUS gunzip 2> /dev/null
+find . -maxdepth 1 -name "*gz" -type f -print0 | xargs -0 -n 1 -P $NR_CPUS gunzip 2> /dev/null
 
 #Set sample name- sample name is the name of the fastq files minus any identifying information from the sequencer
 sampleName=`ls *.fastq | head -1 | sed 's/_.*//' | sed 's/\..*//'`
