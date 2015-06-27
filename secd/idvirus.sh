@@ -40,7 +40,7 @@ argUsed=`echo $1 | tr '[:lower:]' '[:upper:]'`
 if [[ $1 == sivall ]]; then
     genotypingcodes="NEED TO SET"
     krakenDatabase="/home/shared/databases/kraken/std/"
-    targetref=/home/shared/databases/viral/ai/sivall/*fasta
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/sivall/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/sivall/newfiles"
     echo "vcftofasta.sh ran targeting $1"
     echo "Script vcftofasta.sh ran targeting $1"
@@ -49,7 +49,7 @@ if [[ $1 == sivall ]]; then
 elif [[ $1 == aiall ]]; then
     genotypingcodes="NEED TO SET"
     krakenDatabase="/home/shared/databases/kraken/std/"
-    targetref=/home/shared/databases/viral/ai/aiall/*fasta
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/aiall/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/aiall/newfiles"
     echo "vcftofasta.sh ran targeting $1"
     echo "Script vcftofasta.sh ran targeting $1"
@@ -59,7 +59,7 @@ elif [[ $1 == h5n2 ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
     pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
-    targetref=/home/shared/databases/viral/ai/h5n2/*fasta
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h5n2/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/h5n2/newfiles"
     echo "vcftofasta.sh rran targeting $1"
     echo "Script vcftofasta.sh ran targeting $1"
@@ -69,7 +69,7 @@ elif [[ $1 == h5n8 ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
     pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
-    targetref=/home/shared/databases/viral/ai/h5n8/*fasta
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h5n8/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/h5n8/newfiles"
     echo "vcftofasta.sh rran targeting $1"
     echo "Script vcftofasta.sh ran targeting $1"
@@ -78,7 +78,7 @@ elif [[ $1 == h5n8 ]]; then
 elif [[ $1 == secd ]]; then
     genotypingcodes="NEED TO SET"
     krakenDatabase="/home/shared/databases/kraken/stdPlusSECD"
-    targetref=/home/shared/databases/viral/secd/*fasta
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/secd/*fasta
     bioinfoVCF="/bioinfo11/TStuber/Results/viruses/secd/newfiles"
     echo "vcftofasta.sh ran targeting $1"
     echo "Script vcftofasta.sh ran targeting $1"
@@ -87,7 +87,7 @@ elif [[ $1 == secd ]]; then
 elif [[ $1 == reo ]]; then
     genotypingcodes="NEED TO SET"
     krakenDatabase="/home/shared/databases/kraken/std/"
-    targetref=/home/shared/databases/viral/reo/*fasta
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/reo/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/reo/newfiles"
     echo "vcftofasta.sh ran targeting $1"
     echo "Script vcftofasta.sh ran targeting $1"
@@ -96,7 +96,7 @@ elif [[ $1 == reo ]]; then
 elif [[ $1 == vsv ]]; then
     genotypingcodes="NEED TO SET"
     krakenDatabase="/home/shared/databases/kraken/std/"
-    targetref=/home/shared/databases/viral/vsv/*fasta
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/vsv/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/vsv/newfiles"
     echo "vcftofasta.sh ran targeting $1"
     echo "Script vcftofasta.sh ran targeting $1"
@@ -1102,17 +1102,17 @@ else
 	insert2=`egrep -c "GAGTTGACATAAAC[AGT]CAGGCCACGC|GCGTGGCCTG[ACT]GTTTATGTCAACTC" $forReads`
         insert3=`egrep -c "GAGTTGACATAAACC[AGT]AGGCCACGC|GCGTGGCCT[ACT]GGTTTATGTCAACTC" $forReads`
 		echo "" >> ${emailbody}
-		echo "POSITION 446:" >> ${emailbody}
+		echo "POSITION 446 read counts:" >> ${emailbody}
 		echo "(-CC) No insert count: $noc" >> ${emailbody}
 		echo "(CCC) C insert count: $cinsert" >> ${emailbody}
         echo "" >> ${emailbody}
-	echo "([AGT]CC) Non-C insert count at position 1: $insert1" >> ${emailbody}
-        	echo "           (ACC) Non-C insert count at position 1: $insertA" >> ${emailbody}
-		echo "           (TCC) Non-C insert count at position 1: $insertT" >> ${emailbody}
-		echo "           (GCC) Non-C insert count at position 1: $insertG" >> ${emailbody}	
+	echo "([AGT]CC) A,G,T insert count at position 1: $insert1" >> ${emailbody}
+        	echo "           (ACC) A insert count at position 1: $insertA" >> ${emailbody}
+		echo "           (TCC) T insert count at position 1: $insertT" >> ${emailbody}
+		echo "           (GCC) G insert count at position 1: $insertG" >> ${emailbody}	
 	echo "" >> ${emailbody}
-	echo "(C[AGT]C) Non-C insert count at position 2: $insert2" >> ${emailbody}
-        echo "(CC[AGT]) Non-C insert count at position 3: $insert3" >> ${emailbody}
+	echo "(C[AGT]C) A,G,T insert count at position 2: $insert2" >> ${emailbody}
+        echo "(CC[AGT]) A,G,T insert count at position 3: $insert3" >> ${emailbody}
 		echo "" >> ${emailbody}
 	else
 		echo "pingyrdb not being referenced, therefore not checking for C insert"
