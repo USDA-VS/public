@@ -985,7 +985,7 @@ cd ${root}/share_folder
 
 if [[ ${genotypingcodes} == "NEED TO SET" ]]; then
     echo "genotyping codes not given"
-    cp ${root}/${sampleName}-reference_guided_assemblies/${sampleName}.consensus.reads.fasta ${root}/share_folder/${sampleName}-submissionfile.fasta
+    cp ${root}/${sampleName}-reference_guided_assemblies/${sampleName}.consensus.reads.fasta ${root}/${sampleName}-submissionfile.fasta
 else
     echo "sampleName: $sampleName"
 
