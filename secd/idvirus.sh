@@ -447,11 +447,15 @@ lastalign
 ###
 # Place zero coverage positins to hapreadyAll.vcf
 
-echo "${orgref}-${refname}.hapreadyAll.vcf"
-echo "${orgref}-${refname}.UG.vcf"
+echo "orgref: ${orgref}"
+echo "refname: ${refname}"
 
 grep '^#' ${orgref}-${refname}.hapreadyAll.vcf > header
 grep -v '^#' ${orgref}-${refname}.hapreadyAll.vcf > snps
+
+refname=`echo ${refname} | sed 's/\.readreference//'`
+
+echo "fixed refname: $refname"
 
 awk 'BEGIN{OFS="\t"} $10 == "./." {print $0}' ${orgref}-${refname}.UG.vcf > zerocoverage
 
@@ -530,12 +534,14 @@ mv *coveragefile alignment
 
 }
 
-
 #######################################################################################
 function lastalign () {
 # Align Last Time
 bwa index $ref
 samtools faidx $ref
+
+#########################
+
 java -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
@@ -550,7 +556,84 @@ else
     fi
 fi
 
-#${orgref}-${refname}.sam
+#adding -B 8 will require reads to have few mismatches to align to reference.  -B 1 will allow the most mismatch per read. -A [1] may be increased to increase the number of mismatches allow
+if [[ $sampleType == "paired" ]]; then
+bwa mem -M -B 1 -t 10 -T 20 -P -a -R @RG"\t"ID:"${orgref}-${refname}""\t"PL:ILLUMINA"\t"PU:"${orgref}-${refname}"_RG1_UNIT1"\t"LB:"${orgref}-${refname}"_LIB1"\t"SM:"${orgref}-${refname}" $ref $forReads $revReads > ${orgref}-${refname}.sam
+else
+bwa mem -M -B 1 -t 10 -T 20 -P -a -R @RG"\t"ID:"${orgref}-${refname}""\t"PL:ILLUMINA"\t"PU:"${orgref}-${refname}"_RG1_UNIT1"\t"LB:"${orgref}-${refname}"_LIB1"\t"SM:"${orgref}-${refname}" $ref $forReads > ${orgref}-${refname}.sam
+fi
+
+samtools view -bh -F4 -T $ref ${orgref}-${refname}.sam > ${orgref}-${refname}.raw.bam
+echo "Sorting Bam"
+samtools sort ${orgref}-${refname}.raw.bam ${orgref}-${refname}.sorted
+echo "****Indexing Bam"
+samtools index ${orgref}-${refname}.sorted.bam
+rm ${orgref}-${refname}.sam
+rm ${orgref}-${refname}.raw.bam
+samtools view -h -b -F4 ${orgref}-${refname}.sorted.bam > ./${orgref}-${refname}.mappedReads.bam
+samtools index ./${orgref}-${refname}.mappedReads.bam
+
+echo "***Marking Duplicates"
+java -Xmx4g -jar  ${picardPath}/MarkDuplicates.jar INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
+
+echo "***Index ${orgref}-${refname}.dup.bam"
+samtools index ${orgref}-${refname}.dup.bam
+
+##############################
+echo $ref
+
+java -jar ${GATKPath} -T ClipReads -R $ref -I ${orgref}-${refname}.dup.bam -o ${orgref}-${refname}.downsample.bam -filterNoBases -dcov 10
+samtools index ${orgref}-${refname}.downsample.bam
+
+rm *UG.vcf
+
+echo "*** Calling VCFs with UnifiedGenotyper"
+java -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.UG.vcf -nct 2
+
+if [ -s ${orgref}-${refname}.UG.vcf ]; then
+    echo "${orgref}-${refname}.UG.vcf present continueing script"
+else
+    sleep 60
+    echo "${orgref}-${refname}.UG.vcf is missing, try making again"
+    java -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.UG.vcf -nct 2
+    if [ -s ${orgref}-${refname}.UG.vcf ]; then
+        echo "${orgref}-${refname}.UG.vcf present continueing script"
+    else
+        echo "" >> ${emailbody}
+        echo "${orgref}-${refname}.UG.vcf failed to make, Further analysis required" >> ${emailbody}
+        email_list="Tod.P.Stuber@aphis.usda.gov"
+        echo "${orgref}-${refname}.UG.vcf failed to make, Further analysis required" | mutt -s "Sample $sampleName Reference_Set $argUsed" -- $email_list
+        exit 1
+    fi
+fi
+
+#########
+# make reference guided contig using Unified Genotyper
+java -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${refname}.readreference.fasta -V ${orgref}-${refname}.UG.vcf
+
+echo ">${refname}" > ${refname}.readreference.temp; grep -v ">" ${refname}.readreference.fasta >> ${refname}.readreference.temp; mv ${refname}.readreference.temp ${refname}.fasta
+
+# Align reads to Unified Genotyper made reference.  This is the last alignment that will make the final haplotypecaller reference guided assembly
+ref="${refname}.fasta"
+refname=`echo $ref | sed 's/\.fasta//'`
+echo "ref: $ref and refname: $refname"
+
+bwa index $ref
+samtools faidx $ref
+rm ${refname}.dict
+java -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=$ref OUTPUT=${refname}.dict
+
+if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
+    echo "Index and dict are present, continue script"
+else
+    sleep 5
+    echo "Either index or dict for reference is missing, try making again"
+    samtools faidx $ref
+    java -jar ${picardPath}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
+    if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
+        read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
+    fi
+fi
 
 #adding -B 8 will require reads to have few mismatches to align to reference.  -B 1 will allow the most mismatch per read. -A [1] may be increased to increase the number of mismatches allow
 if [[ $sampleType == "paired" ]]; then
@@ -576,11 +659,9 @@ echo "***Index ${orgref}-${refname}.dup.bam"
 samtools index ${orgref}-${refname}.dup.bam
 java -jar ${GATKPath} -T ClipReads -R $ref -I ${orgref}-${refname}.dup.bam -o ${orgref}-${refname}.downsample.bam -filterNoBases -dcov 10
 samtools index ${orgref}-${refname}.downsample.bam
-
-rm *UG.vcf
+########
 
 #bam prepared now onto variant calling
-
 java -Xmx4g -jar ${GATKPath} -R $ref -T HaplotypeCaller -ploidy 1 -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.hapreadyAll.vcf -bamout ${orgref}-${refname}.bamout.bam -dontUseSoftClippedBases -allowNonUniqueKmersInRef
 java -Xmx4g -jar ${igvtools} index ${orgref}-${refname}.hapreadyAll.vcf
 
@@ -598,26 +679,6 @@ else
         echo "${orgref}-${refname}.hapreadyAll.vcf failed to make, Further analysis required" >> ${emailbody}
         email_list="Tod.P.Stuber@aphis.usda.gov"
         echo "${orgref}-${refname}.hapreadyAll.vcf failed to make, Further analysis required" | mutt -s "Sample $sampleName Reference_Set $argUsed" -- $email_list
-        exit 1
-    fi
-fi
-
-echo "*** Calling VCFs with UnifiedGenotyper"
-java -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.UG.vcf -nct 2
-
-if [ -s ${orgref}-${refname}.UG.vcf ]; then
-    echo "${orgref}-${refname}.UG.vcf present continueing script"
-else
-    sleep 60
-    echo "${orgref}-${refname}.UG.vcf is missing, try making again"
-    java -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.UG.vcf -nct 2
-    if [ -s ${orgref}-${refname}.UG.vcf ]; then
-        echo "${orgref}-${refname}.UG.vcf present continueing script"
-    else
-        echo "" >> ${emailbody}
-        echo "${orgref}-${refname}.UG.vcf failed to make, Further analysis required" >> ${emailbody}
-        email_list="Tod.P.Stuber@aphis.usda.gov"
-        echo "${orgref}-${refname}.UG.vcf failed to make, Further analysis required" | mutt -s "Sample $sampleName Reference_Set $argUsed" -- $email_list
         exit 1
     fi
 fi
