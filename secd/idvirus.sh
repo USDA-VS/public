@@ -38,7 +38,7 @@ argUsed=`echo $1 | tr '[:lower:]' '[:upper:]'`
 #######################################################################################
 
 if [[ $1 == sivall ]]; then
-    genotypingcodes="NEED TO SET"
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/sivall/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/sivall/newfiles"
@@ -47,7 +47,7 @@ if [[ $1 == sivall ]]; then
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == aiall ]]; then
-    genotypingcodes="NEED TO SET"
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/aiall/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/aiall/newfiles"
