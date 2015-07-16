@@ -33,6 +33,8 @@ shift $(($OPTIND - 1))
 # This must be below the getopts
 argUsed=`echo $1 | tr '[:lower:]' '[:upper:]'`
 
+# By default
+pingyrdb=no
 #######################################################################################
 #|||||||||||||||||||||||||||||| Environment Controls ||||||||||||||||||||||||||||||||||
 #######################################################################################
@@ -102,9 +104,18 @@ elif [[ $1 == vsv ]]; then
     echo "Script vcftofasta.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
+elif [[ $1 == isav ]]; then
+    genotypingcodes="NEED TO SET"
+    krakenDatabase="/home/shared/databases/kraken/std/"
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/isav/*fasta
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/isav/newfiles"
+    echo "vcftofasta.sh ran targeting $1"
+    echo "Script vcftofasta.sh ran targeting $1"
+    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+
 else
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: aiall, sivall, h5n2, h5n8, secd, reo, vsv"
+    echo "Incorrect argument!  Must use one of the following arguments: aiall, sivall, h5n2, h5n8, secd, reo, vsv, isav"
     echo ""
     echo "Set optional flags"
     echo -e '   flag -m will email just "M"e'
@@ -1009,9 +1020,10 @@ rm *fastq*
 rm *dict
 rm *mappedReads*
 
+wait
 # Go back to the assemble folder
 cd $assemblyfolder
-
+wait
 ###########
 
 contigcount=`grep -c ">" ${sampleName}.consensus.reads.fasta`
