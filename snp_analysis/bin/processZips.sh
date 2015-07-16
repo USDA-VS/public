@@ -618,11 +618,11 @@ egrep -v "#" $n.SNPsZeroCoverage.vcf | egrep "AC=2" | awk '$6 > 300' | grep -c "
 #  Show Mean Coverage at Terminal and coverageReport
 echo "Mean Coverage"
 
+echo "Sample identified and ran as:  $1" >> /scratch/report/dailyReport.txt
+
 echo -e "$n \t $readcount \t ${aveCoverage} \t ${percGenomeCoverage}% "
 echo -e "$n \t $readcount \t ${aveCoverage} \t ${percGenomeCoverage}% " >> /scratch/report/coverageReport.txt
 echo -e "$n \t $readcount \t ${aveCoverage} \t ${percGenomeCoverage}% " >> /scratch/report/dailyReport.txt
-
-echo "Sample identified and ran as:  $1" >> /scratch/report/dailyReport.txt
 
 mv $n.Metrics_summary.xls qualityvalues/
 mv $n.stats.txt qualityvalues/
