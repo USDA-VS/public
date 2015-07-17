@@ -217,7 +217,7 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 
 ###################################################################
 # Lineage 2
-elif [ $1 == TB2]; then
+elif [ $1 == TB2 ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb2/NC_021251.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tb2/HQ-NC021251.vcf"
 bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb2-H37/newFiles"
@@ -319,11 +319,18 @@ elif [ $1 == para ]; then
    bioinfo="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/newFiles"
    #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
+
+elif [ $1 == h5n2 ]; then
+   cp /home/shared/virus/ai/h5n2/northernpintal.fasta ./
+   hqs="/home/shared/virus/ai/h5n2/13895-1-highqualitysnps.vcf"
+   bioinfo=""
+   #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+
     ###################################################################
 
 else
     echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, s
-uis2, suis3, suis4, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para"
+uis2, suis3, suis4, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para, h5n2"
     exit 1
 fi
 
@@ -441,16 +448,18 @@ fi
 
 # Make the finished "ready" .bam file
 echo "***Print Reads"
-java -Xmx4g -jar ${gatk} -T PrintReads -R $ref -I $n.realignedBam.bam -BQSR $n.recal_data.grp -o $n.ready-mem.bam
+java -Xmx4g -jar ${gatk} -T PrintReads -R $ref -I $n.realignedBam.bam -BQSR $n.recal_data.grp -o $n.preready-mem.bam
 
-if [ ! -e $n.ready-mem.bam ]; then
-	java -Xmx4g -jar ${gatk} -T PrintReads --fix_misencoded_quality_scores -R $ref -I $n.realignedBam.bam -BQSR $n.recal_data.grp -o $n.ready-mem.bam
+if [ ! -e $n.preready-mem.bam ]; then
+	java -Xmx4g -jar ${gatk} -T PrintReads --fix_misencoded_quality_scores -R $ref -I $n.realignedBam.bam -BQSR $n.recal_data.grp -o $n.preready-mem.bam
 fi
 
+java -jar ${gatk} -T ClipReads -R $ref -I $n.preready-mem.bam -o $n.ready-mem.bam -filterNoBases -dcov 10
+samtools index $n.ready-mem.bam
 
 #Collect Depth of coverage info
 echo "***Collect Depth of Coverage"
-java -jar ${gatk} -T DepthOfCoverage -R $ref -I $n.ready-mem.bam -o $n.coverage -omitIntervals --omitLocusTable --omitPerSampleStats -nt 8
+java -jar ${gatk} -T DepthOfCoverage -R $ref -I $n.preready-mem.bam -o $n.coverage -omitIntervals --omitLocusTable --omitPerSampleStats -nt 8
 
 #########################
 
