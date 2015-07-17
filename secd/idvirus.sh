@@ -462,19 +462,24 @@ echo "orgref: ${orgref}"
 echo "refname: ${refname}"
 
 grep '^#' ${orgref}-${refname}.hapreadyAll.vcf > header
-grep -v '^#' ${orgref}-${refname}.hapreadyAll.vcf > HCbody
+grep -v '^#' ${orgref}-${refname}.hapreadyAll.vcf > snps
 
 chromname=`awk ' $1 !~ /^#/ {print $1}' ${orgref}-${refname}.hapreadyAll.vcf | head -1`
-if [ -s HCbody ]; then
-	echo "HCbody exists and has size greater than zero"
-	grep -v '^#' ${orgref}-${refname}.UG.vcf | awk -v c=$chromname 'BEGIN {FS="\t"; OFS="\t"} { if($10 == "./." ) print c, $2, $3, $4, "N", $6, $7, $8, "GT", "1"; else print c, $2, $3, $4, $5, $6, $7, $8, $9, $10}' > UGbody
-else
-	echo "HCbody is empty"
-	grep -v '^#' ${orgref}-${refname}.UG.vcf | awk -v r=$refname 'BEGIN {FS="\t"; OFS="\t"} { if($10 == "./." ) print r, $2, $3, $4, "N", $6, $7, $8, "GT", "1"; else print r, $2, $3, $4, $5, $6, $7, $8, $9, $10}' > UGbody
-fi
+#if [ -s HCbody ]; then
+#	echo "HCbody exists and has size greater than zero"
+#	grep -v '^#' ${orgref}-${refname}.UG.vcf | awk -v c=$chromname 'BEGIN {FS="\t"; OFS="\t"} { if($10 == "./." ) print c, $2, $3, $4, "N", $6, $7, $8, "GT", "1"; else print c, $2, $3, $4, $5, $6, $7, $8, $9, $10}' > UGbody
+#else
+#	echo "HCbody is empty"
+#	grep -v '^#' ${orgref}-${refname}.UG.vcf | awk -v r=$refname 'BEGIN {FS="\t"; OFS="\t"} { if($10 == "./." ) print r, $2, $3, $4, "N", $6, $7, $8, "GT", "1"; else print r, $2, $3, $4, $5, $6, $7, $8, $9, $10}' > UGbody
+#fi
 
 # The first input takes precedence
-cat HCbody UGbody | awk '{ if (a[$2]++ == 0) print $0; }' | sort -nk2,2 > body
+#cat HCbody UGbody | awk '{ if (a[$2]++ == 0) print $0; }' | sort -nk2,2 > body
+
+# Get zero coverage regions the chromosome name from the UG positions needs to be updated to the HC names
+awk 'BEGIN{OFS="\t"} $10 == "./." {print $0}' ${orgref}-${refname}.UG.vcf | awk -v c=$chromname 'BEGIN{OFS="\t"} {print c, $2, $3, $4, "N", $6, $7, $8, "GT", "1"}' > zeroformated
+
+cat snps zeroformated | sort -nk2,2 > body
 
 cp ${orgref}-${refname}.hapreadyAll.vcf OLD-${orgref}-${refname}.hapreadyAll.vcf
 cat header body > ${orgref}-${refname}.hapreadyAll.vcf
