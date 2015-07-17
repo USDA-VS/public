@@ -473,42 +473,8 @@ else
 	grep -v '^#' ${orgref}-${refname}.UG.vcf | awk -v r=$refname 'BEGIN {FS="\t"; OFS="\t"} { if($10 == "./." ) print r, $2, $3, $4, "N", $6, $7, $8, "GT", "1"; else print r, $2, $3, $4, $5, $6, $7, $8, $9, $10}' > UGbody
 fi
 
-echo $refname
-read -p "$LINENO Enter"
-
-#refname=`echo ${refname} | sed 's/\.readreference//'`
-#echo "fixed refname: $refname"
-#awk 'BEGIN{OFS="\t"} $10 == "./." {print $0}' ${orgref}-${refname}.UG.vcf > zerocoverage
-
-# The chromosome name from the UG positions needs to be updated to the HC names
-#awk -v c=$chromname 'BEGIN{OFS="\t"} {print c, $2, $3, $4, "N", $6, $7, $8, "GT", "1"}' zerocoverage > zeroformated
-
+# The first input takes precedence
 cat HCbody UGbody | awk '{ if (a[$2]++ == 0) print $0; }' | sort -nk2,2 > body
-
-#cat header body > ${orgref}-${refname}.hapreadyAll.vcf
-
-# The zero coverage position have been updated to the HC.vcf, but if end positions might still be missing, so they need to be added
-
-#awk '$1 !~ /^#/ {print $2}' ${orgref}-${refname}.UG.vcf > UGpositions
-#read -p "$LINENO ENTER"
-
-#awk '$1 !~ /^#/ {print $2}' body > HCpositions
-#read -p "$LINENO ENTER"
-#
-#cat UGpositions HCpositions | sort | uniq -u > missingpositions
-#read -p "$LINENO ENTER"
-#
-#pos=`cat missingpositions | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-#read -p "$LINENO ENTER"
-#
-#echo $pos
-#read -p "$LINENO ENTER"
-#
-#awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $0}' ${orgref}-${refname}.UG.vcf > UGpositionstoadd
-#read -p "$LINENO ENTER"
-#
-#cat body UGpositionstoadd | sort -nk2,2 > completebody
-#read -p "$LINENO ENTER"
 
 cp ${orgref}-${refname}.hapreadyAll.vcf OLD-${orgref}-${refname}.hapreadyAll.vcf
 cat header body > ${orgref}-${refname}.hapreadyAll.vcf
@@ -938,6 +904,7 @@ wait
 #######################################################################################
 #|||||||||||||||||||||||||||||||||||| Finish Up |||||||||||||||||||||||||||||||||||||||
 #######################################################################################
+read -p "$LINENO Enter"
 
 wait
 sleep 5
@@ -959,12 +926,13 @@ rm ${summaryfile}.pre
 for i in `find . -name "*samplecoveragefile"`; do
     cat $i >> allsamplecoveragefile
 done
+pwd
 
 plotR allsamplecoveragefile $sampleName
 mv myplot.pdf ${sampleName}.assembly_graph.pdf
+pwd
 
 cd $root
-pwd
 
 mkdir ${sampleName}-reference_guided_assemblies
 for i in `find . -name "*reference_guided.fasta"`; do
@@ -1229,7 +1197,7 @@ else
 fi
 rm *fastq*
 
-Cleanup
+#Cleanup
 rm -r `ls | egrep -v "emailfile|emailfiles|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
 
 if [ "$mflag" ]; then
