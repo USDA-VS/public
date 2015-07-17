@@ -462,20 +462,56 @@ echo "orgref: ${orgref}"
 echo "refname: ${refname}"
 
 grep '^#' ${orgref}-${refname}.hapreadyAll.vcf > header
-grep -v '^#' ${orgref}-${refname}.hapreadyAll.vcf > snps
+grep -v '^#' ${orgref}-${refname}.hapreadyAll.vcf > HCbody
 
-refname=`echo ${refname} | sed 's/\.readreference//'`
+chromname=`awk ' $1 !~ /^#/ {print $1}' ${orgref}-${refname}.hapreadyAll.vcf | head -1`
+if [ -s HCbody ]; then
+	echo "HCbody exists and has size greater than zero"
+	grep -v '^#' ${orgref}-${refname}.UG.vcf | awk -v c=$chromname 'BEGIN {FS="\t"; OFS="\t"} { if($10 == "./." ) print c, $2, $3, $4, "N", $6, $7, $8, "GT", "1"; else print c, $2, $3, $4, $5, $6, $7, $8, $9, $10}' > UGbody
+else
+	echo "HCbody is empty"
+	grep -v '^#' ${orgref}-${refname}.UG.vcf | awk -v r=$refname 'BEGIN {FS="\t"; OFS="\t"} { if($10 == "./." ) print r, $2, $3, $4, "N", $6, $7, $8, "GT", "1"; else print r, $2, $3, $4, $5, $6, $7, $8, $9, $10}' > UGbody
+fi
 
-echo "fixed refname: $refname"
+echo $refname
+read -p "$LINENO Enter"
 
-awk 'BEGIN{OFS="\t"} $10 == "./." {print $0}' ${orgref}-${refname}.UG.vcf > zerocoverage
+#refname=`echo ${refname} | sed 's/\.readreference//'`
+#echo "fixed refname: $refname"
+#awk 'BEGIN{OFS="\t"} $10 == "./." {print $0}' ${orgref}-${refname}.UG.vcf > zerocoverage
 
-awk 'BEGIN{OFS="\t"} {print $1, $2, $3, $4, "N", $6, $7, $8, "GT", "1"}' zerocoverage > zeroformated
+# The chromosome name from the UG positions needs to be updated to the HC names
+#awk -v c=$chromname 'BEGIN{OFS="\t"} {print c, $2, $3, $4, "N", $6, $7, $8, "GT", "1"}' zerocoverage > zeroformated
 
-cat snps zeroformated | sort -nk2,2 > body
+cat HCbody UGbody | awk '{ if (a[$2]++ == 0) print $0; }' | sort -nk2,2 > body
 
+#cat header body > ${orgref}-${refname}.hapreadyAll.vcf
+
+# The zero coverage position have been updated to the HC.vcf, but if end positions might still be missing, so they need to be added
+
+#awk '$1 !~ /^#/ {print $2}' ${orgref}-${refname}.UG.vcf > UGpositions
+#read -p "$LINENO ENTER"
+
+#awk '$1 !~ /^#/ {print $2}' body > HCpositions
+#read -p "$LINENO ENTER"
+#
+#cat UGpositions HCpositions | sort | uniq -u > missingpositions
+#read -p "$LINENO ENTER"
+#
+#pos=`cat missingpositions | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+#read -p "$LINENO ENTER"
+#
+#echo $pos
+#read -p "$LINENO ENTER"
+#
+#awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $0}' ${orgref}-${refname}.UG.vcf > UGpositionstoadd
+#read -p "$LINENO ENTER"
+#
+#cat body UGpositionstoadd | sort -nk2,2 > completebody
+#read -p "$LINENO ENTER"
+
+cp ${orgref}-${refname}.hapreadyAll.vcf OLD-${orgref}-${refname}.hapreadyAll.vcf
 cat header body > ${orgref}-${refname}.hapreadyAll.vcf
-###
 
 # make reference guided contig
 java -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${orgref}-${refname}.reference_guided.fasta -V ${orgref}-${refname}.hapreadyAll.vcf -IUPAC ${orgref}-${refname}
