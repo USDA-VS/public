@@ -680,7 +680,7 @@ samtools index ${orgref}-${refname}.downsample.bam
 ########
 
 #bam prepared now onto variant calling
-java -Xmx4g -jar ${GATKPath} -R $ref -T HaplotypeCaller -ploidy 1 -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.hapreadyAll.vcf -bamout ${orgref}-${refname}.bamout.bam -dontUseSoftClippedBases -allowNonUniqueKmersInRef -stand_call_conf 20.0 -stand_emit_conf 20.0
+java -Xmx4g -jar ${GATKPath} -R $ref -T HaplotypeCaller -ploidy 1 -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.hapreadyAll.vcf -bamout ${orgref}-${refname}.bamout.bam -dontUseSoftClippedBases -allowNonUniqueKmersInRef 
 java -Xmx4g -jar ${igvtools} index ${orgref}-${refname}.hapreadyAll.vcf
 
 if [ -s ${orgref}-${refname}.hapreadyAll.vcf ]; then
