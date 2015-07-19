@@ -39,10 +39,10 @@ for f in *; do
 	cd $currentdir
 	echo "$f started"
 	cd ./$f
-	mkdir ./temp
-	cp *R1*.fastq.gz ./temp
-	`gunzip ./temp/*R1*.fastq.gz && oligo_identifier.sh ./temp/*R1*.fastq | tee tee_oligo_identifier_out1.txt` &
-
+	#mkdir ./temp
+	#cp *R1*.fastq.gz ./temp
+	#`gunzip ./temp/*R1*.fastq.gz && oligo_identifier.sh ./temp/*R1*.fastq | tee tee_oligo_identifier_out1.txt` &
+	`processZips.sh h5n2` &
 done
 
 #

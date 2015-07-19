@@ -312,10 +312,24 @@ i=$parabinary
         echo "$parabinary" >> tee_tb_oligo_identifier_out2.txt
         echo "$paracounts" >> tee_tb_oligo_identifier_out2.txt
     else
-        echo "oligo_identifier.sh could not find a match for $n"
-        echo "oligo_identifier.sh could not find a match for $n" >> /scratch/report/dailyReport.txt
-        echo "${n} Unable to find a reference, oligo_identifier.sh stats: Oligo counts: ${bruccounts} ${tbcounts} ${paracounts}, Binary: ${brucbinary} ${tbbinary} ${parabinary}" >> /scratch/report/dailyReport.txt
+	catch="In else statement running as h5n2"
+        echo "In else statement running as h5n2"
+        `processZips.sh h5n2 $catch | tee tee_processZips_out.txt` &
+        echo "h5n2" >> tee_tb_oligo_identifier_out2.txt
+        echo "h5n2-binary" >> tee_tb_oligo_identifier_out2.txt
+        echo "h5n2-counts" >> tee_tb_oligo_identifier_out2.txt
+        #echo "oligo_identifier.sh could not find a match for $n"
+        #echo "oligo_identifier.sh could not find a match for $n" >> /scratch/report/dailyReport.txt
+        #echo "${n} Unable to find a reference, oligo_identifier.sh stats: Oligo counts: ${bruccounts} ${tbcounts} ${paracounts}, Binary: ${brucbinary} ${tbbinary} ${parabinary}" >> /scratch/report/dailyReport.txt
     fi
+
+        catch="In if statement running as h5n2"
+        echo "In if statement running as h5n2"
+        `processZips.sh h5n2 $catch | tee tee_processZips_out.txt` &
+        echo "h5n2" >> tee_tb_oligo_identifier_out2.txt
+        echo "h5n2-binary" >> tee_tb_oligo_identifier_out2.txt
+        echo "h5n2-counts" >> tee_tb_oligo_identifier_out2.txt
+
 fi
 
 echo "Sample ${n}, ${tagname}, Oligo counts: Bruc ${bruccounts} TB ${tbcounts} MAC ${paracounts}, Binary: Bruc ${brucbinary} TB ${tbbinary} MAC ${parabinary}, ID:  ${catch}"
