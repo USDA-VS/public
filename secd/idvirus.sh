@@ -1015,7 +1015,7 @@ java -jar ${GATKPath} -T ClipReads -R $ref -I ${orgref}-${refname}.dup.bam -o ${
 samtools index ${orgref}-${refname}.downsample.bam
 
 # Make a quick and simple VCF to highlight possible problem areas of the consensus
-java -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}..UG.vcf -nct 8
+java -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.UG.vcf -nct 8
 
 #############################
 
