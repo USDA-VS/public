@@ -530,6 +530,24 @@ elif [[ $1 == para ]]; then
     echo "Script vcftofasta.sh ran using para variables" >> section5
     email_list="tod.p.stuber@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
+elif [[ $1 == h5n2 ]]; then
+
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/snp-genotypingcodes.txt"
+    # This file tells the script how to cluster VCFs
+    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/ovis/script_dependents/Ovis_Defining_SNPs.txt"
+    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
+    FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
+    FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
+    FilterDirectory="/bioinfo11/TStuber/Results/brucella/ovis/script_dependents/FilterFiles" #Files containing positions to filter
+    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/ovis/script_dependents/RemoveFromAnalysis.txt"
+    QUAL=300 # Minimum quality for calling a SNP
+    lowEnd=1
+    highEnd=350 # QUAL range to change ALT to N
+    bioinfoVCF=""
+    echo "vcftofasta.sh ran as H5N2"
+    echo "Script vcftofasta.sh ran using h5n2 variables" > section5
+    email_list="tod.p.stuber@usda.gov"
+
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
     # Excel tab label "New groupings"
@@ -541,7 +559,7 @@ elif [[ $1 == para ]]; then
 else
 
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis, tb1, tb2, tb3, tb4a, tb4b, tb5, tb6, para"
+    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis, tb1, tb2, tb3, tb4a, tb4b, tb5, tb6, para, h5n2"
     echo ""
     echo "Set optional flags"
     echo "flag -c with look for positions to filter.  By default, with no -c, this will not be done."
