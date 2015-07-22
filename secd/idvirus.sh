@@ -336,10 +336,6 @@ else
     if [ -s ${refname}.UG.vcf ]; then
         echo "${refname}.UG.vcf present continueing script"
     else
-        echo "" >> ${emailbody}
-        echo "${refname}.UG.vcf failed to make, Further analysis required" >> ${emailbody}
-        email_list="Tod.P.Stuber@aphis.usda.gov"
-        echo "${refname}.UG.vcf failed to make, Further analysis required" | mutt -s "Sample $sampleName Reference_Set $argUsed" -- $email_list
         exit 1
     fi
 fi
@@ -617,10 +613,6 @@ else
     if [ -s ${orgref}-${refname}.UG.vcf ]; then
         echo "${orgref}-${refname}.UG.vcf present continueing script"
     else
-        echo "" >> ${emailbody}
-        echo "${orgref}-${refname}.UG.vcf failed to make, Further analysis required" >> ${emailbody}
-        email_list="Tod.P.Stuber@aphis.usda.gov"
-        echo "${orgref}-${refname}.UG.vcf failed to make, Further analysis required" | mutt -s "Sample $sampleName Reference_Set $argUsed" -- $email_list
         exit 1
     fi
 fi
@@ -693,10 +685,6 @@ else
     if [ -s ${orgref}-${refname}.hapreadyAll.vcf ]; then
         echo "${orgref}-${refname}.hapreadyAll.vcf present continueing script"
     else
-        echo "" >> ${emailbody}
-        echo "${orgref}-${refname}.hapreadyAll.vcf failed to make, Further analysis required" >> ${emailbody}
-        email_list="Tod.P.Stuber@aphis.usda.gov"
-        echo "${orgref}-${refname}.hapreadyAll.vcf failed to make, Further analysis required" | mutt -s "Sample $sampleName Reference_Set $argUsed" -- $email_list
         exit 1
     fi
 fi
@@ -818,10 +806,6 @@ else
     if [ -s ${refname}.UG.vcf ]; then
         echo "${refname}.UG.vcf present continueing script"
     else
-        echo "" >> ${emailbody}
-        echo "${refname}.UG.vcf failed to make, Further analysis required" >> ${emailbody}
-        email_list="Tod.P.Stuber@aphis.usda.gov"
-        echo "${refname}.UG.vcf failed to make, Further analysis required" | mutt -s "Sample $sampleName Reference_Set $argUsed" -- $email_list
         exit 1
     fi
 fi
