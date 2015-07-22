@@ -1014,6 +1014,9 @@ samtools index ${orgref}-${refname}.dup.bam
 java -jar ${GATKPath} -T ClipReads -R $ref -I ${orgref}-${refname}.dup.bam -o ${orgref}-${refname}.downsample.bam -filterNoBases -dcov 10
 samtools index ${orgref}-${refname}.downsample.bam
 
+# Make a quick and simple VCF to highlight possible problem areas of the consensus
+java -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}..UG.vcf -nct 8
+
 #############################
 
 rm *sorted.bam*
