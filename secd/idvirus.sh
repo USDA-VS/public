@@ -347,6 +347,7 @@ echo ">${refname}" > ${refname}.readreference.temp; awk ' $8 ~ /^AN=2/ {print $4
 
 echo "short BLAST"
 blastn -query ${refname}.readreference.fasta -db /data/BLAST/db/nt -num_threads 20 -out ${refname}-readreference-max1-nt-id.txt -max_target_seqs 1 -outfmt "6 saccver"
+rm ${refname}.readreference.fasta
 
 if [ -s ${refname}-readreference-max1-nt-id.txt ]; then
     echo "Something was found"
@@ -518,15 +519,15 @@ depthcov=`awk '{sum+=$3} END { print sum/NR}' ${orgref}-${refname}-coveragefile`
 echo "depthcov $depthcov"
 
 LC_NUMERIC=en_US
-printf "%-30s %'10d %11.2f%% %'10dX\n" ${orgref}-${refname} $mapCount $perc $depthcov >> ${summaryfile}.pre
+printf "%-45s %'10d %11.2f%% %'10dX\n" ${orgref}-${refname} $mapCount $perc $depthcov >> ${summaryfile}.pre
 
 echo "`printf "%'.0f\n" ${mapCount}` reads aligned to ${orgref}-${refname}"
 echo "${perc}% genome coverage, $depthcov"
 
 awk -v x=${orgref}-${refname} 'BEGIN {OFS="\t"} {print x, $2, $3}' ${orgref}-${refname}-coveragefile | grep -v "segment_all" > ${orgref}-${refname}-samplecoveragefile
 
-rm *sorted.bam*
-rm *dup.bam*
+#rm *sorted.bam*
+#rm *dup.bam*
 rm *mappedReads.bam
 rm *fasta.amb
 rm *fasta.ann
@@ -622,6 +623,7 @@ fi
 java -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${refname}.readreference.fasta -V ${orgref}-${refname}.UG.vcf
 
 echo ">${refname}" > ${refname}.readreference.temp; grep -v ">" ${refname}.readreference.fasta >> ${refname}.readreference.temp; mv ${refname}.readreference.temp ${refname}.fasta
+rm ${refname}.readreference.*
 
 # Align reads to Unified Genotyper made reference.  This is the last alignment that will make the final haplotypecaller reference guided assembly
 ref="${refname}.fasta"
@@ -823,6 +825,7 @@ rm *fasta*
 rm *coveragefile
 rm *vcf*
 rm *bam*
+rm ${refname}.readreference.fasta
 
 }
 
@@ -900,12 +903,12 @@ wait
 sleep 5
 echo "" >> ${summaryfile}
 echo "Alignment stats (reference guided):" >> ${summaryfile}
-printf "%-30s %10s %11s %10s\n" "reference used" "read count" "percent cov" "ave depth" >> ${summaryfile}
+printf "%-45s %10s %11s %10s\n" "reference used" "read count" "percent cov" "ave depth" >> ${summaryfile}
 sort -k1,1 < ${summaryfile}.pre >> ${summaryfile}
 
 echo "" >> ${emailbody}
 echo "Alignment stats (reference guided):" >> ${emailbody}
-printf "%-30s %10s %11s %10s\n" "reference used" "read count" "percent cov" "ave depth" >> ${emailbody}
+printf "%-45s %10s %11s %10s\n" "reference used" "read count" "percent cov" "ave depth" >> ${emailbody}
 sort -k1,1 < ${summaryfile}.pre >> ${emailbody}
 
 rm ${summaryfile}.pre
@@ -1029,7 +1032,7 @@ blastn -query ${sampleName}.consensusnoN.reads.fasta -db /data/BLAST/db/nt -num_
 echo "" >> ${summaryfile}
 echo "--------------------------------------------------" >> ${summaryfile}
 echo "*** NT Database ***" >> ${summaryfile}
-awk 'BEGIN{printf "%-30s %-8s %-8s %-8s %-3s %-6s %-6s %-1s\n", "query ID", "qlength", "slength", "% id", "mis", "evalue", "bscore", "Description"} {printf "%-30s %-8s %-8s %-8s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' ${sampleName}-consensus-max1-nt.txt >> ${summaryfile}
+awk 'BEGIN{printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s\n", "query ID", "qlength", "slength", "% id", "mis", "evalue", "bscore", "Description"} {printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' ${sampleName}-consensus-max1-nt.txt >> ${summaryfile}
 echo "" >> ${summaryfile}
 
 if [ $pingyrdb == yes ]; then
