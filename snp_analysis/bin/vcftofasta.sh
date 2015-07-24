@@ -730,48 +730,6 @@ echo "Finished preparing filter files"
 
 }
 
-#################################################################################
-
-# This function make sure there is a matching coverage file for each vcf.
-
-function checkMatchingCoverageFile () {
-
-echo "Checking for coverageFile for each vcf"
-
-# Make list of tb numbers of vcfs.
-for i in *; do
-getbase=`basename "$i"`
-number=`echo $getbase | sed $tbNumberV | sed $tbNumberW`
-echo $number >> vcfFiles
-done
-
-# Make list of tb numbers of coverageFiles
-for f in $coverageFiles/*; do
-getbase=`basename "$f"`
-number=`echo $getbase | sed $tbNumberV | sed $tbNumberW | sed 's/-coverage//g'`
-echo $number >> coverageFiles
-done
-
-uniqlist=`cat vcfFiles coverageFiles | sort | uniq -u`
-
-rm vcfFiles
-rm coverageFiles
-
-uniqNumberSize=`echo $uniqlist | wc | awk '{print $3}'`
-if [ $uniqNumberSize -gt 4 ]
-then
-echo "No matching file was present"
-echo "Either there is no coverageFile for a vcf"
-echo "Or there is an extra coverageFile that is not needed"
-echo "Must have matching files, and restart script."
-echo "$uniqlist"
-
-else
-echo "coverageFiles are available for all vcfs"
-echo "Perfect match, Good Job Chap!"
-fi
-
-}
 
 #################################################################################
 
@@ -830,37 +788,44 @@ for d in $directories; do
                 [[ $((count%NR_CPUS)) -eq 0 ]] && wait
             done
             wait
-        elif [ $((chromCount)) -eq 2 ]; then
+        elif [ $((chromCount)) -gt 1 ]; then
             #Mark vcf allowing areas of the genome to be removed from the SNP analysis
                 for i in *.vcf; do m=`basename "$i"`; n=`echo $m | sed $dropEXT` # n is name with all right of "_" and "." removed.
+                grep '^#' $i > ${i}.header
+                grep -v '^#' $i > ${i}.body
                 #Mark vcf allowing areas of the genome to be removed from the SNP analysis
-                echo "***Adding filter to $n***"
-                awk 'BEGIN{OFS="\t"} $1 !~ /#/ && $10 !~ /\.\/\./ {print $1, $2}' $i > $i.file
-                cat "${FilterDirectory}/$d.txt" $i.file >> $i.catFile
-                cat $i.catFile | sort -k1,1 -k2,2 | uniq -d > $i.txt
-                pos1=`cat $i.txt | grep "chrom1" | awk '{print $2}' | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-                echo "pos1: $pos1"
-                awk -v var1="chrom1" -v var2=$pos1 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.subfilter1.vcf
-                pos2=`cat $i.txt | grep "chrom2" | awk '{print $2}' | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-                echo "pos2: $pos2"
-                awk -v var1="chrom2" -v var2=$pos2 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $n.subfilter1.vcf > $n.subfilter.vcf
-                rm $i.file
-                rm $i.catFile
-                rm $i.txt
-                rm $n.subfilter1.vcf
-                grep -v "Not_Included" $n.subfilter.vcf > $n.nomisfits.vcf
-                mv $n.nomisfits.vcf $i
-
+                # Iterate through chrom number range
+                    for n in $(seq 1 $chromCount); do
+                        echo "***Adding filter to $n***"
+                        awk 'BEGIN{OFS="\t"} $1 !~ /#/ && $10 !~ /\.\/\./ {print $1, $2}' ${i}.body > $i.file
+                        cat "${FilterDirectory}/$d.txt" $i.file >> $i.catFile
+                        cat $i.catFile | sort -k1,1 -k2,2 | uniq -d > $i.txt
+                        pos=`cat $i.txt | grep "chrom${number}" | awk '{print $2}' | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+                        echo "pos: $pos"
+                        awk -v var1="chrom${number}" -v var2=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.subfilter${number}.vcf
+                    done
+                        cat $n.subfilter*.vcf > $n.filter.vcf
+--------------------
+#pos2=`cat $i.txt | grep "chrom2" | awk '{print $2}' | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+#echo "pos2: $pos2"
+#awk -v var1="chrom2" -v var2=$pos2 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $n.subfilter1.vcf > $n.subfilter.vcf
+                        rm $i.file
+                        rm $i.catFile
+                        rm $i.txt
+                        rm $n.subfilter*.vcf
+                        mv ${i}.header > $n.nomisfits.vcf
+                        grep -v "Not_Included" $n.filter.vcf >> $n.nomisfits.vcf
+                        mv $n.nomisfits.vcf $i
                 done
         else
-        echo "Greater than 2 chromosomes present.  Exiting script."
+        echo "Check chromosome count numbers at line $LINENO.  Exiting script."
         exit 1
         fi
     wait
     sleep 2
 
     mkdir marked_files
-    mv *.subfilter.vcf ./marked_files
+    mv *.filter.vcf ./marked_files
     else
         echo "********** Group/Subgroup/Clade Filter not ran ***********"
         echo "********** Group/Subgroup/Clade Filter not ran ***********" >> ../../section5
@@ -1511,32 +1476,36 @@ echo "***Marking all VCFs and removing filtering regions"
         done
         wait
 
-        elif [ $((chromCount)) -eq 2 ]; then
-        for i in *.vcf; do
-
-            m=`basename "$i"`
-            n=`echo $m | sed $dropEXT` # n is name with all right of "_" and "." removed.
-            #Mark vcf allowing areas of the genome to be removed from the SNP analysis
-            echo "********* $n **********"
-            awk 'BEGIN{OFS="\t"} $1 !~ /#/ && $10 !~ /\.\/\./ {print $1, $2}' $i > $i.file
-            cat "${FilterDirectory}/FilterToAll.txt" $i.file >> $i.catFile
-cat $i.catFile | sort -k1,1 -k2,2 | uniq -d > $i.txt
-            pos1=`cat $i.txt | grep "chrom1" | awk '{print $2}' | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-            echo "pos1: $pos1"
-            awk -v var1="chrom1" -v var2=$pos1 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filter1.vcf
-            pos2=`cat $i.txt | grep "chrom2" | awk '{print $2}' | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-            echo "pos2: $pos2"
-            awk -v var1="chrom2" -v var2=$pos2 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $n.filter1.vcf > $n.filter.vcf
-           
-	rm $i.file
-            rm $i.catFile
-            rm $i.txt
-            rm $n.filter1.vcf
-            grep -v "Not_Included" $n.filter.vcf > $n.noPPE.vcf
-            mv $n.noPPE.vcf $i
-        done
+        elif [ $((chromCount)) -gt 1 ]; then
+            for i in *.vcf; do m=`basename "$i"`; n=`echo $m | sed $dropEXT` # n is name with all right of "_" and "." removed.
+            grep '^#' $i > ${i}.header
+            grep -v '^#' $i > ${i}.body
+                #Mark vcf allowing areas of the genome to be removed from the SNP analysis
+                # Iterate through chrom number range
+                for n in $(seq 1 $chromCount); do
+                    echo "********* $n **********"
+                    awk 'BEGIN{OFS="\t"} $1 !~ /#/ && $10 !~ /\.\/\./ {print $1, $2}' ${i}.body > $i.file
+                    cat "${FilterDirectory}/FilterToAll.txt" $i.file >> $i.catFile
+                    cat $i.catFile | sort -k1,1 -k2,2 | uniq -d > $i.txt
+                    pos=`cat $i.txt | grep "chrom${number}" | awk '{print $2}' | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+                    echo "pos: $pos"
+                    awk -v var1="chrom${number}" -v var2=$pos1 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filter${number}.vcf
+                done
+                    cat $n.filter*.vcf > $n.filterall.vcf
+#pos2=`cat $i.txt | grep "chrom2" | awk '{print $2}' | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+#echo "pos2: $pos2"
+#awk -v var1="chrom2" -v var2=$pos2 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $n.filter1.vcf > $n.filter.vcf
+               
+                rm $i.file
+                rm $i.catFile
+                rm $i.txt
+                rm $n.filter*.vcf
+                mv ${i}.header > $n.noPPE.vcf
+                grep -v "Not_Included" n.filterall.vcf >> $n.noPPE.vcf
+                mv $n.noPPE.vcf $i
+            done
         else
-            echo "Greater than 2 chromosomes present.  Exiting script."
+            echo "Check chromosome count numbers at line $LINENO.  Exiting script."
         exit 1
         fi
 
