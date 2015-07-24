@@ -548,14 +548,6 @@ elif [[ $1 == h5n2 ]]; then
     echo "Script vcftofasta.sh ran using h5n2 variables" > section5
     email_list="tod.p.stuber@usda.gov"
 
-    # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
-    # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
-    # Excel tab label "New groupings"
-
-    excelinfile="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/vcfs/Filtered_Regions.xlsx"
-    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
-    filterFileCreations
-
 else
 
     echo ""
