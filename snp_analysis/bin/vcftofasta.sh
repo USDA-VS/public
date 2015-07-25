@@ -582,10 +582,12 @@ fulDir=$PWD # Current working directory, do not change.
 #################################################################################
 
 # Count the number of chromosomes used in the reference when VCFs were made.
-singleFile=`ls *.vcf | head -1`
-chromCount=`awk ' $0 !~ /^#/ {print $1}' $singleFile | sort | uniq -d | awk 'END {print NR}'`
-chroms=`awk ' $0 !~ /^#/ {print $1}' $singleFile | sort -n | uniq -d`
-echo "The number of chromosomes seen in VCF: $chromCount"
+#singleFile=`ls *.vcf | head -1`
+chromCount=`awk ' $0 !~ /^#/ {print $1}' *vcf | sort | uniq -d | awk 'END {print NR}'`
+awk ' $0 !~ /^#/ {print $1}' *vcf | sort | uniq -d > chroms
+echo "The number of chromosomes/segments seen in VCF: $chromCount"
+echo "These are the chromosomes/segments found:"
+cat chroms
 
 #################################################################################
 
