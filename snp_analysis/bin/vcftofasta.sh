@@ -535,11 +535,10 @@ elif [[ $1 == h5n2 ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/snp-genotypingcodes.txt"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/ovis/script_dependents/Ovis_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/ovis/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/ovis/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="/bioinfo11/MKillian/Analysis/script_dependents/ai/h5n2/snppipeline/FilterFiles" #Files containing positions to filter
+    RemoveFromAnalysis="bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
@@ -713,8 +712,8 @@ for i in *.txt; do
        echo "chrom2	100000000" >> "$number.num"
        echo "chrom2	100000000" >> "$number.num"
     else
-        echo "Greater than 2 chromosomes present.  Exiting script."
-        exit 1
+        echo "Greater than 2 chromosomes present."
+        
     fi
 
         rm $i
@@ -1373,14 +1372,9 @@ wait
 echo "The chromosome count is: $chromCount"
 pwd
 
-if [ $chromCount -gt 2 ]; then
-    echo "More than 2 chromosomes detected."
-    echo "Unable to handle more than 2."
-    echo "Exiting script at line $LINENO"
-    exit 1
-fi
-# Change chromosome identification to general chrom1 and/or chrom2
+read -p "$LINENO ENTER"
 
+# Change chromosome identification to general chrom1 and/or chrom2
 for f in *.vcf; do
     echo "echoing f: $f"
     num=1
@@ -1391,7 +1385,7 @@ for f in *.vcf; do
     num=$(( $num + 1 ))
     done
 done
-
+read -p "$LINENO ENTER"
 ########################################################################
 
 printf "%s\t%s\t%s\t%s\n" "TB Number" "Group" "Subgroup" "Clade" > FileMakerGroupImport.txt

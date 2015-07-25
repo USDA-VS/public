@@ -321,8 +321,8 @@ elif [ $1 == para ]; then
 
 
 elif [ $1 == h5n2 ]; then
-   cp /home/shared/virus/ai/h5n2/northernpintal.fasta ./
-   hqs="/home/shared/virus/ai/h5n2/13895-1-highqualitysnps.vcf"
+   cp /home/shared/virus/ai/h5n2/TY-BC-FAV10-2014.fasta ./
+   hqs="/home/shared/virus/ai/h5n2/14111-1-highqualitysnps.vcf"
    bioinfo=""
    #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
@@ -468,8 +468,9 @@ java -jar ${gatk} -T DepthOfCoverage -R $ref -I $n.preready-mem.bam -o $n.covera
 # ploidy 2 is default
 echo "***HaplotypeCaller, aka calling SNPs"
 #-allowNonUniqueKmersInRef
-java -Xmx4g -jar ${gatk} -R $ref -T HaplotypeCaller -I $n.ready-mem.bam -o $n.hapreadyAll.vcf -bamout $n.bamout.bam -dontUseSoftClippedBases -allowNonUniqueKmersInRef
+java -Xmx4g -jar ${gatk} -R $ref -T HaplotypeCaller -I $n.ready-mem.bam -o $n.hapreadyAll.vcf -ERC GVCF -bamout $n.bamout.bam -dontUseSoftClippedBases -allowNonUniqueKmersInRef
 java -Xmx4g -jar ${igvtools} index $n.hapreadyAll.vcf
+cp $n.hapreadyAll.vcf ../$n.initial
 
 echo "******Awk VCF leaving just SNPs******"
 awk '/#/ || $4 ~ /^[ATGC]$/ && $5 ~ /^[ATGC]$/ {print $0}' $n.hapreadyAll.vcf > $n.hapreadyOnlySNPs.vcf
