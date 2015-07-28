@@ -244,7 +244,7 @@ elif [[ $1 == suis4 ]]; then
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/suis4/script_dependents/Suis4_Defining_SNPs.txt"
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
-    FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
+    FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
     FilterDirectory="/bioinfo11/TStuber/Results/brucella/suis4/script_dependents/FilterFiles" #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucela/suis4/script_dependents/RemoveFromAnalysis.txt"
