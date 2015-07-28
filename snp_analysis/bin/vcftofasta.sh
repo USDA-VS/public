@@ -834,7 +834,8 @@ for d in $directories; do
     # Make concatemer with the position and REF call.
     echo "***Making Concatemer"
     for i in *.vcf; do
-    	awk -v Q="$QUAL" '$0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
+    	#awk -v Q="$QUAL" '$0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
+	awk -v Q="$QUAL" '$0 !~ /^#/ && $6 > Q {print $1 "-" $2, $4}' $i >> concatemer
     done
 
     # Get rid of duplicates in concatemer and list all the positions and REF calls
@@ -910,8 +911,8 @@ for i in *.vcf; do
     # echo the name grabbed
     echo $n
     # Create .cut file that lists the positions and ALT calls
-    awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
-
+    #awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
+    awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $1 "-" $2, $5}' $i > $n.cut
     # Fill in the .cut file with REF calls at positions that were not called as SNPs
     #cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1 > $n.filledcutnoN
     cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.8n > $n.filledcutnoN
@@ -1053,8 +1054,8 @@ fi
             rm ${i%filledcut}vcf
         ##############################################################
 
-	sed 's/chrom[0-9-]*//g' $n.tod | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
-            # Add each isolate to the table
+	    awk '{print $2}' $n.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > $n.fas
+	    # Add each isolate to the table
             awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> $d.table.txt) &
     		let count+=1
     		[[ $((count%NR_CPUS)) -eq 0 ]] && wait
@@ -1102,7 +1103,7 @@ echo "$d *********"
 pwd
 
 cat *.fas | sed '/root/{N;d;}' >> fastaGroup.txt
-cat *.fas >> RAxMLfastaGroup.txt
+awk 'FNR==1{print ""}1' *fas | grep -v '^$' > RAxMLfastaGroup.txt
 
 #clustalw2 -OUTFILE=alignment.txt -RANGE=1,2 -OUTPUT=FASTA -INFILE=fastaGroup.txt & 
 /usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} -m GTRCAT -p 12345 && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf &
@@ -1373,20 +1374,18 @@ wait
 echo "The chromosome count is: $chromCount"
 pwd
 
-read -p "$LINENO ENTER"
-
 # Change chromosome identification to general chrom1 and/or chrom2
-for f in *.vcf; do
-    echo "echoing f: $f"
-    num=1
-    for i in $chroms; do
-        sed "s/$i/chrom${num}/g" $f > temp.vcf
-        mv temp.vcf $f
-        echo "$i was marked as chrom${num}"
-    num=$(( $num + 1 ))
-    done
-done
-read -p "$LINENO ENTER"
+#for f in *.vcf; do
+#    echo "echoing f: $f"
+#    num=1
+#    for i in `cat chroms`; do
+#        sed "s/$i/chrom${num}/g" $f > temp.vcf
+#        mv temp.vcf $f
+#        echo "$i was marked as chrom${num}"
+#    num=$(( $num + 1 ))
+#    done
+#done
+
 ########################################################################
 
 printf "%s\t%s\t%s\t%s\n" "TB Number" "Group" "Subgroup" "Clade" > FileMakerGroupImport.txt
@@ -1526,8 +1525,9 @@ echo "" >> section3
 for i in *.vcf; do
 
     # Get quality positions in VCF
-    formatedpos=`awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/{print $2}' $i | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-    
+    #formatedpos=`awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/{print $2}' $i | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+    formatedpos=`awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $2}' $i | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+
     # If a group number matches a quality position in the VCF (formatedpos) then print the position
     groupNumbers=`grep "Group" "${DefiningSNPs}" | awk -v x=$formatedpos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1}'`
     echo "This is the Group Numbers: $groupNumbers"
@@ -1642,7 +1642,8 @@ cd ./all_vcfs/
     # Factor in possible multiple chromosomes
     echo "***Making Concatemer"
     for i in *.vcf; do
-awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
+    #awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
+    awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $1 "-" $2, $4}' $i >> concatemer
     done
 
 # Get rid of duplicates in concatemer and list all the positions and REF calls
@@ -1659,7 +1660,8 @@ echo "***Creating normalized vcf using AC2, QUAL > 150"
 for i in *.vcf; do
     (n=${i%.vcf}
     echo $n
-    awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
+    #awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
+    awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $1 "-" $2, $5}' $i > $n.cut
 
     #cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1 > $n.filledcutnoN
     cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.8n > $n.filledcutnoN
@@ -1762,7 +1764,7 @@ for i in *.filledcut; do
 
     # Use this cat command to skip the time intensive grep
     # With all_vcfs this grep doesn't eliminate many snps.
-    sed 's/chrom[0-9-]*//g' $i | tr -d [:space:] | awk '{print $0}' | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
+    awk '{print $2}' $i | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
 
     # Add each isolate to the table
     awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
