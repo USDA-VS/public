@@ -1108,6 +1108,7 @@ awk 'FNR==1{print ""}1' *fas | grep -v '^$' > RAxMLfastaGroup.txt
 #clustalw2 -OUTFILE=alignment.txt -RANGE=1,2 -OUTPUT=FASTA -INFILE=fastaGroup.txt & 
 /usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} -m GTRCAT -p 12345 && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf &
 wait
+
 rm RAxML_parsimonyTree*
 for i in RAxML*Tree*; do mv $i ../${i}.tre; done
 #grep ">" alignment.txt | sed 's/>//g' > cleanedAlignment.txt
@@ -1703,12 +1704,30 @@ wait
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 wait
 
+# Make a concatemer of the .filledcut files
+        for i in *.filledcut; do
+            cat $i >> cutConcatemer
+            done
+        echo "***Making the select file containing positions of interest"
+        # Capture only positions that have more than one SNP type called at a position
+        cat cutConcatemer | sort -k1.6n -k1.8n | uniq | awk '{print $1}' | uniq -d > select
+        # Compare the positions in select with total_pos and output total_pos position that match select positions
+        # but only with positions that are in the select file.
+        # This getting rid of calls that are the same for all isolates being analyzed
+        echo "***grepping the total_pos file"
+
+        echo "***grepping the .filledcut files for $d"
+
+        grep -w -f select total_pos | sort -k1.6n -k1.8n > clean_total_pos
+
+
+
 ########################################################################
 ######################## FILTER FILE CREATOR ###########################
 ########################################################################
 if [ "$cflag" ]; then
 echo "Finding positions to filter, At line $LINENO"
-sed 's/chrom[0-9]-//' total_pos | awk '{print $1}' > prepositionlist
+sed 's/chrom[0-9]-//' clean_total_pos | awk '{print $1}' > prepositionlist
 
 for n  in `cat prepositionlist`; do
 
@@ -1749,13 +1768,14 @@ fi
 ########################################################################
 
 # Begin the table
-awk '{print $1}' total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
-awk '{print $2}' total_pos | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
+awk '{print $1}' clean_total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
+awk '{print $2}' clean_total_pos | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
 echo "***grepping the .filledcut files"
 # Make the fasta files:  Fill in positions with REF if not present in .clean file
 
     for i in *.filledcut; do
-        (echo " working on filled cut for $i"
+        #(
+	echo " working on filled cut for $i"
         m=`basename "$i"`
         n=`echo $m | sed $dropEXT`
 
@@ -1792,9 +1812,10 @@ echo "***grepping the .filledcut files"
 
         awk '{print $2}' $n.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > $n.fas
         # Add each isolate to the table
-        awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt) &
-        let count+=1
-        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+        awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
+#) &
+ #       let count+=1
+  #      [[ $((count%NR_CPUS)) -eq 0 ]] && wait
     done
 
 wait
@@ -1802,7 +1823,7 @@ echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 
 echo "grepping filledcut files is finished"
 #Make a reference fasta sequence
-awk '{print $2}' total_pos > root
+awk '{print $2}' clean_total_pos > root
 cat root | tr -cd "[:print:]" | sed "s/^/>root;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > root.fas
 echo "" >> root.fas
 
