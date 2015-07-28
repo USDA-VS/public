@@ -327,7 +327,7 @@ elif [ $1 == h5n2 ]; then
    #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 elif [ $1 == h5nx ]; then
-cp /home/shared/virus/ai/h5n2/TY-BC-FAV10-2014.fasta ./
+cp /home/shared/virus/ai/h5nx/BC-turkey-PB2-HA-MP.fasta ./
 hqs="/home/shared/virus/ai/h5n2/14111-1-highqualitysnps.vcf"
 bioinfo=""
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
