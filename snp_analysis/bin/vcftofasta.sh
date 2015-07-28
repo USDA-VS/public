@@ -834,8 +834,8 @@ for d in $directories; do
     # Make concatemer with the position and REF call.
     echo "***Making Concatemer"
     for i in *.vcf; do
-    	#awk -v Q="$QUAL" '$0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
-	awk -v Q="$QUAL" '$0 !~ /^#/ && $6 > Q {print $1 "-" $2, $4}' $i >> concatemer
+    	awk -v Q="$QUAL" '$0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
+        #awk -v Q="$QUAL" '$0 !~ /^#/ && $6 > Q {print $1 "-" $2, $4}' $i >> concatemer
     done
 
     # Get rid of duplicates in concatemer and list all the positions and REF calls
@@ -911,8 +911,8 @@ for i in *.vcf; do
     # echo the name grabbed
     echo $n
     # Create .cut file that lists the positions and ALT calls
-    #awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
-    awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $1 "-" $2, $5}' $i > $n.cut
+    awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
+    #awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $1 "-" $2, $5}' $i > $n.cut
     # Fill in the .cut file with REF calls at positions that were not called as SNPs
     #cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1 > $n.filledcutnoN
     cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.8n > $n.filledcutnoN
@@ -1525,8 +1525,8 @@ echo "" >> section3
 for i in *.vcf; do
 
     # Get quality positions in VCF
-    #formatedpos=`awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/{print $2}' $i | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-    formatedpos=`awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $2}' $i | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+    formatedpos=`awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/{print $2}' $i | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+    #formatedpos=`awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $2}' $i | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
 
     # If a group number matches a quality position in the VCF (formatedpos) then print the position
     groupNumbers=`grep "Group" "${DefiningSNPs}" | awk -v x=$formatedpos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1}'`
@@ -1642,8 +1642,8 @@ cd ./all_vcfs/
     # Factor in possible multiple chromosomes
     echo "***Making Concatemer"
     for i in *.vcf; do
-    #awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
-    awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $1 "-" $2, $4}' $i >> concatemer
+    awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
+    #awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $1 "-" $2, $4}' $i >> concatemer
     done
 
 # Get rid of duplicates in concatemer and list all the positions and REF calls
@@ -1660,8 +1660,8 @@ echo "***Creating normalized vcf using AC2, QUAL > 150"
 for i in *.vcf; do
     (n=${i%.vcf}
     echo $n
-    #awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
-    awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $1 "-" $2, $5}' $i > $n.cut
+    awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
+    #awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $1 "-" $2, $5}' $i > $n.cut
 
     #cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1 > $n.filledcutnoN
     cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.8n > $n.filledcutnoN
@@ -1754,24 +1754,49 @@ awk '{print $2}' total_pos | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t'
 echo "***grepping the .filledcut files"
 # Make the fasta files:  Fill in positions with REF if not present in .clean file
 
-for i in *.filledcut; do
-    #(
-    echo " working on filled cut for $i"
-    m=`basename "$i"`
-    n=`echo $m | sed $dropEXT`
-    # Compare the positions in select with "isolate".cut and output position for .cut that only matched select positions
-    #grep -f select $i > $n.tod
+    for i in *.filledcut; do
+        (echo " working on filled cut for $i"
+        m=`basename "$i"`
+        n=`echo $m | sed $dropEXT`
 
-    # Use this cat command to skip the time intensive grep
-    # With all_vcfs this grep doesn't eliminate many snps.
-    awk '{print $2}' $i | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g'  > $n.fas
+        egrep -w -f select $i | sort -k1.6n -k1.8n > $n.pretod
 
-    # Add each isolate to the table
-    awk '{print $2}' $i | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
-#) &
- #   let count+=1
-  #  [[ $((count%NR_CPUS)) -eq 0 ]] && wait
-done
+        ##############################################################
+        # Change AC1s to IUPAC
+
+        # get positions being used
+        awk '{print $1}' ${n}.pretod > ${n}.usedpostions
+        # get AC1 positions and iupac calls  that were changed to iupac
+        awk ' $0 !~ /#/ && $6 > 300 && $8 ~ /^AC=1;/ {print $1 "-" $2, $5}' ${i%filledcut}vcf > ${n}.ac
+        # get just positions of those AC1 grabbed above
+        awk '{print $1}' ${n}.ac > ${n}.acpositions
+        # AC duplicate positions will need to be kept
+        cat ${n}.usedpostions ${n}.acpositions | sort | uniq -d > ${n}.actokeep
+        # get AC1 position with iupac, these are only positions already in the pretod
+
+        if [ -s ${n}.actokeep ]; then
+            grep -w -f ${n}.actokeep ${n}.ac > ${n}.actomerge
+            # merge iupac updates to filledcut
+            cat ${n}.actomerge $n.pretod | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > $n.tod
+            rm ${n}.pretod
+            rm ${n}.actomerge
+        else
+            mv $n.pretod $n.tod
+        fi
+        rm ${n}.usedpostions
+        rm ${n}.ac
+        rm ${n}.acpositions
+        rm ${n}.actokeep
+        rm ${i%filledcut}vcf
+        ##############################################################
+
+        awk '{print $2}' $n.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > $n.fas
+        # Add each isolate to the table
+        awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt) &
+        let count+=1
+        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+    done
+
 wait
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 
