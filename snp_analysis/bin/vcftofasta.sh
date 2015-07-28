@@ -1526,16 +1526,14 @@ echo "" >> section3
 for i in *.vcf; do
 
     # Get quality positions in VCF and include chromosome identification
-    formatedpos=`awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/{print $1-$2}' $i | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+    formatedpos=`awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2}' $i | sed 's/^/\^/' | sed 's/$/\$|/' | tr -d "\n" | sed 's/|$//'`
     #formatedpos=`awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $2}' $i | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
     echo "formatedpos:"
     echo "$formatedpos"
-    read -p "$LINENO Enter"
 
     # If a group number matches a quality position in the VCF (formatedpos) then print the position
     groupNumbers=`grep "Group" "${DefiningSNPs}" | awk -v x=$formatedpos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1}'`
     echo "This is the Group Numbers: $groupNumbers"
-    read -p "$LINENO Enter"
 
     # Typically a single group position is found, and the VCF will be placed into just one group.  It is posible that an isolate will need to go in more than one group because of were it falls on the tree.  In this case there may be 2 group, or more, group positions found.  The number of group positions found is captured in sizeGroup.
     sizeGroup=`echo $groupNumbers | wc | awk '{print $3}'`
