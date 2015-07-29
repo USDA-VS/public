@@ -328,7 +328,7 @@ elif [ $1 == h5n2 ]; then
 
 elif [ $1 == h5nx ]; then
 cp /home/shared/virus/ai/h5nx/BC-turkey-PB2-HA-MP.fasta ./
-hqs="/home/shared/virus/ai/h5n2/14111-1-highqualitysnps.vcf"
+hqs="/home/shared/virus/ai/h5nx/11602-1-highqualitysnps.vcf"
 bioinfo=""
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
@@ -442,7 +442,6 @@ if [ ! -e $n.realignedBam.bam ]; then
 	#cat $n.errorReport | mutt -s "$n Alignment failure" -- tod.p.stuber@usda.gov
 	java -Xmx4g -jar ${gatk} -T IndelRealigner --fix_misencoded_quality_scores -I $n.dup.bam -R $ref -targetIntervals $n.forIndelRealigner.intervals -o $n.realignedBam.bam
 fi
-read -p "$LINENO ENTER"
 
 # Uses a .vcf file which contains SNP calls of known high value to recalibrates base quality scores
 # http://www.broadinstitute.org/gatk/guide/tagged?tag=baserecalibrator

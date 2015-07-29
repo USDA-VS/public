@@ -547,6 +547,23 @@ elif [[ $1 == h5n2 ]]; then
     echo "Script vcftofasta.sh ran using h5n2 variables" > section5
     email_list="tod.p.stuber@usda.gov"
 
+elif [[ $1 == h5nx ]]; then
+
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/snp-genotypingcodes.txt"
+    # This file tells the script how to cluster VCFs
+    DefiningSNPs="/bioinfo11/MKillian/Analysis/script_dependents/ai/h5nx/snp_pipeline/h5nx_defining_SNPs.txt"
+    FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
+    FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
+    FilterDirectory="/bioinfo11/MKillian/Analysis/script_dependents/ai/h5nx/snp_pipeline/FilterFiles/" #Files containing positions to filter
+    RemoveFromAnalysis="bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
+    QUAL=300 # Minimum quality for calling a SNP
+    lowEnd=1
+    highEnd=350 # QUAL range to change ALT to N
+    bioinfoVCF=""
+    echo "vcftofasta.sh ran as H5Nx"
+    echo "Script vcftofasta.sh ran using h5nx variables" > section5
+    email_list="tod.p.stuber@usda.gov"
+
 else
 
     echo ""
@@ -1776,8 +1793,7 @@ echo "***grepping the .filledcut files"
 # Make the fasta files:  Fill in positions with REF if not present in .clean file
 
     for i in *.filledcut; do
-        #(
-	echo " working on filled cut for $i"
+        (echo " working on filled cut for $i"
         m=`basename "$i"`
         n=`echo $m | sed $dropEXT`
 
@@ -1814,10 +1830,9 @@ echo "***grepping the .filledcut files"
 
         awk '{print $2}' $n.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > $n.fas
         # Add each isolate to the table
-        awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
-#) &
- #       let count+=1
-  #      [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+        awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt) &
+        let count+=1
+        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
     done
 
 wait
