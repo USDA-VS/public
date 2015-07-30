@@ -43,7 +43,7 @@ if [[ $1 == sivall ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/sivall/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/sivall/newfiles"
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/siv/identification/"
     echo "vcftofasta.sh ran targeting $1"
     echo "Script vcftofasta.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
@@ -1120,7 +1120,7 @@ cd $root
 #rm *fastq*
 echo "" >> ${summaryfile}
 echo "" >> ${summaryfile}
-echo "Files copied to: $bioinfoVCF" >> ${summaryfile}
+#echo "Files copied to: $bioinfoVCF" >> ${summaryfile}
 echo "" >> ${summaryfile}
 
 rm *headers
@@ -1203,8 +1203,8 @@ else
 
     rm ${emailbody}
     rm emailfiles
-    echo "Copying to ${bioinfoVCF}"
-    cp -r $PWD ${bioinfoVCF}
+    #echo "Copying to ${bioinfoVCF}"
+    #cp -r $PWD ${bioinfoVCF}
 
 fi
 
