@@ -176,9 +176,9 @@ elif [[ $1 == mel ]]; then
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
     FilterDirectory="/bioinfo11/TStuber/Results/brucella/melitensis/script_dependents/FilterFiles" #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/melitensis/script_dependents/RemoveFromAnalysis.txt"
-    QUAL=300 # Minimum quality for calling a SNP
+    QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
-    highEnd=350 # QUAL range to change ALT to N
+    highEnd=200 # QUAL range to change ALT to N
     bioinfoVCF="/bioinfo11/TStuber/Results/brucella/melitensis/vcfs"
     echo "vcftofasta.sh ran as B. melitensis"
     echo "Script vcftofasta.sh ran using B. melitensis variables" > section5
