@@ -542,7 +542,7 @@ elif [[ $1 == h5n2 ]]; then
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF=""
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/h5n2/snp_analysis/script2/"
     echo "vcftofasta.sh ran as H5N2"
     echo "Script vcftofasta.sh ran using h5n2 variables" > section5
     email_list="tod.p.stuber@usda.gov"
@@ -559,7 +559,7 @@ elif [[ $1 == h5nx ]]; then
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF=""
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/h5nx/snp_analysis/script2/"
     echo "vcftofasta.sh ran as H5Nx"
     echo "Script vcftofasta.sh ran using h5nx variables" > section5
     email_list="tod.p.stuber@usda.gov"
