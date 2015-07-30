@@ -44,8 +44,8 @@ if [[ $1 == sivall ]]; then
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/sivall/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/siv/identification/"
-    echo "vcftofasta.sh ran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == aiall ]]; then
@@ -53,8 +53,8 @@ elif [[ $1 == aiall ]]; then
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/aiall/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/aiall/newfiles"
-    echo "vcftofasta.sh ran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == h5n2 ]]; then
@@ -63,8 +63,8 @@ elif [[ $1 == h5n2 ]]; then
     pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h5n2/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/h5n2/newfiles"
-    echo "vcftofasta.sh rran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    echo "idvirus.sh rran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == h5n8 ]]; then
@@ -73,8 +73,8 @@ elif [[ $1 == h5n8 ]]; then
     pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h5n8/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/h5n8/newfiles"
-    echo "vcftofasta.sh rran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    echo "idvirus.sh rran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == secd ]]; then
@@ -82,8 +82,8 @@ elif [[ $1 == secd ]]; then
     krakenDatabase="/home/shared/databases/kraken/stdPlusSECD"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/secd/*fasta
     bioinfoVCF="/bioinfo11/TStuber/Results/viruses/secd/newfiles"
-    echo "vcftofasta.sh ran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == reo ]]; then
@@ -91,8 +91,8 @@ elif [[ $1 == reo ]]; then
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/reo/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/reo/newfiles"
-    echo "vcftofasta.sh ran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == vsv ]]; then
@@ -100,8 +100,8 @@ elif [[ $1 == vsv ]]; then
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/vsv/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/vsv/newfiles"
-    echo "vcftofasta.sh ran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == isav ]]; then
@@ -109,8 +109,8 @@ elif [[ $1 == isav ]]; then
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/isav/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/isav/newfiles"
-    echo "vcftofasta.sh ran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 else
