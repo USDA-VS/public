@@ -545,7 +545,7 @@ elif [[ $1 == h5n2 ]]; then
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/h5n2/snp_analysis/script2/"
     echo "vcftofasta.sh ran as H5N2"
     echo "Script vcftofasta.sh ran using h5n2 variables" > section5
-    email_list="tod.p.stuber@usda.gov"
+    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == h5nx ]]; then
 
@@ -562,7 +562,7 @@ elif [[ $1 == h5nx ]]; then
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/h5nx/snp_analysis/script2/"
     echo "vcftofasta.sh ran as H5Nx"
     echo "Script vcftofasta.sh ran using h5nx variables" > section5
-    email_list="tod.p.stuber@usda.gov"
+    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 else
 
