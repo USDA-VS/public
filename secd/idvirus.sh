@@ -113,9 +113,18 @@ elif [[ $1 == isav ]]; then
     echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
+elif [[ $1 == h11n9 ]]; then
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
+    krakenDatabase="/home/shared/databases/kraken/std/"
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h11n9/*fasta
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/h11n9/identification"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
+    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+
 else
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: aiall, sivall, h5n2, h5n8, secd, reo, vsv, isav"
+    echo "Incorrect argument!  Must use one of the following arguments: aiall, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav"
     echo ""
     echo "Set optional flags"
     echo -e '   flag -m will email just "M"e'
