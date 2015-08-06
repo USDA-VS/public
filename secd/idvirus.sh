@@ -48,6 +48,15 @@ if [[ $1 == sivall ]]; then
     echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
+elif [[ $1 == test ]]; then
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
+    krakenDatabase="/home/shared/databases/kraken/std/"
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/test/*fasta
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/aiall/newfiles"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
+    email_list="tod.p.stuber@usda.gov" # Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+
 elif [[ $1 == aiall ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
@@ -124,7 +133,7 @@ elif [[ $1 == h11n9 ]]; then
 
 else
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: aiall, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav"
+    echo "Incorrect argument!  Must use one of the following arguments: test, aiall, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav"
     echo ""
     echo "Set optional flags"
     echo -e '   flag -m will email just "M"e'
@@ -1044,7 +1053,11 @@ echo "*** NT Database ***" >> ${summaryfile}
 awk 'BEGIN{printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s\n", "query ID", "qlength", "slength", "% id", "mis", "evalue", "bscore", "Description"} {printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' ${sampleName}-consensus-max1-nt.txt >> ${summaryfile}
 echo "" >> ${summaryfile}
 
-if [ $pingyrdb == yes ]; then
+pingyrdb=`grep -m 1 -o "H5N2" ${summaryfile}`
+echo "In the pingyrdb varable: $pingyrdb"
+read -p "$LINENO Enter"
+
+if [ -n $pingyrdb ]; then
     echo "pintail-gyrfalcon BLAST $contigcount contigs..."
     blastn -query ${sampleName}.consensusnoN.reads.fasta -db /data/BLAST/blastdb-pintail-gyrfalcon/pintail-gyrfalcon.fsa -num_threads 20 -out ${sampleName}-consensus-blast_alignment-pintail-gyrfalcon.txt -outfmt 1
     blastn -query ${sampleName}.consensusnoN.reads.fasta -db /data/BLAST/blastdb-pintail-gyrfalcon/pintail-gyrfalcon.fsa -num_threads 20 -out ${sampleName}-consensus-fmt6-pintail-gyrfalcon.txt -outfmt "6 qseqid qlen slen pident mismatch evalue bitscore stitle saccver"
@@ -1171,7 +1184,7 @@ fi
 if [[ $sampleType == "paired" ]]; then
 	echo "paried data, not checking for C insert"
 else
-	if [ $pingyrdb == yes ]; then
+	if [ -n $pingyrdb ]; then
 		noc=`egrep -c "GAGTTGACATAAACCAGGCCACGC|GCGTGGCCTGGTTTATGTCAACTC" $forReads`
 		cinsert=`egrep -c "GAGTTGACATAAACCCAGGCCACGC|GCGTGGCCTGGGTTTATGTCAACTC" $forReads`
         insert1=`egrep -c "GAGTTGACATAAA[AGT]CCAGGCCACGC|GCGTGGCCTGG[ACT]TTTATGTCAACTC" $forReads`
