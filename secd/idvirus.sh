@@ -34,7 +34,7 @@ shift $(($OPTIND - 1))
 argUsed=`echo $1 | tr '[:lower:]' '[:upper:]'`
 
 # By default
-pingyrdb=no
+
 #######################################################################################
 #|||||||||||||||||||||||||||||| Environment Controls ||||||||||||||||||||||||||||||||||
 #######################################################################################
@@ -57,11 +57,11 @@ elif [[ $1 == test ]]; then
     echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov" # Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
-elif [[ $1 == aiall ]]; then
+elif [[ $1 == allflu ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
-    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/aiall/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/aiall/newfiles"
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/allflu/*fasta
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
     echo "idvirus.sh ran targeting $1"
     echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
@@ -133,7 +133,7 @@ elif [[ $1 == h11n9 ]]; then
 
 else
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: test, aiall, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav"
+    echo "Incorrect argument!  Must use one of the following arguments: test, allflu, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav"
     echo ""
     echo "Set optional flags"
     echo -e '   flag -m will email just "M"e'
@@ -1053,7 +1053,7 @@ echo "*** NT Database ***" >> ${summaryfile}
 awk 'BEGIN{printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s\n", "query ID", "qlength", "slength", "% id", "mis", "evalue", "bscore", "Description"} {printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' ${sampleName}-consensus-max1-nt.txt >> ${summaryfile}
 echo "" >> ${summaryfile}
 
-pingyrdb=`grep -m 1 -o "H5N2" ${summaryfile}`
+pingyrdb=`egrep -m 1 -o "H5N1|H5N2|H5N8" ${summaryfile}`
 echo "In the pingyrdb varable: $pingyrdb"
 read -p "$LINENO Enter"
 
@@ -1221,12 +1221,14 @@ if [ "$mflag" ]; then
     cat ${emailbody} | mutt -s "Sample: ${sampleName}, Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
     rm emailfiles
 else
+    echo "" >> ${emailbody}
+    echo "Files copied to: ${bioinfoVCF}" >> ${emailbody}		
     cat ${emailbody} | mutt -s "Sample: ${sampleName}, Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
 
     rm ${emailbody}
     rm emailfiles
-    #echo "Copying to ${bioinfoVCF}"
-    #cp -r $PWD ${bioinfoVCF}
+    echo "Copying to ${bioinfoVCF}"
+    cp -r $PWD ${bioinfoVCF}
 
 fi
 
