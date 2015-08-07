@@ -235,7 +235,7 @@ elif [ $1 == TB3 ]; then
 #cp /home/shared/mycobacterium/tbc/snppipeline/tb3/NC_021193.fasta ./
 #hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/HQ-13-7575.vcf"
 cp /home/shared/mycobacterium/tbc/snppipeline/tb3/NC_021193it3-readreference.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/14-1537-highqualitysnps.vcf"
+hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/13-7575-highqualitysnps.vcf"
 
 #bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/newFiles"
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
@@ -638,6 +638,7 @@ rm ../*identifier_out2*
 mv ${startingdir}/fastq ${startingdir}/spoligo
 rm ${startingdir}/spoligo/*fastq
 rm -r ${startingdir}/temp
+ln qualityvalues/$n.stats.txt ./stats-$n.txt
 
 cp $0 ./
 

@@ -33,6 +33,8 @@ shift $(($OPTIND - 1))
 # This must be below the getopts
 argUsed=`echo $1 | tr '[:lower:]' '[:upper:]'`
 
+pingyrdb=""
+
 # By default
 
 #######################################################################################
@@ -1055,9 +1057,8 @@ echo "" >> ${summaryfile}
 
 pingyrdb=`egrep -m 1 -o "H5N1|H5N2|H5N8" ${summaryfile}`
 echo "In the pingyrdb varable: $pingyrdb"
-read -p "$LINENO Enter"
 
-if [ -n $pingyrdb ]; then
+if [[ -n $pingyrdb ]]; then
     echo "pintail-gyrfalcon BLAST $contigcount contigs..."
     blastn -query ${sampleName}.consensusnoN.reads.fasta -db /data/BLAST/blastdb-pintail-gyrfalcon/pintail-gyrfalcon.fsa -num_threads 20 -out ${sampleName}-consensus-blast_alignment-pintail-gyrfalcon.txt -outfmt 1
     blastn -query ${sampleName}.consensusnoN.reads.fasta -db /data/BLAST/blastdb-pintail-gyrfalcon/pintail-gyrfalcon.fsa -num_threads 20 -out ${sampleName}-consensus-fmt6-pintail-gyrfalcon.txt -outfmt "6 qseqid qlen slen pident mismatch evalue bitscore stitle saccver"
@@ -1184,7 +1185,7 @@ fi
 if [[ $sampleType == "paired" ]]; then
 	echo "paried data, not checking for C insert"
 else
-	if [ -n $pingyrdb ]; then
+	if [[ -n $pingyrdb ]]; then
 		noc=`egrep -c "GAGTTGACATAAACCAGGCCACGC|GCGTGGCCTGGTTTATGTCAACTC" $forReads`
 		cinsert=`egrep -c "GAGTTGACATAAACCCAGGCCACGC|GCGTGGCCTGGGTTTATGTCAACTC" $forReads`
         insert1=`egrep -c "GAGTTGACATAAA[AGT]CCAGGCCACGC|GCGTGGCCTGG[ACT]TTTATGTCAACTC" $forReads`
