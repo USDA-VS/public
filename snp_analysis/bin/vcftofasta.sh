@@ -998,10 +998,14 @@ wait
 if [ "$cflag" ]; then
 echo "Finding positions to filter, At line $LINENO"
 
+# Get the positions in table
 sed 's/chrom[0-9]-//' clean_total_pos | awk '{print $1}' > prepositionlist
 
+# For each position in table do...
 for n  in `cat prepositionlist`; do
 
+# Count the number of vcfs that have the position
+# Only take into account positions that are present in 3 or more vcfs and place these positions into a new list
 (positioncount=`awk -v n=$n ' $2 == n {count++} END {print count}' ./starting_files/*vcf`
 echo "position count: $positioncount"        
 if [ $positioncount -gt 2 ]; then 
@@ -1014,10 +1018,13 @@ done
 
 for p in `cat positionlist`; do
 
+# Get the max qual value in all vcf at position
 (maxqual=`awk -v p=$p 'BEGIN{max=0} $2 == p {if ($6>max) max=$6} END {print max}' ./starting_files/*vcf | sed 's/\..*//'`
 
+# Get the max map quality
         maxmap=`awk -v p=$p ' $2 == p {print $8}' ./starting_files/*vcf | sed 's/.*;MQ=\(.*\);MQ.*/\1/' | sed 's/;MQ.*//' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'`
 
+# If the max qual is less than 800 OR the max map is less than 52 then filter position
         if [ $maxqual -lt 800  ] || [ $maxmap -lt 52  ]; then
                 echo "maxqual $maxqual" >> filterpositiondetail
                 echo "maxmap $maxmap" >> filterpositiondetail
