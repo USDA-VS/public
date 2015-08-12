@@ -1,6 +1,7 @@
 #!/bin/sh
 
 root=`pwd`
+flu=no
 
 #PATHs
 picardPath='/usr/local/bin/picard-tools-1.117/'
@@ -54,10 +55,21 @@ elif [[ $1 == test ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/test/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/aiall/newfiles"
+    #bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/aiall/newfiles"
     echo "idvirus.sh ran targeting $1"
     echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov" # Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+
+elif [[ $1 == flu ]]; then
+    flu=yes
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
+    krakenDatabase="/home/shared/databases/kraken/std/"
+    pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/flu/*fasta
+    #bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
+    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" 
 
 elif [[ $1 == allflu ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
@@ -224,7 +236,7 @@ if [[ $sampleType == "paired" ]]; then
     echo "R2 file size: ${revFileSize}, read count: $revCount" >> $summaryfile
 
     echo "R1 file size: ${forFileSize}, read count: $forCount" >> ${emailbody}
-    echo "R2 file size: ${revFileSize}, read count: $revCount" >> ${emailbody}
+   echo "R2 file size: ${revFileSize}, read count: $revCount" >> ${emailbody}
 else
     echo "Single fastq file size: ${forFileSize}, read count: $forCount" >> $summaryfile
     echo "Single fastq file size: ${forFileSize}, read count: $forCount" >> $emailbody
@@ -885,6 +897,125 @@ echo "Set up references"
 # Reference is set in Environment Controls
 # target will only call "fasta" files
 
+if [[ $flu=yes ]]; then
+
+function findbest () {
+
+ref=`ls | grep .fasta`
+echo "Reference Input:  $ref"
+refname=${ref%.fasta}
+
+bwa index $ref
+samtools faidx $ref
+java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+
+if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
+    echo "Index and dict are present, continue script"
+else
+    sleep 5
+    echo "Either index or dict for reference is missing, try making again"
+    samtools faidx $ref
+    java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+    if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
+        read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
+    fi
+fi
+
+#adding -B 8 will require reads to have few mismatches to align to reference.  -B 1 will allow the most mismatch per read. -A [1] may be increased to increase the number of mismatches allow
+if [[ $sampleType == "paired" ]]; then
+    bwa mem -M -B 1 -t 10 -T 20 -P -a -R @RG"\t"ID:"$refname""\t"PL:ILLUMINA"\t"PU:"$refname"_RG1_UNIT1"\t"LB:"$refname"_LIB1"\t"SM:"$refname" $ref $forReads $revReads > ${refname}.sam
+else
+    bwa mem -M -B 1 -t 10 -T 20 -P -a -R @RG"\t"ID:"$refname""\t"PL:ILLUMINA"\t"PU:"$refname"_RG1_UNIT1"\t"LB:"$refname"_LIB1"\t"SM:"$refname" $ref $forReads > ${refname}.sam
+fi
+
+samtools view -bh -F4 -T $ref ${refname}.sam > ${refname}.raw.bam
+echo "Sorting Bam"
+samtools sort ${refname}.raw.bam ${refname}.sorted
+echo "****Indexing Bam"
+samtools index ${refname}.sorted.bam
+
+#Number of nucleotides in reference with coverage
+echo "*** Bamtools is getting coverage..."
+bamtools coverage -in ${refname}.sorted.bam | awk -v x=${refname} 'BEGIN{OFS="\t"}{print x, $2, $3}' >> ${refname}-coveragefile
+
+#Length of reference
+countNTs=`grep -v ">" $ref | wc | awk '{print $3}'`
+
+covCount=`awk '{ if ($3 != 0) count++ } END { print count }' ${refname}-coveragefile`
+echo "covCount $covCount"
+
+declare -i x=${covCount}
+declare -i y=${countNTs}
+
+#Percent of reference with coverage
+perc=`awk -v x=$x -v y=$y 'BEGIN { print(x/y)*100}'`
+echo "perc: $perc"
+
+printf "%-20s %11.2f%% %'10dX\n" ${refname} $perc $covCount >> ${root}/${s}/${sampleName}.findbest
+}
+
+    cp $targetref ./
+	cd ${root}
+	mkdir segment{1..8}
+	mv segment1*fasta ./segment1/
+        mv segment2*fasta ./segment2/
+	mv segment3*fasta ./segment3/
+	mv segment4*fasta ./segment4/
+	mv segment5*fasta ./segment5/
+	mv segment6*fasta ./segment6/
+	mv segment7*fasta ./segment7/
+	mv segment8*fasta ./segment8/
+
+	mv segment1 ./segment1_PB2/
+        mv segment2 ./segment2_PB1/
+        mv segment3 ./segment3_PA/
+        mv segment4 ./segment4_HA/
+        mv segment5 ./segment5_NP/
+        mv segment6 ./segment6_NA/
+        mv segment7 ./segment7_MP/
+        mv segment8 ./segment8_NS/
+	
+	for s in segment*; do
+		(cd $root
+		cd $s
+		echo "s: $s"
+		pwd
+		for i in *fasta; do
+			(cd ${root}/${s}
+			mkdir ${i%.fasta}
+        		mv ${i} ${i%.fasta}
+			ln ${root}/*fastq* ${i%.fasta}
+        		echo "working on $sampleName $s $i"
+       			cd ${i%.fasta}; findbest) &
+	        let count+=1
+                [[ $((count%55)) -eq 0 ]] && wait
+    		done
+	wait
+	cd ${root}/$s
+	best=`sort -rk2,3 ${root}/${s}/${sampleName}.findbest | head -1 | awk '{print $1}'` 
+	echo "The best found: $best"
+	rm -r `ls | grep -v ${best}` 
+	find . -name "*gz" -exec mv {} ./ \;
+	find . -name "*fasta" -exec mv {} ./ \;
+	segmentname=${PWD##*/}  # Segment name from working directory 
+	rm -r ${best}
+	mv *fasta ${segmentname}.fasta) &
+                let count+=1
+                [[ $((count%55)) -eq 0 ]] && wait
+	done
+
+	wait
+	cd $root
+	pwd
+
+	for i in segment*; do 
+		(echo ""; echo "####### $i ########"; echo ""; cd ${root}; cd $i; alignreads) &
+                let count+=1
+                [[ $((count%55)) -eq 0 ]] && wait
+	done
+
+else
+
 if [ "$bflag" ]; then
     echo ""
     echo " *** B FLAG ON, BUG FINDING MODE, SINGLE SAMPE PROCESSING *** "
@@ -896,7 +1027,8 @@ if [ "$bflag" ]; then
         cp ${i} ${i%.fasta}
         cp *fastq ${i%.fasta}
         echo "working on $sampleName $i"
-        cd ${i%.fasta}; alignreads
+        read -p "$LINENO ENTER"
+	cd ${i%.fasta}; alignreads
     done
 else
     for i in `ls $targetref`; do cp $i ./; done
@@ -910,6 +1042,7 @@ else
     let count+=1
     [[ $((count%10)) -eq 0 ]] && wait
     done
+fi
 fi
 wait
 
@@ -1216,6 +1349,10 @@ rm *fastq*
 
 #Cleanup
 rm -r `ls | egrep -v "emailfile|emailfiles|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
+
+mkdir fastas
+cp $targetref ./fastas
+pwd > ./fastas/filelocation.txt
 
 if [ "$mflag" ]; then
     email_list="tod.p.stuber@usda.gov"
