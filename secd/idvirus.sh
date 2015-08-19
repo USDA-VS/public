@@ -10,6 +10,7 @@ pythonGetFasta="/home/tstuber/workspace/stuber/python_scripts/GetFASTAbyGI.py"
 
 # NCBI downloaded reference location
 mydb="/data/mydb"
+idscriptrunsummary="/home/shared/idvirus_run_summary.txt"
 
 # flag -m will email just "M"e
 # flag -b will turn off muliple for starts for "B"ug finding
@@ -46,15 +47,26 @@ if [[ $1 == sivall ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/sivall/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/siv/identification/"
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
     echo "idvirus.sh ran targeting $1"
     echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
-elif [[ $1 == test ]]; then
+elif [[ $1 == gen ]]; then
+    genotypingcodes="NEED TO SET"
+    krakenDatabase="/home/shared/databases/kraken/std/"
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/gen/*fasta
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
+    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+
+
+elif [[ $1 == testflu ]]; then
+    flu=yes
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
-    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/test/*fasta
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/testflu/*fasta
     #bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/aiall/newfiles"
     echo "idvirus.sh ran targeting $1"
     echo "Script idvirus.sh ran targeting $1"
@@ -66,7 +78,7 @@ elif [[ $1 == flu ]]; then
     krakenDatabase="/home/shared/databases/kraken/std/"
     pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/flu/*fasta
-    #bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
     echo "idvirus.sh ran targeting $1"
     echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" 
@@ -85,7 +97,7 @@ elif [[ $1 == h5n2 ]]; then
     krakenDatabase="/home/shared/databases/kraken/std/"
     pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h5n2/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/h5n2/newfiles"
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
     echo "idvirus.sh rran targeting $1"
     echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
@@ -95,7 +107,7 @@ elif [[ $1 == h5n8 ]]; then
     krakenDatabase="/home/shared/databases/kraken/std/"
     pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h5n8/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/h5n8/newfiles"
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
     echo "idvirus.sh rran targeting $1"
     echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
@@ -147,7 +159,7 @@ elif [[ $1 == h11n9 ]]; then
 
 else
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: test, allflu, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav"
+    echo "Incorrect argument!  Must use one of the following arguments: gen, testflu, allflu, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav"
     echo ""
     echo "Set optional flags"
     echo -e '   flag -m will email just "M"e'
@@ -536,6 +548,13 @@ countNTs=`grep -v ">" $ref | wc | awk '{print $3}'`
 echo "*** Bamtools is getting coverage..."
 bamtools coverage -in ${orgref}-${refname}.dup.bam | awk -v x=${orgref}-${refname} 'BEGIN{OFS="\t"}{print x, $2, $3}' >> ${orgref}-${refname}-coveragefile
 
+#Mean depth of coverage
+meancov=`awk '{ sum += $3 } END { if (NR > 0) print sum / NR }' ${orgref}-${refname}-coveragefile`
+
+#Length of reference
+countNTs=`awk 'END{print NR}' ${orgref}-${refname}-coveragefile`
+
+#count positions with coverage
 covCount=`awk '{ if ($3 != 0) count++ } END { print count }' ${orgref}-${refname}-coveragefile`
 echo "covCount $covCount"
 
@@ -546,15 +565,11 @@ declare -i y=${countNTs}
 perc=`awk -v x=$x -v y=$y 'BEGIN { print(x/y)*100}'`
 echo "perc: $perc"
 
-#Average depth of coverage for the reference
-depthcov=`awk '{sum+=$3} END { print sum/NR}' ${orgref}-${refname}-coveragefile`
-echo "depthcov $depthcov"
-
 LC_NUMERIC=en_US
-printf "%-45s %'10d %11.2f%% %'10dX\n" ${orgref}-${refname} $mapCount $perc $depthcov >> ${summaryfile}.pre
+printf "%-45s %'10d %11.2f%% %'10dX\n" ${orgref}-${refname} $mapCount $perc $meancov >> ${summaryfile}.pre
 
 echo "`printf "%'.0f\n" ${mapCount}` reads aligned to ${orgref}-${refname}"
-echo "${perc}% genome coverage, $depthcov"
+echo "${perc}% genome coverage, $meancov"
 
 awk -v x=${orgref}-${refname} 'BEGIN {OFS="\t"} {print x, $2, $3}' ${orgref}-${refname}-coveragefile | grep -v "segment_all" > ${orgref}-${refname}-samplecoveragefile
 
@@ -897,7 +912,7 @@ echo "Set up references"
 # Reference is set in Environment Controls
 # target will only call "fasta" files
 
-if [[ $flu=yes ]]; then
+if [[ $flu == yes ]]; then
 
 function findbest () {
 
@@ -938,9 +953,13 @@ samtools index ${refname}.sorted.bam
 echo "*** Bamtools is getting coverage..."
 bamtools coverage -in ${refname}.sorted.bam | awk -v x=${refname} 'BEGIN{OFS="\t"}{print x, $2, $3}' >> ${refname}-coveragefile
 
-#Length of reference
-countNTs=`grep -v ">" $ref | wc | awk '{print $3}'`
+#Mean depth of coverage
+meancov=`awk '{ sum += $3 } END { if (NR > 0) print sum / NR }' ${refname}-coveragefile`
 
+#Length of reference
+countNTs=`awk 'END{print NR}' ${refname}-coveragefile`
+
+#count positions with coverage
 covCount=`awk '{ if ($3 != 0) count++ } END { print count }' ${refname}-coveragefile`
 echo "covCount $covCount"
 
@@ -951,7 +970,7 @@ declare -i y=${countNTs}
 perc=`awk -v x=$x -v y=$y 'BEGIN { print(x/y)*100}'`
 echo "perc: $perc"
 
-printf "%-20s %11.2f%% %'10dX\n" ${refname} $perc $covCount >> ${root}/${s}/${sampleName}.findbest
+printf "%-20s %11.2f%% %'10dX\n" ${refname} $perc $meancov >> ${root}/${s}/${sampleName}.findbest
 }
 
     cp $targetref ./
@@ -992,7 +1011,9 @@ printf "%-20s %11.2f%% %'10dX\n" ${refname} $perc $covCount >> ${root}/${s}/${sa
     		done
 	wait
 	cd ${root}/$s
-	best=`sort -rk2,3 ${root}/${s}/${sampleName}.findbest | head -1 | awk '{print $1}'` 
+	averagecov=`awk '{ sum += $3 } END { if (NR > 0) print sum / NR }' ${root}/${s}/${sampleName}.findbest`
+	best=`sed 's/X$//g' ${root}/${s}/${sampleName}.findbest | awk -v x=$averagecov ' $3 > x {print $0}' | sort -rk2,3 | head -1 | awk '{print $1}'`
+	#best=`sort -rk2,3 ${root}/${s}/${sampleName}.findbest | head -1 | awk '{print $1}'` 
 	echo "The best found: $best"
 	rm -r `ls | grep -v ${best}` 
 	find . -name "*gz" -exec mv {} ./ \;
@@ -1032,6 +1053,7 @@ if [ "$bflag" ]; then
     done
 else
     for i in `ls $targetref`; do cp $i ./; done
+
     for i in *fasta; do
         (cd ${root}
         mkdir ${i%.fasta}
@@ -1058,6 +1080,11 @@ echo "" >> ${summaryfile}
 echo "Alignment stats (reference guided):" >> ${summaryfile}
 printf "%-45s %10s %11s %10s\n" "reference used" "read count" "percent cov" "ave depth" >> ${summaryfile}
 sort -k1,1 < ${summaryfile}.pre >> ${summaryfile}
+
+currentdate=`date`
+sort -k1,1 < ${summaryfile}.pre | awk -v name="$sampleName" -v curdate="$currentdate" 'BEGIN{OFS="\t"} {print curdate, name, $1, $2, $3, $4}' >> $idscriptrunsummary
+
+sort -k1,1 < ${summaryfile}.pre | awk -v name="$sampleName" -v curdate="$currentdate" 'BEGIN{OFS="\t"} {print curdate, name, $1, $2, $3, $4}' >> /bioinfo11/TStuber/Results/viruses/idvirus_run_summary.txt
 
 echo "" >> ${emailbody}
 echo "Alignment stats (reference guided):" >> ${emailbody}

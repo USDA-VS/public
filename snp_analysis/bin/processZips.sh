@@ -324,9 +324,16 @@ elif [ $1 == para ]; then
 
     ###################################################################
 
+
+elif [ $1 == secd ]; then
+   cp /home/shared/virus/secd/scriptDependents/KC210145.fasta ./
+   hqs="/home/shared/virus/secd/scriptDependents/HighestQualitySNPs.vcf"
+   #bioinfo=""
+   #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+
 else
     echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, s
-uis2, suis3, suis4, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para"
+uis2, suis3, suis4, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para, secd"
     exit 1
 fi
 
@@ -378,6 +385,9 @@ bwa mem -M -t 16 -R @RG"\t"ID:"$n""\t"PL:ILLUMINA"\t"PU:"$n"_RG1_UNIT1"\t"LB:"$n
 echo "***Making Bam file"
 samtools view -bh -F4 -T $ref $n.sam > $n.raw.bam
 
+if [ $1 == secd ]; then
+        echo "secd, not assembling unmapped reads"
+else
 ####### unmapped reads #######
 #Bam with mapped and unmapped reads
 samtools view -bh -T $ref $n.sam > $n.all.bam
@@ -398,6 +408,7 @@ mv ${n}_abyss-stats ../unmappedReads
 mv *coverage* ../unmappedReads
 rm *abyss*
 ######################
+fi
 
 echo "***Sorting Bam"
 samtools sort $n.raw.bam $n.sorted
@@ -457,6 +468,9 @@ java -jar ${gatk} -T DepthOfCoverage -R $ref -I $n.ready-mem.bam -o $n.coverage 
 
 #########################
 
+if [ $1 == secd ]; then
+	echo "secd, not using haplotypecaller"
+else
 # http://www.broadinstitute.org/gatk/guide/tagged?tag=unifiedgenotyper
 # In group tb4b position 3336835 was not being found in some isolates.  Adding this advance flag allowed these positions to be found.
 # ploidy 2 is default
@@ -489,6 +503,8 @@ cat $n.body $n.vcfFormated | awk 'BEGIN{OFS="\t"}{if ($4 == ".") print $1, $2, $
 cat $n.header $n.SNPsMapzeroNoHeader.vcf > $n.unsortSNPsZeroCoverage.vcf
 java -Xmx4g -jar ${igvtools} sort $n.unsortSNPsZeroCoverage.vcf $n.SNPsZeroCoverage.vcf
 java -Xmx4g -jar ${igvtools} index $n.SNPsZeroCoverage.vcf
+
+fi
 
 # Add zero positions to vcf
 java -Xmx4g -jar ${gatk} -R $ref -T UnifiedGenotyper -out_mode EMIT_ALL_SITES -I ${n}.ready-mem.bam -o ${n}.allsites.vcf -nt 8
