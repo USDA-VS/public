@@ -15,16 +15,20 @@ idscriptrunsummary="/home/shared/idvirus_run_summary.txt"
 # flag -m will email just "M"e
 # flag -b will turn off muliple for starts for "B"ug finding
 # flag -k will run Kraken
+# flag -e flag used when running script from idemail.sh
 bflag=
 mflag=
 kflag=
-while getopts 'bmk' OPTION; do
+eflag=
+while getopts 'bmke' OPTION; do
     case $OPTION in
         b) bflag=1
         ;;
         m) mflag=1
         ;;
         k) kflag=1
+        ;;
+        e) eflag=1
         ;;
         ?) echo "Invalid option: -$OPTARG" >&2
         ;;
@@ -53,7 +57,7 @@ if [[ $1 == sivall ]]; then
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == gen ]]; then
-    genotypingcodes="NEED TO SET"
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/gen/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
@@ -974,6 +978,8 @@ printf "%-20s %11.2f%% %'10dX\n" ${refname} $perc $meancov >> ${root}/${s}/${sam
 }
 
     cp $targetref ./
+    mkdir fastas
+    cp $targetref ./fastas
 	cd ${root}
 	mkdir segment{1..8}
 	mv segment1*fasta ./segment1/
@@ -1042,6 +1048,8 @@ if [ "$bflag" ]; then
     echo " *** B FLAG ON, BUG FINDING MODE, SINGLE SAMPE PROCESSING *** "
     echo ""
     for i in `ls $targetref`; do cp $i ./; done
+    mkdir fastas
+    cp $targetref ./fastas
     for i in *fasta; do
         cd ${root}
         mkdir ${i%.fasta}
@@ -1053,7 +1061,8 @@ if [ "$bflag" ]; then
     done
 else
     for i in `ls $targetref`; do cp $i ./; done
-
+    mkdir fastas
+    cp $targetref ./fastas
     for i in *fasta; do
         (cd ${root}
         mkdir ${i%.fasta}
@@ -1091,7 +1100,6 @@ echo "Alignment stats (reference guided):" >> ${emailbody}
 printf "%-45s %10s %11s %10s\n" "reference used" "read count" "percent cov" "ave depth" >> ${emailbody}
 sort -k1,1 < ${summaryfile}.pre >> ${emailbody}
 
-rm ${summaryfile}.pre
 #####################
 
 for i in `find . -name "*samplecoveragefile"`; do
@@ -1214,6 +1222,12 @@ echo "--------------------------------------------------" >> ${summaryfile}
 echo "*** NT Database ***" >> ${summaryfile}
 awk 'BEGIN{printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s\n", "query ID", "qlength", "slength", "% id", "mis", "evalue", "bscore", "Description"} {printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' ${sampleName}-consensus-max1-nt.txt >> ${summaryfile}
 echo "" >> ${summaryfile}
+
+sort -k1,1 < ${summaryfile}.pre > ${summaryfile}.sorted
+echo "*** ${sampleName}" >> /scratch/report/idemailsummary
+paste ${summaryfile}.sorted ${sampleName}-consensus-max1-nt.txt | awk 'BEGIN{printf "%-30s %-11s %-8s %-10s %-3s %-6s %-6s %-1s\n", "ID", "read count", "per cov", "ave depth", "mis", "evalue", "bscore", "Description"} {printf "%-30s %-11s %-8s %-10s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' >> /scratch/report/idemailsummary
+
+rm ${summaryfile}.pre ${summaryfile}.sorted
 
 pingyrdb=`egrep -m 1 -o "H5N1|H5N2|H5N8" ${summaryfile}`
 echo "In the pingyrdb varable: $pingyrdb"
@@ -1377,24 +1391,32 @@ rm *fastq*
 #Cleanup
 rm -r `ls | egrep -v "emailfile|emailfiles|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
 
-mkdir fastas
-cp $targetref ./fastas
 pwd > ./fastas/filelocation.txt
 
-if [ "$mflag" ]; then
-    email_list="tod.p.stuber@usda.gov"
-    cat ${emailbody} | mutt -s "Sample: ${sampleName}, Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
-    rm emailfiles
+if [ "$eflag" ]; then
+	# eflag is used when script is called from idemail.sh
+	# making summary file to send in email
+	echo "Files copied to: ${bioinfoVCF}" >> /scratch/report/idemailsummary
+	echo "" >> /scratch/report/idemailsummary
+	rm emailfile*
+	echo "Copying to ${bioinfoVCF}"
+        cp -r $PWD ${bioinfoVCF}
 else
-    echo "" >> ${emailbody}
-    echo "Files copied to: ${bioinfoVCF}" >> ${emailbody}		
-    cat ${emailbody} | mutt -s "Sample: ${sampleName}, Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
+	# else when idvirus.sh is ran on its own
+	if [ "$mflag" ]; then
+    		email_list="tod.p.stuber@usda.gov"
+    		cat ${emailbody} | mutt -s "Sample: ${sampleName}, Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
+    		rm emailfiles
+	else
+    		echo "" >> ${emailbody}
+    		echo "Files copied to: ${bioinfoVCF}" >> ${emailbody}		
+    		cat ${emailbody} | mutt -s "Sample: ${sampleName}, Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
 
-    rm ${emailbody}
-    rm emailfiles
-    echo "Copying to ${bioinfoVCF}"
-    cp -r $PWD ${bioinfoVCF}
-
+    		rm ${emailbody}
+    		rm emailfiles
+    		echo "Copying to ${bioinfoVCF}"
+    		cp -r $PWD ${bioinfoVCF}
+	fi
 fi
 
 echo "****************************** END ******************************"
