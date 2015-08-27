@@ -10,6 +10,17 @@ pythonGetFasta="/home/tstuber/workspace/stuber/python_scripts/GetFASTAbyGI.py"
 
 # NCBI downloaded reference location
 mydb="/data/mydb"
+#Delete files in local database that may be empty
+dzdo chmod 755 * ${mydb}/*
+for i in ${mydb}/*; do
+	if [ -s $i ]; then
+        	echo "file $i exists"
+	else
+        	echo "file $i is empty and has been deleted"
+		rm -f $i
+	fi
+done
+
 idscriptrunsummary="/home/shared/idvirus_run_summary.txt"
 
 # flag -m will email just "M"e
@@ -152,6 +163,15 @@ elif [[ $1 == isav ]]; then
     echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
+elif [[ $1 == bvd ]]; then
+    genotypingcodes="NEED TO SET"
+    krakenDatabase="/home/shared/databases/kraken/std/"
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/bvd/*fasta
+    bioinfoVCF="/bioinfo11/KBrien/newfiles"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
+    email_list="tod.p.stuber@usda.gov Kaitlin.E.Brien@aphis.usda.gov"
+
 elif [[ $1 == h11n9 ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
@@ -163,7 +183,7 @@ elif [[ $1 == h11n9 ]]; then
 
 else
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: gen, testflu, allflu, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav"
+    echo "Incorrect argument!  Must use one of the following arguments: gen, testflu, allflu, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav, bvd"
     echo ""
     echo "Set optional flags"
     echo -e '   flag -m will email just "M"e'
@@ -391,17 +411,22 @@ fi
 # make reference guided contig
 java -Xmx2g -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${refname}.readreference.fasta -V ${refname}.UG.vcf
 
-echo ">${refname}" > ${refname}.readreference.temp; awk ' $8 ~ /^AN=2/ {print $4} ' ${refname}.UG.vcf | tr -d [:space:] >> ${refname}.readreference.temp; echo "" >> ${refname}.readreference.temp; mv ${refname}.readreference.temp ${refname}.readreference.fasta
+#echo ">${refname}" > ${refname}.readreference.temp; awk ' $8 ~ /^AN=2/ {print $4} ' ${refname}.UG.vcf | tr -d [:space:] >> ${refname}.readreference.temp; echo "" >> ${refname}.readreference.temp; mv ${refname}.readreference.temp ${refname}.readreference.fasta
 
 echo "short BLAST"
 blastn -query ${refname}.readreference.fasta -db /data/BLAST/db/nt -num_threads 20 -out ${refname}-readreference-max1-nt-id.txt -max_target_seqs 1 -outfmt "6 saccver"
-rm ${refname}.readreference.fasta
+#rm ${refname}.readreference.fasta
+
+head -1 ${refname}-readreference-max1-nt-id.txt > ${refname}-readreference-max1-nt-id.txt.temp; mv ${refname}-readreference-max1-nt-id.txt.temp ${refname}-readreference-max1-nt-id.txt
 
 if [ -s ${refname}-readreference-max1-nt-id.txt ]; then
     echo "Something was found"
 else
+    echo ">${refname}" > ${refname}.readreference.temp; awk ' $8 ~ /^AN=2/ {print $4} ' ${refname}.UG.vcf | tr -d [:space:] >> ${refname}.readreference.temp; echo "" >> ${refname}.readreference.temp; mv ${refname}.readreference.temp ${refname}.readreference.fasta
+    blastn -query ${refname}.readreference.fasta -db /data/BLAST/db/nt -num_threads 20 -out ${refname}-readreference-max1-nt-id.txt -max_target_seqs 1 -outfmt "6 saccver"
+    head -1 ${refname}-readreference-max1-nt-id.txt > ${refname}-readreference-max1-nt-id.txt.temp; mv ${refname}-readreference-max1-nt-id.txt.temp ${refname}-readreference-max1-nt-id.txt
     echo "No matches"
-    exit 1
+    #exit 1
 fi
 
 rm *dict
@@ -522,15 +547,15 @@ chromname=`awk ' $1 !~ /^#/ {print $1}' ${orgref}-${refname}.hapreadyAll.vcf | h
 #cat HCbody UGbody | awk '{ if (a[$2]++ == 0) print $0; }' | sort -nk2,2 > body
 
 # Get zero coverage regions the chromosome name from the UG positions needs to be updated to the HC names
-awk 'BEGIN{OFS="\t"} $10 == "./." {print $0}' ${orgref}-${refname}.UG.vcf | awk -v c=$chromname 'BEGIN{OFS="\t"} {print c, $2, $3, $4, "N", $6, $7, $8, "GT", "1"}' > zeroformated
+awk -v c=$chromname 'BEGIN{OFS="\t"}{if($10 == "./.") print c, $2, $3, $4, "N", $6, $7, $8, "GT", "1" }' ${orgref}-${refname}.UG.vcf > zeroformated
 
 cat snps zeroformated | sort -nk2,2 > body
 
-cp ${orgref}-${refname}.hapreadyAll.vcf OLD-${orgref}-${refname}.hapreadyAll.vcf
-cat header body > ${orgref}-${refname}.hapreadyAll.vcf
+#cp ${orgref}-${refname}.hapreadyAll.vcf OLD-${orgref}-${refname}.hapreadyAll.vcf
+cat header body > ${orgref}-${refname}.newhapreadyAll.vcf
 
 # make reference guided contig
-java -Xmx2g -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${orgref}-${refname}.reference_guided.fasta -V ${orgref}-${refname}.hapreadyAll.vcf -IUPAC ${orgref}-${refname}
+java -Xmx2g -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${orgref}-${refname}.reference_guided.fasta -V ${orgref}-${refname}.newhapreadyAll.vcf -IUPAC ${orgref}-${refname}
 
 if [ $sampleType == "paired" ]; then
     java -Xmx2g -jar ${picardPath}/SamToFastq.jar INPUT=${orgref}-${refname}.dup.bam FASTQ=./${orgref}-${refname}-mapped_R1.fastq SECOND_END_FASTQ=./${orgref}-${refname}-mapped_R2.fastq
@@ -670,6 +695,7 @@ else
 fi
 
 #########
+
 # make reference guided contig using Unified Genotyper
 java -Xmx2g -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${refname}.readreference.fasta -V ${orgref}-${refname}.UG.vcf
 
@@ -1017,10 +1043,16 @@ printf "%-20s %11.2f%% %'10dX\n" ${refname} $perc $meancov >> ${root}/${s}/${sam
     		done
 	wait
 	cd ${root}/$s
-	averagecov=`awk '{ sum += $3 } END { if (NR > 0) print sum / NR }' ${root}/${s}/${sampleName}.findbest`
-	best=`sed 's/X$//g' ${root}/${s}/${sampleName}.findbest | awk -v x=$averagecov ' $3 > x {print $0}' | sort -rk2,3 | head -1 | awk '{print $1}'`
-	#best=`sort -rk2,3 ${root}/${s}/${sampleName}.findbest | head -1 | awk '{print $1}'` 
+	averagecov=`sed 's/%//g' ${root}/${s}/${sampleName}.findbest | sed 's/X$//' | sed 's/,//' | awk '{ sum += $2 } END { if (NR > 0) print sum / NR }'`
+	meandepth=`sed 's/%//g' ${root}/${s}/${sampleName}.findbest | sed 's/X$//' | sed 's/,//' | awk '{ sum += $3 } END { if (NR > 0) print sum / NR }'`
+	best=`sed 's/%//g' ${root}/${s}/${sampleName}.findbest | sed 's/X$//' | sed 's/,//' | awk -v x=$averagecov ' $2+1 > x {print $0}' | awk -v x=$meandepth ' $3+1 > x {print $0}' | sort -rk2,2 | head -1 | awk '{print $1}'`
+	if [ -z $best  ]; then 
+	
+	best=`sed 's/%//' ${root}/${s}/${sampleName}.findbest | sed 's/X//' | sed 's/,//' | sort -nrk2,2 -nrk3,3 | head -1 | awk '{print $1}'` 
+	
+	fi
 	echo "The best found: $best"
+	echo "The best found: $best" >> ${root}/bestrefs.txt
 	rm -r `ls | grep -v ${best}` 
 	find . -name "*gz" -exec mv {} ./ \;
 	find . -name "*fasta" -exec mv {} ./ \;
@@ -1056,7 +1088,6 @@ if [ "$bflag" ]; then
         cp ${i} ${i%.fasta}
         cp *fastq ${i%.fasta}
         echo "working on $sampleName $i"
-        read -p "$LINENO ENTER"
 	cd ${i%.fasta}; alignreads
     done
 else
@@ -1113,6 +1144,8 @@ pwd
 
 cd $root
 
+pwd 
+
 mkdir ${sampleName}-reference_guided_assemblies
 for i in `find . -name "*reference_guided.fasta"`; do
     cp $i ${sampleName}-reference_guided_assemblies
@@ -1125,6 +1158,7 @@ for i in `ls *fasta | sort -k1,1`; do
     echo ">${i%.reference_guided.fasta}" >> ${sampleName}.consensus.reads.fasta
     awk '/^>/ {printf("\n%s\n",$0);next; } { printf("%s",$0);}  END {printf("\n");}' $i | awk 'length > x { x = length; y = $0 } END { print y }' >> ${sampleName}.consensus.reads.fasta
 done
+pwd
 
 #######################################################################################
 #|||||||||||||||||||||||||||||| Reference Set Alignment |||||||||||||||||||||||||||||||
@@ -1214,6 +1248,7 @@ wait
 
 contigcount=`grep -c ">" ${sampleName}.consensus.reads.fasta`
 sed 's/NNN//g' ${sampleName}.consensus.reads.fasta > ${sampleName}.consensusnoN.reads.fasta
+pwd
 
 echo "nt BLAST $contigcount contigs..."
 blastn -query ${sampleName}.consensusnoN.reads.fasta -db /data/BLAST/db/nt -num_threads 20 -out ${sampleName}-consensus-max1-nt.txt -max_target_seqs 1 -outfmt "6 qseqid qlen slen pident mismatch evalue bitscore stitle saccver"
@@ -1225,7 +1260,7 @@ echo "" >> ${summaryfile}
 
 sort -k1,1 < ${summaryfile}.pre > ${summaryfile}.sorted
 echo "*** ${sampleName}" >> /scratch/report/idemailsummary
-paste ${summaryfile}.sorted ${sampleName}-consensus-max1-nt.txt | awk 'BEGIN{printf "%-30s %-11s %-8s %-10s %-3s %-6s %-6s %-1s\n", "ID", "read count", "per cov", "ave depth", "mis", "evalue", "bscore", "Description"} {printf "%-30s %-11s %-8s %-10s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' >> /scratch/report/idemailsummary
+paste ${summaryfile}.sorted ${sampleName}-consensus-max1-nt.txt | awk 'BEGIN{printf "%-41s %-11s %-8s %-10s %-3s %-6s %-6s %-1s\n", "ID", "read count", "per cov", "ave depth", "mis", "evalue", "bscore", "Description"} {printf "%-41s %-11s %-8s %-10s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' >> /scratch/report/idemailsummary
 
 rm ${summaryfile}.pre ${summaryfile}.sorted
 
@@ -1305,6 +1340,7 @@ EOL
         echo "metadata not available"
         cp ${root}/${sampleName}-reference_guided_assemblies/${sampleName}.consensus.reads.fasta ${root}/${sampleName}-submissionfile.fasta
     fi
+pwd
 
 rm *temp
 rm *information
@@ -1389,18 +1425,18 @@ fi
 rm *fastq*
 
 #Cleanup
-rm -r `ls | egrep -v "emailfile|emailfiles|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
+rm -r `ls | egrep -v "emailfile|emailfiles|bestrefs.txt|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
 
 pwd > ./fastas/filelocation.txt
 
 if [ "$eflag" ]; then
 	# eflag is used when script is called from idemail.sh
 	# making summary file to send in email
-	echo "Files copied to: ${bioinfoVCF}" >> /scratch/report/idemailsummary
-	echo "" >> /scratch/report/idemailsummary
+#	echo "Files copied to: ${bioinfoVCF}" >> /scratch/report/idemailsummary
+#	echo "" >> /scratch/report/idemailsummary
 	rm emailfile*
-	echo "Copying to ${bioinfoVCF}"
-        cp -r $PWD ${bioinfoVCF}
+#	echo "Copying to ${bioinfoVCF}"
+#       cp -r $PWD ${bioinfoVCF}
 else
 	# else when idvirus.sh is ran on its own
 	if [ "$mflag" ]; then
