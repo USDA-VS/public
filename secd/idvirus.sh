@@ -534,7 +534,7 @@ echo "refname: ${refname}"
 grep '^#' ${orgref}-${refname}.hapreadyAll.vcf > header
 grep -v '^#' ${orgref}-${refname}.hapreadyAll.vcf > snps
 
-chromname=`awk ' $1 !~ /^#/ {print $1}' ${orgref}-${refname}.hapreadyAll.vcf | head -1`
+#chromname=`awk ' $1 !~ /^#/ {print $1}' ${orgref}-${refname}.hapreadyAll.vcf | head -1`
 #if [ -s HCbody ]; then
 #	echo "HCbody exists and has size greater than zero"
 #	grep -v '^#' ${orgref}-${refname}.UG.vcf | awk -v c=$chromname 'BEGIN {FS="\t"; OFS="\t"} { if($10 == "./." ) print c, $2, $3, $4, "N", $6, $7, $8, "GT", "1"; else print c, $2, $3, $4, $5, $6, $7, $8, $9, $10}' > UGbody
@@ -547,7 +547,7 @@ chromname=`awk ' $1 !~ /^#/ {print $1}' ${orgref}-${refname}.hapreadyAll.vcf | h
 #cat HCbody UGbody | awk '{ if (a[$2]++ == 0) print $0; }' | sort -nk2,2 > body
 
 # Get zero coverage regions the chromosome name from the UG positions needs to be updated to the HC names
-awk -v c=$chromname 'BEGIN{OFS="\t"}{if($10 == "./.") print c, $2, $3, $4, "N", $6, $7, $8, "GT", "1" }' ${orgref}-${refname}.UG.vcf > zeroformated
+awk -v c=$refname 'BEGIN{OFS="\t"}{if($10 == "./.") print c, $2, $3, $4, "N", $6, $7, $8, "GT", "1" }' ${orgref}-${refname}.UG.vcf > zeroformated
 
 cat snps zeroformated | sort -nk2,2 > body
 
@@ -556,6 +556,8 @@ cat header body > ${orgref}-${refname}.newhapreadyAll.vcf
 
 # make reference guided contig
 java -Xmx2g -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${orgref}-${refname}.reference_guided.fasta -V ${orgref}-${refname}.newhapreadyAll.vcf -IUPAC ${orgref}-${refname}
+
+read -p "$LINENO Enter"
 
 if [ $sampleType == "paired" ]; then
     java -Xmx2g -jar ${picardPath}/SamToFastq.jar INPUT=${orgref}-${refname}.dup.bam FASTQ=./${orgref}-${refname}-mapped_R1.fastq SECOND_END_FASTQ=./${orgref}-${refname}-mapped_R2.fastq
@@ -1150,6 +1152,7 @@ mkdir ${sampleName}-reference_guided_assemblies
 for i in `find . -name "*reference_guided.fasta"`; do
     cp $i ${sampleName}-reference_guided_assemblies
 done
+pwd
 
 cd ${root}/${sampleName}-reference_guided_assemblies
 pwd
@@ -1253,13 +1256,31 @@ pwd
 echo "nt BLAST $contigcount contigs..."
 blastn -query ${sampleName}.consensusnoN.reads.fasta -db /data/BLAST/db/nt -num_threads 20 -out ${sampleName}-consensus-max1-nt.txt -max_target_seqs 1 -outfmt "6 qseqid qlen slen pident mismatch evalue bitscore stitle saccver"
 echo "" >> ${summaryfile}
+
+hsegment=`grep "segment4" ${sampleName}-consensus-max1-nt.txt | sed 's/.*\(H[0-9]\{1,2\}\).*/\1/'`
+echo "hsegment: $hsegment"
+nsegment=`grep "segment6" ${sampleName}-consensus-max1-nt.txt | sed 's/.*\(N[0-9]\{1,2\}\).*/\1/'`
+echo "nsegment: $nsegment"
+
+subtype=${hsegment}${nsegment}
+
+# echo subtype to terminal
+i=0; while [ $i -lt 11 ]; do echo "*** Subtype: $subtype"; i=$[$i+1]; done
+
+if [[ -n $subtype ]]; then
+        echo "Subtype: $subtype" >> ${summaryfile}
+	echo "Subtype: $subtype" >> $idscriptrunsummary
+	echo "Subtype: $subtype" >> /bioinfo11/TStuber/Results/viruses/idvirus_run_summary.txt
+
+fi
+
 echo "--------------------------------------------------" >> ${summaryfile}
 echo "*** NT Database ***" >> ${summaryfile}
 awk 'BEGIN{printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s\n", "query ID", "qlength", "slength", "% id", "mis", "evalue", "bscore", "Description"} {printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' ${sampleName}-consensus-max1-nt.txt >> ${summaryfile}
 echo "" >> ${summaryfile}
 
 sort -k1,1 < ${summaryfile}.pre > ${summaryfile}.sorted
-echo "*** ${sampleName}" >> /scratch/report/idemailsummary
+echo "*** ${sampleName} ${subtype}" >> /scratch/report/idemailsummary
 paste ${summaryfile}.sorted ${sampleName}-consensus-max1-nt.txt | awk 'BEGIN{printf "%-41s %-11s %-8s %-10s %-3s %-6s %-6s %-1s\n", "ID", "read count", "per cov", "ave depth", "mis", "evalue", "bscore", "Description"} {printf "%-41s %-11s %-8s %-10s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' >> /scratch/report/idemailsummary
 
 rm ${summaryfile}.pre ${summaryfile}.sorted
@@ -1323,14 +1344,14 @@ else
         # Create "here-document"
 cat >./param.txt <<EOL
 
->Seq1 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 1, polymerase PB2 (PB2) gene, complete cds.
->Seq2 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 2, polymerase PB1 (PB1) gene, complete cds.
->Seq3 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 3, polymerase PA (PA) gene, complete cds.
->Seq4 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 4, hemagglutinin (HA) gene, complete cds.
->Seq5 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 5, nucleoprotein (NP) gene, complete cds.
->Seq6 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 6, neuraminidase (NA) gene, complete cds.
->Seq7 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 7, matrix protein 2 (M2) and matrix protein 1 (M1) genes, complete cds.
->Seq8 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 8, non-structural protein NS1 and non-structural protein NS2 (NS) gene, complete cds.
+>Seq1 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 1, polymerase PB2 (PB2) gene, complete cds.
+>Seq2 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 2, polymerase PB1 (PB1) gene, complete cds.
+>Seq3 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 3, polymerase PA (PA) gene, complete cds.
+>Seq4 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 4, hemagglutinin (HA) gene, complete cds.
+>Seq5 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 5, nucleoprotein (NP) gene, complete cds.
+>Seq6 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 6, neuraminidase (NA) gene, complete cds.
+>Seq7 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 7, matrix protein 2 (M2) and matrix protein 1 (M1) genes, complete cds.
+>Seq8 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 8, non-structural protein NS1 and non-structural protein NS2 (NS) gene, complete cds.
 
 EOL
 
@@ -1432,21 +1453,21 @@ pwd > ./fastas/filelocation.txt
 if [ "$eflag" ]; then
 	# eflag is used when script is called from idemail.sh
 	# making summary file to send in email
-#	echo "Files copied to: ${bioinfoVCF}" >> /scratch/report/idemailsummary
-#	echo "" >> /scratch/report/idemailsummary
+	echo "Files copied to: ${bioinfoVCF}" >> /scratch/report/idemailsummary
+	echo "" >> /scratch/report/idemailsummary
 	rm emailfile*
-#	echo "Copying to ${bioinfoVCF}"
-#       cp -r $PWD ${bioinfoVCF}
+	echo "Copying to ${bioinfoVCF}"
+        cp -r $PWD ${bioinfoVCF}
 else
 	# else when idvirus.sh is ran on its own
 	if [ "$mflag" ]; then
     		email_list="tod.p.stuber@usda.gov"
-    		cat ${emailbody} | mutt -s "Sample: ${sampleName}, Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
+    		cat ${emailbody} | mutt -s "Sample: ${sampleName}, Subtype: $subtype, Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
     		rm emailfiles
 	else
     		echo "" >> ${emailbody}
     		echo "Files copied to: ${bioinfoVCF}" >> ${emailbody}		
-    		cat ${emailbody} | mutt -s "Sample: ${sampleName}, Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
+    		cat ${emailbody} | mutt -s "Sample: ${sampleName}, Subtype: $subtype, Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
 
     		rm ${emailbody}
     		rm emailfiles
