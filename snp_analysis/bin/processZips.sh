@@ -105,8 +105,8 @@ elif [ $1 == suis2 ]; then
     ###################################################################
 
 elif [ $1 == suis3 ]; then
-    cp /home/shared/brucella/suis3/script_dependents/2015-07-15-B-REF-BS3-686.fasta ./
-    hqs="/home/shared/brucella/suis3/script_dependents/B-686-SNPsHighestQualitySNPs.vcf"
+    cp /home/shared/brucella/suis3/script_dependents/B-REF-BS3-686.fasta ./
+    hqs="/home/shared/brucella/suis3/script_dependents/B15-0007-highqualitysnps.vcf"
     bioinfo="/bioinfo11/TStuber/Results/brucella/suis3/newFiles"
     sharedSAN="/home/shared/brucella/suis3/newFiles"
 

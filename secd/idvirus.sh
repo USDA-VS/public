@@ -554,7 +554,7 @@ cat snps zeroformated | sort -nk2,2 > body
 #cp ${orgref}-${refname}.hapreadyAll.vcf OLD-${orgref}-${refname}.hapreadyAll.vcf
 cat header body > ${orgref}-${refname}.newhapreadyAll.vcf
 
-# make reference guided contig
+# make reference guided contig THIS IS THE FINAL REFERNCE.  THE LAST ALIGNMENT WILL BE MADE AND BLAST RESULTS WILL BE BASED ON THIS CONSENSUS SEQUENCE
 java -Xmx2g -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${orgref}-${refname}.reference_guided.fasta -V ${orgref}-${refname}.newhapreadyAll.vcf -IUPAC ${orgref}-${refname}
 
 read -p "$LINENO Enter"
@@ -1462,12 +1462,12 @@ else
 	# else when idvirus.sh is ran on its own
 	if [ "$mflag" ]; then
     		email_list="tod.p.stuber@usda.gov"
-    		cat ${emailbody} | mutt -s "Sample: ${sampleName}, Subtype: $subtype, Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
+    		cat ${emailbody} | mutt -s "Sample: ${sampleName}, $subtype Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
     		rm emailfiles
 	else
     		echo "" >> ${emailbody}
     		echo "Files copied to: ${bioinfoVCF}" >> ${emailbody}		
-    		cat ${emailbody} | mutt -s "Sample: ${sampleName}, Subtype: $subtype, Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
+    		cat ${emailbody} | mutt -s "Sample: ${sampleName}, $subtype Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
 
     		rm ${emailbody}
     		rm emailfiles
