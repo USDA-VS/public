@@ -506,10 +506,14 @@ java -Xmx4g -jar ${igvtools} index $n.SNPsZeroCoverage.vcf
 
 fi
 
-# Add zero positions to vcf
+# Add zero positions to vcf.
+# Emit all sites into VCF, not just the SNPs and indels.  This allows finding the positions with zero coverage.
 java -Xmx4g -jar ${gatk} -R $ref -T UnifiedGenotyper -out_mode EMIT_ALL_SITES -I ${n}.ready-mem.bam -o ${n}.allsites.vcf -nt 8
+# Header and any position is
 awk ' $0 ~ /#/ || $8 !~ /^AN=2;/ {print $0}' ${n}.allsites.vcf > $n.ready-mem.vcf
 java -Xmx4g -jar ${igvtools} index $n.ready-mem.vcf
+
+read -p "$LINENO ENTER"
 
 echo "***Deleting Files"
 rm $n.unsortSNPsZeroCoverage.vcf
