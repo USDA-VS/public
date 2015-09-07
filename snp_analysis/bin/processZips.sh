@@ -506,14 +506,12 @@ java -Xmx4g -jar ${igvtools} index $n.SNPsZeroCoverage.vcf
 
 fi
 
-# Add zero positions to vcf.
-# Emit all sites into VCF, not just the SNPs and indels.  This allows finding the positions with zero coverage.
+# Emit all sites to VCF, not just the SNPs and indels.  This allows making a UnifiedGenotyper VCF similar to what was used before using the Haplotypecaller.
 java -Xmx4g -jar ${gatk} -R $ref -T UnifiedGenotyper -out_mode EMIT_ALL_SITES -I ${n}.ready-mem.bam -o ${n}.allsites.vcf -nt 8
-# Header and any position is
+
+# This removes all positions same as the reference.  These positions are found by removing rows were column (field) 8 begins with AN=2.  This decreases the size of the VCF considerably.  The final VCF contains all SNP, indel or zero mapped/coverage positions
 awk ' $0 ~ /#/ || $8 !~ /^AN=2;/ {print $0}' ${n}.allsites.vcf > $n.ready-mem.vcf
 java -Xmx4g -jar ${igvtools} index $n.ready-mem.vcf
-
-read -p "$LINENO ENTER"
 
 echo "***Deleting Files"
 rm $n.unsortSNPsZeroCoverage.vcf
