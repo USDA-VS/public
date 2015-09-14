@@ -1283,6 +1283,8 @@ sort -k1,1 < ${summaryfile}.pre > ${summaryfile}.sorted
 echo "*** ${sampleName} ${subtype}" >> /scratch/report/idemailsummary
 paste ${summaryfile}.sorted ${sampleName}-consensus-max1-nt.txt | awk 'BEGIN{printf "%-41s %-11s %-8s %-10s %-3s %-6s %-6s %-1s\n", "ID", "read count", "per cov", "ave depth", "mis", "evalue", "bscore", "Description"} {printf "%-41s %-11s %-8s %-10s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' >> /scratch/report/idemailsummary
 
+#awk 'BEGIN{printf "%-41s %-11s %-8s %-10s %-3s %-6s %-6s %-1s\n", "ID", "read count", "per cov", "ave depth", "mis", "evalue", "bscore", "Description"} {printf "%-41s %-11s %-8s %-10s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' ${summaryfile}.sorted  >> /scratch/report/idemailsummary
+
 rm ${summaryfile}.pre ${summaryfile}.sorted
 
 pingyrdb=`egrep -m 1 -o "H5N1|H5N2|H5N8" ${summaryfile}`
