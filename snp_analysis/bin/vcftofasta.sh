@@ -1140,11 +1140,12 @@ cat *.fas >> RAxMLfastaGroup.txt
 /usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} -m GTRCAT -p 12345 && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf &
 wait
 rm RAxML_parsimonyTree*
-for i in RAxML*Tree*; do mv $i ../${i}.tre; done
+for i in RAxML*Tree*; do cp $i ../${i}.tre; done
 #grep ">" alignment.txt | sed 's/>//g' > cleanedAlignment.txt
 
 pwd
-inputfile=`ls RAxML_result*`
+#inputfile=`ls RAxML_result*`
+inputfile=`ls RAxML_bestTree*`
 tr ":" "\n" < ${inputfile} | tr "," "\n" | sed 's/(//g' | sed 's/)//g' | grep -v "\.[0-9]*" | grep -v "root" > cleanedAlignment.txt
 
 awk 'NR==FNR{o[FNR]=$1; next} {t[$1]=$0} END{for(x=1; x<=FNR; x++){y=o[x]; print t[y]}}' cleanedAlignment.txt ../$d.table.txt > joined.txt
