@@ -318,6 +318,12 @@ i=$parabinary
     fi
 fi
 
+allbinary=`echo ${brucbinary} ${tbbinary} ${parabinary} | grep -c "1"`
+if [[ $allbinary == 0  ]]; then 
+	echo "${n} NEEDS SPECIAL ATTENTION!!!" >> /scratch/report/dailyReport.txt
+	echo "PLEASE GIVE TOD OR VIJAY SPECIAL INSTRUCTIONS FOR ${n}.  This sample was NOT identified as Brucella, TB complex or avium complex." | mutt -s "${n} NEEDS SPECIAL ATTENTION!!!" -- Doris.M.Bravo@aphis.usda.gov tod.p.stuber@usda.gov suelee.robbe-austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov 
+fi	
+
 echo "Sample ${n}, ${tagname}, Oligo counts: Bruc ${bruccounts} TB ${tbcounts} MAC ${paracounts}, Binary: Bruc ${brucbinary} TB ${tbbinary} MAC ${parabinary}, ID:  ${catch}"
 
 #Push to logfile
