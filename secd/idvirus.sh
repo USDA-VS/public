@@ -81,7 +81,7 @@ elif [[ $1 == testflu ]]; then
     flu=yes
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
-    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/testflu/*fasta
+    targetref=/home/tstuber/virus_seeds/circovirus_picornavirus/*fasta
     #bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/aiall/newfiles"
     echo "idvirus.sh ran targeting $1"
     echo "Script idvirus.sh ran targeting $1"
@@ -1420,6 +1420,10 @@ if [ -e $sampleName-Krona_identification_graphic.html ]; then
 	ls $sampleName-Krona_identification_graphic.html >> emailfiles
 fi
 
+if [ -e kraken/${sampleName}-kraken_report.txt ]; then
+        ls kraken/${sampleName}-kraken_report.txt >> emailfiles
+fi
+
 if [[ $sampleType == "paired" ]]; then
 	echo "paried data, not checking for C insert"
 else
@@ -1453,7 +1457,7 @@ fi
 rm *fastq*
 
 #Cleanup
-rm -r `ls | egrep -v "emailfile|emailfiles|bestrefs.txt|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
+rm -r `ls | egrep -v "kraken|emailfile|emailfiles|bestrefs.txt|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
 
 pwd > ./fastas/filelocation.txt
 

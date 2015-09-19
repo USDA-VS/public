@@ -1022,19 +1022,23 @@ for p in `cat positionlist`; do
 (maxqual=`awk -v p=$p 'BEGIN{max=0} $2 == p {if ($6>max) max=$6} END {print max}' ./starting_files/*vcf | sed 's/\..*//'`
 
 # Get the max map quality
-        maxmap=`awk -v p=$p ' $2 == p {print $8}' ./starting_files/*vcf | sed 's/.*;MQ=\(.*\);MQ.*/\1/' | sed 's/;MQ.*//' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'`
+        maxmap=`awk -v p=$p ' $2 == p {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | sed 's/;MQ.*//' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'`
+	
+	avemap=`awk -v p=$p '$6 != "." && $2 == p {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
 
 # If the max qual is less than 800 OR the max map is less than 52 then filter position
-        if [ $maxqual -lt 800  ] || [ $maxmap -lt 52  ]; then
+        if [ $maxqual -lt 800  ] || [ $maxmap -lt 56 ] || [ $avemap -lt 55 ]; then
                 echo "maxqual $maxqual" >> filterpositiondetail
                 echo "maxmap $maxmap" >> filterpositiondetail
                 echo "position $p" >> filterpositiondetail
-                echo ""  >> filterpositiondetail
+                echo "avemap $avemap" >> filterpositiondetail
+		echo ""  >> filterpositiondetail
                 echo "$p" >> ${d}-filtertheseposition.txt
 
                 echo "maxqual $maxqual"
                 echo "maxmap $maxmap"
-                echo "position $p"
+                echo "avemap $avemap"
+		echo "position $p"
                 echo ""
         fi) &
     	let count+=1
@@ -1758,18 +1762,22 @@ for p in `cat positionlist`; do
 
     (maxqual=`awk -v p=$p 'BEGIN{max=0} $2 == p {if ($6>max) max=$6} END {print max}' ./*vcf | sed 's/\..*//'`
 
-    maxmap=`awk -v p=$p ' $2 == p {print $8}' ./*vcf | sed 's/.*;MQ=\(.*\);MQ.*/\1/' | sed 's/;MQ.*//' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'`
+    maxmap=`awk -v p=$p ' $2 == p {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'` 
+    avemap=`awk -v p=$p '$6 != "." && $2 == p {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
 
-    if [ $maxqual -lt 800  ] || [ $maxmap -lt 52  ]; then
+	#change maxmap from 52 to 56 2015-09-18
+    if [ $maxqual -lt 800  ] || [ $maxmap -lt 56  ] || [ $avemap -lt 55 ]; then
         echo "maxqual $maxqual" >> filterpositiondetail
         echo "maxmap $maxmap" >> filterpositiondetail
+	echo "avemap $avemap" >> filterpositiondetail
         echo "position $p" >> filterpositiondetail
         echo ""  >> filterpositiondetail
         echo "$p" >> all_vcf-filtertheseposition.txt
 
         echo "maxqual $maxqual"
         echo "maxmap $maxmap"
-        echo "position $p"
+        echo "avemap $avemap"
+	echo "position $p"
         echo ""
     fi) &
     let count+=1
