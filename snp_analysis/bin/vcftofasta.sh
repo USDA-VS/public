@@ -565,6 +565,7 @@ tbNumberOnly='s/.*\([0-9]\{2\}-[0-9,FM]\{4,6\}\).*/\1/' #Only tb Number, *labora
 dropEXT='s/\(.*\)\..*/\1/' #Just drop the extention from the file
 
 NR_CPUS=50 # Computer cores to use when analyzing
+LIMIT_CPUS=10
 
 Ncov=1 # Coverage below this value will be changed to -
 
@@ -787,9 +788,10 @@ function fasta_table () {
 # Loop through the directories
 directories=`ls`
 echo "$directories"
+startingdirectory=`pwd`
 
 for d in $directories; do
-    cd ./$d/
+    (cd ${startingdirectory}/$d/
     dir=`basename $PWD`
     echo "Directory:  $dir"
     
@@ -973,7 +975,7 @@ done
 
 #########################################################################
 
-echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
+echo "sleeping 2 seconds at line number: $LINENO"; sleep 2
 wait
 
         # Make a concatemer of the .filledcut files
@@ -1097,7 +1099,7 @@ fi
 	done
 wait
 
-echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
+echo "sleeping 2 seconds at line number: $LINENO"; sleep 2
         #Make a reference fasta sequence
         awk '{print $2}' clean_total_pos > root
         cat root | tr -cd "[:print:]" | sed "s/^/>root;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > root.fas
@@ -1123,9 +1125,12 @@ echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
         rm root
         rm clean_total_pos
         cp /home/shared/Table_Template.xlsx ./${d}-Table_Template.xlsx
-	echo "***Done"
-    cd ..
+	echo "***Done") &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
     done
+    wait
+
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 
 }
@@ -1273,7 +1278,46 @@ rm column
 rm column2
 rm readyFirstOut.txt
 rm firstOutput.txt
-echo "**** orgTable.sh Finished ****"
+echo "**** $c orgTable.sh Finished `date '+ %H:%M:%S'` ****"
+
+# Add map qualities to sorted table
+
+positions=`awk ' NR == 1 {print $0}' $d.sortedTable.txt | tr "\t" "\n" | sed "1d" | sed 's/chrom.*-//g'`
+echo "map-quality" > quality.txt
+echo "Sorted table map quality gathering for $d `date '+ %H:%M:%S'`"
+
+for p in $positions; do  
+         (avemap=`awk -v p=$p '$6 != "." && $2 == p {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
+        echo "$avemap" >> quality.txt) &
+    let count+=1
+    [[ $((count%20)) -eq 0 ]] && wait
+    done
+    wait
+
+tr "\n" "\t" < quality.txt > qualitytransposed.txt
+cat $d.sortedTable.txt qualitytransposed.txt | grep -v '^$' > $d-mapquality-orgainizedtable.txt
+mv $d-mapquality-orgainizedtable.txt $d.sortedTable.txt
+
+# Add map qualities to organized table
+
+positions=`awk ' NR == 1 {print $0}' $c.organizedTable.txt | tr "\t" "\n" | sed "1d" | sed 's/chrom.*-//g'`
+echo "map-quality" > quality.txt
+echo "Organized table map quality gathering for $c `date '+ %H:%M:%S'`"
+
+for p in $positions; do
+         (avemap=`awk -v p=$p '$6 != "." && $2 == p {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
+	echo "$avemap" >> quality.txt) &
+    let count+=1
+    [[ $((count%30)) -eq 0 ]] && wait
+    done
+    wait
+
+tr "\n" "\t" < quality.txt > qualitytransposed.txt
+cat $c.organizedTable.txt qualitytransposed.txt | grep -v '^$' > $d-mapquality-orgainizedtable.txt
+mv $d-mapquality-orgainizedtable.txt $c.organizedTable.txt
+
+rm quality.txt
+rm qualitytransposed.txt
 
 }
 #****************************************************************
