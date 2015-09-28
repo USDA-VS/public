@@ -834,7 +834,8 @@ m=`basename "$i"`; n=`echo $m | sed $dropEXT`
 #                [[ $((count%NR_CPUS)) -eq 0 ]] && wait
             done
             wait
-            
+        
+	else    
 #Mark vcf allowing areas of the genome to be removed from the SNP analysis
                 for i in *.vcf; do m=`basename "$i"`; n=`echo $m | sed $dropEXT` # n is name with all right of "_" and "." removed.
                 grep '^#' $i > ${i}.header
@@ -872,9 +873,6 @@ m=`basename "$i"`; n=`echo $m | sed $dropEXT`
                         rm $i.foundpositions
 
                done
-	else
-        echo "Check chromosome count numbers at line $LINENO.  Exiting script."
-        exit 1
         fi
 
      mkdir marked_files
@@ -885,9 +883,6 @@ m=`basename "$i"`; n=`echo $m | sed $dropEXT`
 
     mkdir marked_files
     mv *.filter.vcf ./marked_files
-    else
-        echo "********** Group/Subgroup/Clade Filter not ran ***********"
-        echo "********** Group/Subgroup/Clade Filter not ran ***********" >> ../../section5
     fi
 
     # Make concatemer with the position and REF call.
@@ -1027,7 +1022,7 @@ wait
 
         echo "***grepping the .filledcut files for $d"
 
-        grep -w -f select total_pos | sort -k1.6n -k1.8n > clean_total_pos
+        grep -w -f select total_pos | sort -k1,1n > clean_total_pos
         
 ########################################################################
 ######################## FILTER FILE CREATOR ###########################
@@ -1095,7 +1090,7 @@ fi
             (m=`basename "$i"`
             n=`echo $m | sed $dropEXT`
             # Compare the positions in select with "isolate".cut and output position for .cut that only matched select positions
-            egrep -w -f select $i | sort -k1.6n -k1.8n > $n.pretod
+            grep -w -f select $i | sort -k1,1n > $n.pretod
 
         ##############################################################
         # Change AC1s to IUPAC
@@ -1125,7 +1120,9 @@ fi
             rm ${n}.actokeep
             rm ${i%filledcut}vcf
         ##############################################################
-
+ 	    
+  	awk '{print $2}' $n.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > $n.fas
+            # Add each isolate to the table
             awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> $d.table.txt) &
     		let count+=1
     		[[ $((count%NR_CPUS)) -eq 0 ]] && wait
@@ -1179,6 +1176,7 @@ awk '{print $0}' *.fas >> RAxMLfastaGroup.txt
 #clustalw2 -OUTFILE=alignment.txt -RANGE=1,2 -OUTPUT=FASTA -INFILE=fastaGroup.txt & 
 /usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} -m GTRCAT -p 12345 && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf; nw_reroot RAxML_bestTree.${d} root > tableinput.${d}; nw_reroot RAxML_bestTree.${d} root > rooted_RAxML_bestTree.${d}; mv rooted_RAxML_bestTree.${d} RAxML_bestTree.${d} &
 wait
+pwd
 read -p "$LINENO Enter"
 
 rm RAxML_parsimonyTree*
@@ -1771,12 +1769,10 @@ cd ./all_vcfs/
     for i in *.vcf; do
     awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
     done
-read -p "$LINENO Enter"
 
 # Get rid of duplicates in concatemer and list all the positions and REF calls
 echo "***Making total_pos"
 cat concatemer | sort -nk1 | uniq | sort -k1.6n -k1.8n > total_pos
-read -p "$LINENO Enter"
 
 # Count the number of SNPs
 totalSNPs=`grep -c ".*" total_pos`
@@ -1786,8 +1782,7 @@ echo "***Creating normalized vcf using AC2, QUAL > 150"
 # Grab the name of the vcf file
 
 for i in *.vcf; do
-#    (
-n=${i%.vcf}
+    (n=${i%.vcf}
     echo $n
     awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
     #awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $1 "-" $2, $5}' $i > $n.cut
@@ -1812,19 +1807,18 @@ n=${i%.vcf}
     grep -w -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}' > ${n}.zerotomerge
     # merge zero updates to filledcut
     cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > ${n}.filledcut
+
     rm ${n}.filledcutnoN
     rm ${n}.zerotomerge
     else
     mv $n.filledcutnoN ${n}.filledcut
     fi
-read -p "$LINENO Enter"
     
     rm ${n}.filledcutNumbers
     rm ${n}.zeropositions
-    rm ${n}.zerotokeep
-#)  &
-#    let count+=1
-#    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+    rm ${n}.zerotokeep)  &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 
 done
 wait
@@ -1834,24 +1828,16 @@ wait
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 wait
 
-# Make a concatemer of the .filledcut files
-for i in *.filledcut; do
-    cat $i >> cutConcatemer
-done
-read -p "$LINENO Enter"
-
 echo "***Making the select file containing positions of interest"
 # Capture only positions that have more than one SNP type called at a position
-cat cutConcatemer | sort -k1.6n -k1.8n | uniq | awk '{print $1}' | uniq -d > select
+cat *filledcut | sort -k1,1n | uniq | awk '{print $1}' | uniq -d > select
 # Compare the positions in select with total_pos and output total_pos position that match select positions
 # but only with positions that are in the select file.
 # This getting rid of calls that are the same for all isolates being analyzed
-echo "***grepping the total_pos file"
 
 echo "***grepping the .filledcut files for $d"
 
-grep -w -f select total_pos | sort -k1.6n -k1.8n > clean_total_pos
-read -p "$LINENO Enter"
+grep -w -f select total_pos | sort -k1,1n > clean_total_pos
 
 ########################################################################
 ######################## FILTER FILE CREATOR ###########################
@@ -1907,14 +1893,13 @@ awk '{print $1}' clean_total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n'
 awk '{print $2}' clean_total_pos | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
 echo "***grepping the .filledcut files"
 # Make the fasta files:  Fill in positions with REF if not present in .clean file
-read -p "$LINENO Enter"
 
     for i in *.filledcut; do
-        (echo " working on filled cut for $i"
+      	(echo " working on filled cut for $i"
         m=`basename "$i"`
         n=`echo $m | sed $dropEXT`
 
-        egrep -w -f select $i | sort -k1.6n -k1.8n > $n.pretod
+        grep -w -f select $i | sort -k1,1n > $n.pretod
 
         ##############################################################
         # Change AC1s to IUPAC
@@ -1954,7 +1939,6 @@ read -p "$LINENO Enter"
 
 wait
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
-read -p "$LINENO Enter"
 
 echo "grepping filledcut files is finished"
 #Make a reference fasta sequence
@@ -1964,7 +1948,6 @@ echo "" >> root.fas
 
 totalSNPs=`grep -c ".*" total_pos`
 echo "Total informative SNPs: $totalSNPs" >> ../section4
-read -p "$LINENO Enter"
 
 #Clean-up
 mkdir starting_files
@@ -2061,7 +2044,7 @@ for d in $directories; do
     echo "****************************************************"
     echo "************* Orginizing Table: $d *****************"
     echo "****************************************************"
-    alignTable &
+    alignTable #&
 pwd
 done
 else
