@@ -1981,7 +1981,7 @@ echo "***************** STARTING Groups *****************"
 echo "***************************************************"
 # Change directory to all_groups
 cd ${fulDir}/all_groups
-fasta_table #&  
+fasta_table &  
 
 echo "***************************************************"
 echo "**************** STARTING SUBGROUPS ***************"
@@ -2043,7 +2043,7 @@ for d in $directories; do
     echo "****************************************************"
     echo "************* Orginizing Table: $d *****************"
     echo "****************************************************"
-    alignTable #&
+    alignTable &
 pwd
 done
 else
