@@ -755,10 +755,6 @@ for i in *.txt; do
        echo "chrom2	100000000" >> "$number.num"
     else
         echo "Greater than 2 chromosomes present."
-<<<<<<< HEAD
-        
-=======
->>>>>>> master
     fi
 
         rm $i
@@ -838,43 +834,13 @@ m=`basename "$i"`; n=`echo $m | sed $dropEXT`
 #                [[ $((count%NR_CPUS)) -eq 0 ]] && wait
             done
             wait
-<<<<<<< HEAD
-        elif [ $((chromCount)) -gt 1 ]; then
-=======
-
-        elif [ $((chromCount)) -gt 1 ]; then
-            echo "multiple chromosomes"
->>>>>>> master
-            #Mark vcf allowing areas of the genome to be removed from the SNP analysis
+            
+#Mark vcf allowing areas of the genome to be removed from the SNP analysis
                 for i in *.vcf; do m=`basename "$i"`; n=`echo $m | sed $dropEXT` # n is name with all right of "_" and "." removed.
                 grep '^#' $i > ${i}.header
                 grep -v '^#' $i > ${i}.body
                 #Mark vcf allowing areas of the genome to be removed from the SNP analysis
                 # Iterate through chrom number range
-<<<<<<< HEAD
-                    for c in `cat chroms`; do
-                        echo "***Adding filter $c to $i***"
-                        awk 'BEGIN{OFS="\t"} $1 !~ /#/ && $10 !~ /\.\/\./ {print $1, $2}' ${i}.body > $i.file
-                        cat "${FilterDirectory}/$d.txt" $i.file >> $i.catFile
-                        cat $i.catFile | sort -k1,1 -k2,2 | uniq -d > $i.txt
-                        pos=`cat $i.txt | grep "${c}" | awk '{print $2}' | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-                        echo "pos: $pos"
-                        awk -v var1="${c}" -v var2=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.subfilter${c}.vcf
-                    done
-                        cat $n.subfilter*.vcf > $n.filter.vcf
-#pos2=`cat $i.txt | grep "chrom2" | awk '{print $2}' | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-#echo "pos2: $pos2"
-#awk -v var1="chrom2" -v var2=$pos2 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $n.subfilter1.vcf > $n.subfilter.vcf
-                        rm $i.file
-                        rm $i.catFile
-                        rm $i.txt
-                        rm $n.subfilter*.vcf
-                        mv ${i}.header > $n.nomisfits.vcf
-                        grep -v "Not_Included" $n.filter.vcf >> $n.nomisfits.vcf
-                        mv $n.nomisfits.vcf $i
-                done
-        else
-=======
             COUNTER=0
                     for c in `cat $dircalled/chroms`; do
                         let COUNTER=COUNTER+1
@@ -907,7 +873,6 @@ m=`basename "$i"`; n=`echo $m | sed $dropEXT`
 
                done
 	else
->>>>>>> master
         echo "Check chromosome count numbers at line $LINENO.  Exiting script."
         exit 1
         fi
@@ -1161,13 +1126,6 @@ fi
             rm ${i%filledcut}vcf
         ##############################################################
 
-<<<<<<< HEAD
-	    awk '{print $2}' $n.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > $n.fas
-	    # Add each isolate to the table
-=======
-            awk '{print $2}' $n.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > $n.fas
-            # Add each isolate to the table
->>>>>>> master
             awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> $d.table.txt) &
     		let count+=1
     		[[ $((count%NR_CPUS)) -eq 0 ]] && wait
@@ -1215,17 +1173,13 @@ function alignTable () {
 echo "$d *********"
 pwd
 
-<<<<<<< HEAD
-cat *.fas | sed '/root/{N;d;}' >> fastaGroup.txt
-awk 'FNR==1{print ""}1' *fas | grep -v '^$' > RAxMLfastaGroup.txt
-=======
 awk '{print $0}' *.fas | sed '/root/{N;d;}' >> fastaGroup.txt
 awk '{print $0}' *.fas >> RAxMLfastaGroup.txt
->>>>>>> master
 
 #clustalw2 -OUTFILE=alignment.txt -RANGE=1,2 -OUTPUT=FASTA -INFILE=fastaGroup.txt & 
 /usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} -m GTRCAT -p 12345 && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf; nw_reroot RAxML_bestTree.${d} root > tableinput.${d}; nw_reroot RAxML_bestTree.${d} root > rooted_RAxML_bestTree.${d}; mv rooted_RAxML_bestTree.${d} RAxML_bestTree.${d} &
 wait
+read -p "$LINENO Enter"
 
 rm RAxML_parsimonyTree*
 for i in RAxML*Tree*; do mv $i ../${i}.tre; done
@@ -1530,26 +1484,6 @@ for v in *.vcf; do
 done
 wait
 
-<<<<<<< HEAD
-############## Capture the number of chromosomes and their name from a single VCF ##############
-
-echo "The chromosome count is: $chromCount"
-pwd
-
-# Change chromosome identification to general chrom1 and/or chrom2
-#for f in *.vcf; do
-#    echo "echoing f: $f"
-#    num=1
-#    for i in `cat chroms`; do
-#        sed "s/$i/chrom${num}/g" $f > temp.vcf
-#        mv temp.vcf $f
-#        echo "$i was marked as chrom${num}"
-#    num=$(( $num + 1 ))
-#    done
-#done
-
-=======
->>>>>>> master
 ########################################################################
 
 printf "%s\t%s\t%s\t%s\n" "TB Number" "Group" "Subgroup" "Clade" > FileMakerGroupImport.txt
@@ -1635,40 +1569,12 @@ echo "***Marking all VCFs and removing filtering regions"
         wait
 
         elif [ $((chromCount)) -gt 1 ]; then
-<<<<<<< HEAD
-            for i in *.vcf; do m=`basename "$i"`; n=`echo $m | sed $dropEXT` # n is name with all right of "_" and "." removed.
-=======
             echo "multiple chromosomes"
 	    for i in *.vcf; do m=`basename "$i"`; n=`echo $m | sed $dropEXT` # n is name with all right of "_" and "." removed.
->>>>>>> master
             grep '^#' $i > ${i}.header
             grep -v '^#' $i > ${i}.body
                 #Mark vcf allowing areas of the genome to be removed from the SNP analysis
                 # Iterate through chrom number range
-<<<<<<< HEAD
-                for c in `cat chroms`; do
-                    echo "********* $n **********"
-                    awk 'BEGIN{OFS="\t"} $1 !~ /#/ && $10 !~ /\.\/\./ {print $1, $2}' ${i}.body > $i.file
-                    cat "${FilterDirectory}/FilterToAll.txt" $i.file >> $i.catFile
-                    cat $i.catFile | sort -k1,1 -k2,2 | uniq -d > $i.txt
-                    pos=`cat $i.txt | grep "chrom${c}" | awk '{print $2}' | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-                    echo "pos: $pos"
-                    awk -v var1="chrom${number}" -v var2=$pos1 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filter${c}.vcf
-                done
-                    cat $n.filter*.vcf > $n.filterall.vcf
-#pos2=`cat $i.txt | grep "chrom2" | awk '{print $2}' | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-#echo "pos2: $pos2"
-#awk -v var1="chrom2" -v var2=$pos2 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $n.filter1.vcf > $n.filter.vcf
-               
-                rm $i.file
-                rm $i.catFile
-                rm $i.txt
-                rm $n.filter*.vcf
-                mv ${i}.header > $n.noPPE.vcf
-                grep -v "Not_Included" n.filterall.vcf >> $n.noPPE.vcf
-                mv $n.noPPE.vcf $i
-            done
-=======
 		COUNTER=0
                 for c in `cat chroms`; do
                     let COUNTER=COUNTER+1
@@ -1696,7 +1602,6 @@ echo "***Marking all VCFs and removing filtering regions"
 		rm $n.filterchrom*.vcf
 		rm $i.foundpositions		
 	   done
->>>>>>> master
         else
             echo "Check chromosome count numbers at line $LINENO.  Exiting script."
         exit 1
@@ -1723,13 +1628,6 @@ echo "" >> section3
 
 for i in *.vcf; do
 
-<<<<<<< HEAD
-    # Get quality positions in VCF and include chromosome identification
-    formatedpos=`awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2}' $i | sed 's/^/\^/' | sed 's/$/\$|/' | tr -d "\n" | sed 's/|$//'`
-    #formatedpos=`awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $2}' $i | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-    echo "formatedpos:"
-    echo "$formatedpos"
-=======
 # If there is one chromosome present just get the position.  If multiple chromosomes are present than the chromsome identification needs to be identified.  The filter file needs to sync with this chromosome identification.  If multiple chromosomes the filter file will be kept as a text file.  If a single chromosome an linked Excel file can be used.
     if [ $((chromCount)) -eq 1 ]; then
 	# Get quality positions in VCF
@@ -1743,7 +1641,6 @@ for i in *.vcf; do
     cat quality-${i%.vcf}
 
 ##----Group
->>>>>>> master
 
     # If a group number matches a quality position in the VCF (formatedpos) then print the position
     grep "Group" "${DefiningSNPs}" > groupsnps
@@ -1873,10 +1770,6 @@ cd ./all_vcfs/
     echo "***Making Concatemer"
     for i in *.vcf; do
     awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
-<<<<<<< HEAD
-    #awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $1 "-" $2, $4}' $i >> concatemer
-=======
->>>>>>> master
     done
 read -p "$LINENO Enter"
 
@@ -1942,24 +1835,6 @@ echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 wait
 
 # Make a concatemer of the .filledcut files
-<<<<<<< HEAD
-        for i in *.filledcut; do
-            cat $i >> cutConcatemer
-            done
-        echo "***Making the select file containing positions of interest"
-        # Capture only positions that have more than one SNP type called at a position
-        cat cutConcatemer | sort -k1.6n -k1.8n | uniq | awk '{print $1}' | uniq -d > select
-        # Compare the positions in select with total_pos and output total_pos position that match select positions
-        # but only with positions that are in the select file.
-        # This getting rid of calls that are the same for all isolates being analyzed
-        echo "***grepping the total_pos file"
-
-        echo "***grepping the .filledcut files for $d"
-
-        grep -w -f select total_pos | sort -k1.6n -k1.8n > clean_total_pos
-
-
-=======
 for i in *.filledcut; do
     cat $i >> cutConcatemer
 done
@@ -1977,7 +1852,6 @@ echo "***grepping the .filledcut files for $d"
 
 grep -w -f select total_pos | sort -k1.6n -k1.8n > clean_total_pos
 read -p "$LINENO Enter"
->>>>>>> master
 
 ########################################################################
 ######################## FILTER FILE CREATOR ###########################
@@ -2078,52 +1952,6 @@ read -p "$LINENO Enter"
         [[ $((count%NR_CPUS)) -eq 0 ]] && wait
     done
 
-<<<<<<< HEAD
-    for i in *.filledcut; do
-        (echo " working on filled cut for $i"
-        m=`basename "$i"`
-        n=`echo $m | sed $dropEXT`
-
-        egrep -w -f select $i | sort -k1.6n -k1.8n > $n.pretod
-
-        ##############################################################
-        # Change AC1s to IUPAC
-
-        # get positions being used
-        awk '{print $1}' ${n}.pretod > ${n}.usedpostions
-        # get AC1 positions and iupac calls  that were changed to iupac
-        awk ' $0 !~ /#/ && $6 > 300 && $8 ~ /^AC=1;/ {print $1 "-" $2, $5}' ${i%filledcut}vcf > ${n}.ac
-        # get just positions of those AC1 grabbed above
-        awk '{print $1}' ${n}.ac > ${n}.acpositions
-        # AC duplicate positions will need to be kept
-        cat ${n}.usedpostions ${n}.acpositions | sort | uniq -d > ${n}.actokeep
-        # get AC1 position with iupac, these are only positions already in the pretod
-
-        if [ -s ${n}.actokeep ]; then
-            grep -w -f ${n}.actokeep ${n}.ac > ${n}.actomerge
-            # merge iupac updates to filledcut
-            cat ${n}.actomerge $n.pretod | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > $n.tod
-            rm ${n}.pretod
-            rm ${n}.actomerge
-        else
-            mv $n.pretod $n.tod
-        fi
-        rm ${n}.usedpostions
-        rm ${n}.ac
-        rm ${n}.acpositions
-        rm ${n}.actokeep
-        rm ${i%filledcut}vcf
-        ##############################################################
-
-        awk '{print $2}' $n.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > $n.fas
-        # Add each isolate to the table
-        awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt) &
-        let count+=1
-        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
-    done
-
-=======
->>>>>>> master
 wait
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 read -p "$LINENO Enter"
