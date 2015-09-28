@@ -791,7 +791,7 @@ echo "$directories"
 startingdirectory=`pwd`
 
 for d in $directories; do
-    (cd ${startingdirectory}/$d/
+    cd ${startingdirectory}/$d/
     dir=`basename $PWD`
     echo "Directory:  $dir"
     
@@ -1125,9 +1125,7 @@ echo "sleeping 2 seconds at line number: $LINENO"; sleep 2
         rm root
         rm clean_total_pos
         cp /home/shared/Table_Template.xlsx ./${d}-Table_Template.xlsx
-	echo "***Done") &
-    let count+=1
-    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+	echo "***Done"
     done
     wait
 
