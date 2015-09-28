@@ -1,6 +1,7 @@
 #!/bin/sh
 
 root=`pwd`
+flu=no
 
 #PATHs
 picardPath='/usr/local/bin/picard-tools-1.117/'
@@ -9,20 +10,36 @@ pythonGetFasta="/home/tstuber/workspace/stuber/python_scripts/GetFASTAbyGI.py"
 
 # NCBI downloaded reference location
 mydb="/data/mydb"
+#Delete files in local database that may be empty
+dzdo chmod 755 * ${mydb}/*
+for i in ${mydb}/*; do
+	if [ -s $i ]; then
+        	echo "file $i exists"
+	else
+        	echo "file $i is empty and has been deleted"
+		rm -f $i
+	fi
+done
+
+idscriptrunsummary="/home/shared/idvirus_run_summary.txt"
 
 # flag -m will email just "M"e
 # flag -b will turn off muliple for starts for "B"ug finding
 # flag -k will run Kraken
+# flag -e flag used when running script from idemail.sh
 bflag=
 mflag=
 kflag=
-while getopts 'bmk' OPTION; do
+eflag=
+while getopts 'bmke' OPTION; do
     case $OPTION in
         b) bflag=1
         ;;
         m) mflag=1
         ;;
         k) kflag=1
+        ;;
+        e) eflag=1
         ;;
         ?) echo "Invalid option: -$OPTARG" >&2
         ;;
@@ -33,8 +50,10 @@ shift $(($OPTIND - 1))
 # This must be below the getopts
 argUsed=`echo $1 | tr '[:lower:]' '[:upper:]'`
 
+pingyrdb=""
+
 # By default
-pingyrdb=no
+
 #######################################################################################
 #|||||||||||||||||||||||||||||| Environment Controls ||||||||||||||||||||||||||||||||||
 #######################################################################################
@@ -43,18 +62,49 @@ if [[ $1 == sivall ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/sivall/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/sivall/newfiles"
-    echo "vcftofasta.sh ran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
-elif [[ $1 == aiall ]]; then
+elif [[ $1 == gen ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
-    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/aiall/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/aiall/newfiles"
-    echo "vcftofasta.sh ran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/gen/*fasta
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
+    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+
+
+elif [[ $1 == testflu ]]; then
+    flu=yes
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
+    krakenDatabase="/home/shared/databases/kraken/std/"
+    targetref=/home/tstuber/virus_seeds/circovirus_picornavirus/*fasta
+    #bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/aiall/newfiles"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
+    email_list="tod.p.stuber@usda.gov" # Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+
+elif [[ $1 == flu ]]; then
+    flu=yes
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
+    krakenDatabase="/home/shared/databases/kraken/std/"
+    pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/flu/*fasta
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
+    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" 
+
+elif [[ $1 == allflu ]]; then
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
+    krakenDatabase="/home/shared/databases/kraken/std/"
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/allflu/*fasta
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == h5n2 ]]; then
@@ -62,9 +112,9 @@ elif [[ $1 == h5n2 ]]; then
     krakenDatabase="/home/shared/databases/kraken/std/"
     pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h5n2/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/h5n2/newfiles"
-    echo "vcftofasta.sh rran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
+    echo "idvirus.sh rran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == h5n8 ]]; then
@@ -72,9 +122,9 @@ elif [[ $1 == h5n8 ]]; then
     krakenDatabase="/home/shared/databases/kraken/std/"
     pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h5n8/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/h5n8/newfiles"
-    echo "vcftofasta.sh rran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
+    echo "idvirus.sh rran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == secd ]]; then
@@ -82,8 +132,8 @@ elif [[ $1 == secd ]]; then
     krakenDatabase="/home/shared/databases/kraken/stdPlusSECD"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/secd/*fasta
     bioinfoVCF="/bioinfo11/TStuber/Results/viruses/secd/newfiles"
-    echo "vcftofasta.sh ran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == reo ]]; then
@@ -91,8 +141,8 @@ elif [[ $1 == reo ]]; then
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/reo/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/reo/newfiles"
-    echo "vcftofasta.sh ran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == vsv ]]; then
@@ -100,8 +150,8 @@ elif [[ $1 == vsv ]]; then
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/vsv/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/vsv/newfiles"
-    echo "vcftofasta.sh ran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == isav ]]; then
@@ -109,13 +159,40 @@ elif [[ $1 == isav ]]; then
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/isav/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/isav/newfiles"
-    echo "vcftofasta.sh ran targeting $1"
-    echo "Script vcftofasta.sh ran targeting $1"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
+    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+
+elif [[ $1 == bvd ]]; then
+    genotypingcodes="NEED TO SET"
+    krakenDatabase="/home/shared/databases/kraken/std/"
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/bvd/*fasta
+    bioinfoVCF="/bioinfo11/KBrien/newfiles"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
+    email_list="tod.p.stuber@usda.gov Kaitlin.E.Brien@aphis.usda.gov"
+
+elif [[ $1 == h11n9 ]]; then
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
+    krakenDatabase="/home/shared/databases/kraken/std/"
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h11n9/*fasta
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/h11n9/identification"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
+    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+
+elif [[ $1 == newcastle ]]; then
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
+    krakenDatabase="/home/shared/databases/kraken/std/"
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/newcastle/*fasta
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/newcastle"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 else
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: aiall, sivall, h5n2, h5n8, secd, reo, vsv, isav"
+    echo "Incorrect argument!  Must use one of the following arguments: gen, testflu, allflu, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav, bvd, newcastle"
     echo ""
     echo "Set optional flags"
     echo -e '   flag -m will email just "M"e'
@@ -204,7 +281,7 @@ if [[ $sampleType == "paired" ]]; then
     echo "R2 file size: ${revFileSize}, read count: $revCount" >> $summaryfile
 
     echo "R1 file size: ${forFileSize}, read count: $forCount" >> ${emailbody}
-    echo "R2 file size: ${revFileSize}, read count: $revCount" >> ${emailbody}
+   echo "R2 file size: ${revFileSize}, read count: $revCount" >> ${emailbody}
 else
     echo "Single fastq file size: ${forFileSize}, read count: $forCount" >> $summaryfile
     echo "Single fastq file size: ${forFileSize}, read count: $forCount" >> $emailbody
@@ -288,7 +365,7 @@ refname=${ref%.fasta}
 ##
 bwa index $ref
 samtools faidx $ref
-java -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
     echo "Index and dict are present, continue script"
@@ -296,7 +373,7 @@ else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
     samtools faidx $ref
-    java -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+    java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
     if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
     fi
@@ -319,44 +396,46 @@ rm ${refname}.raw.bam
 samtools view -h -b -F4 ${refname}.sorted.bam > ./$refname.mappedReads.bam
 
 echo "***Marking Duplicates"
-java -Xmx4g -jar  ${picardPath}/MarkDuplicates.jar INPUT=${refname}.mappedReads.bam OUTPUT=$refname.dup.bam METRICS_FILE=$refname.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
+java -Xmx2g -jar  ${picardPath}/MarkDuplicates.jar INPUT=${refname}.mappedReads.bam OUTPUT=$refname.dup.bam METRICS_FILE=$refname.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
 
 echo "***Index $refname.dup.bam"
 samtools index $refname.dup.bam
 
 echo "*** Calling VCFs with UnifiedGenotyper"
-java -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I $refname.dup.bam -o ${refname}.UG.vcf -nct 2
+java -Xmx2g -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I $refname.dup.bam -o ${refname}.UG.vcf -nct 2
 
 if [ -s ${refname}.UG.vcf ]; then
     echo "${g}.UG.vcf present continueing script"
 else
     sleep 60
     echo "${refname}.UG.vcf is missing, try making again"
-    java -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I ${dupbam} -o ${refname}.UG.vcf -nct 2
+    java -Xmx2g -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I ${dupbam} -o ${refname}.UG.vcf -nct 2
     if [ -s ${refname}.UG.vcf ]; then
         echo "${refname}.UG.vcf present continueing script"
     else
-        echo "" >> ${emailbody}
-        echo "${refname}.UG.vcf failed to make, Further analysis required" >> ${emailbody}
-        email_list="Tod.P.Stuber@aphis.usda.gov"
-        echo "${refname}.UG.vcf failed to make, Further analysis required" | mutt -s "Sample $sampleName Reference_Set $argUsed" -- $email_list
         exit 1
     fi
 fi
 
 # make reference guided contig
-java -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${refname}.readreference.fasta -V ${refname}.UG.vcf
+java -Xmx2g -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${refname}.readreference.fasta -V ${refname}.UG.vcf
 
-echo ">${refname}" > ${refname}.readreference.temp; awk ' $8 ~ /^AN=2/ {print $4} ' ${refname}.UG.vcf | tr -d [:space:] >> ${refname}.readreference.temp; echo "" >> ${refname}.readreference.temp; mv ${refname}.readreference.temp ${refname}.readreference.fasta
+#echo ">${refname}" > ${refname}.readreference.temp; awk ' $8 ~ /^AN=2/ {print $4} ' ${refname}.UG.vcf | tr -d [:space:] >> ${refname}.readreference.temp; echo "" >> ${refname}.readreference.temp; mv ${refname}.readreference.temp ${refname}.readreference.fasta
 
 echo "short BLAST"
 blastn -query ${refname}.readreference.fasta -db /data/BLAST/db/nt -num_threads 20 -out ${refname}-readreference-max1-nt-id.txt -max_target_seqs 1 -outfmt "6 saccver"
+#rm ${refname}.readreference.fasta
+
+head -1 ${refname}-readreference-max1-nt-id.txt > ${refname}-readreference-max1-nt-id.txt.temp; mv ${refname}-readreference-max1-nt-id.txt.temp ${refname}-readreference-max1-nt-id.txt
 
 if [ -s ${refname}-readreference-max1-nt-id.txt ]; then
     echo "Something was found"
 else
+    echo ">${refname}" > ${refname}.readreference.temp; awk ' $8 ~ /^AN=2/ {print $4} ' ${refname}.UG.vcf | tr -d [:space:] >> ${refname}.readreference.temp; echo "" >> ${refname}.readreference.temp; mv ${refname}.readreference.temp ${refname}.readreference.fasta
+    blastn -query ${refname}.readreference.fasta -db /data/BLAST/db/nt -num_threads 20 -out ${refname}-readreference-max1-nt-id.txt -max_target_seqs 1 -outfmt "6 saccver"
+    head -1 ${refname}-readreference-max1-nt-id.txt > ${refname}-readreference-max1-nt-id.txt.temp; mv ${refname}-readreference-max1-nt-id.txt.temp ${refname}-readreference-max1-nt-id.txt
     echo "No matches"
-    exit 1
+    #exit 1
 fi
 
 rm *dict
@@ -464,7 +543,7 @@ echo "refname: ${refname}"
 grep '^#' ${orgref}-${refname}.hapreadyAll.vcf > header
 grep -v '^#' ${orgref}-${refname}.hapreadyAll.vcf > snps
 
-chromname=`awk ' $1 !~ /^#/ {print $1}' ${orgref}-${refname}.hapreadyAll.vcf | head -1`
+#chromname=`awk ' $1 !~ /^#/ {print $1}' ${orgref}-${refname}.hapreadyAll.vcf | head -1`
 #if [ -s HCbody ]; then
 #	echo "HCbody exists and has size greater than zero"
 #	grep -v '^#' ${orgref}-${refname}.UG.vcf | awk -v c=$chromname 'BEGIN {FS="\t"; OFS="\t"} { if($10 == "./." ) print c, $2, $3, $4, "N", $6, $7, $8, "GT", "1"; else print c, $2, $3, $4, $5, $6, $7, $8, $9, $10}' > UGbody
@@ -477,20 +556,22 @@ chromname=`awk ' $1 !~ /^#/ {print $1}' ${orgref}-${refname}.hapreadyAll.vcf | h
 #cat HCbody UGbody | awk '{ if (a[$2]++ == 0) print $0; }' | sort -nk2,2 > body
 
 # Get zero coverage regions the chromosome name from the UG positions needs to be updated to the HC names
-awk 'BEGIN{OFS="\t"} $10 == "./." {print $0}' ${orgref}-${refname}.UG.vcf | awk -v c=$chromname 'BEGIN{OFS="\t"} {print c, $2, $3, $4, "N", $6, $7, $8, "GT", "1"}' > zeroformated
+awk -v c=$refname 'BEGIN{OFS="\t"}{if($10 == "./.") print c, $2, $3, $4, "N", $6, $7, $8, "GT", "1" }' ${orgref}-${refname}.UG.vcf > zeroformated
 
 cat snps zeroformated | sort -nk2,2 > body
 
-cp ${orgref}-${refname}.hapreadyAll.vcf OLD-${orgref}-${refname}.hapreadyAll.vcf
-cat header body > ${orgref}-${refname}.hapreadyAll.vcf
+#cp ${orgref}-${refname}.hapreadyAll.vcf OLD-${orgref}-${refname}.hapreadyAll.vcf
+cat header body > ${orgref}-${refname}.newhapreadyAll.vcf
 
-# make reference guided contig
-java -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${orgref}-${refname}.reference_guided.fasta -V ${orgref}-${refname}.hapreadyAll.vcf -IUPAC ${orgref}-${refname}
+# make reference guided contig THIS IS THE FINAL REFERNCE.  THE LAST ALIGNMENT WILL BE MADE AND BLAST RESULTS WILL BE BASED ON THIS CONSENSUS SEQUENCE
+java -Xmx2g -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${orgref}-${refname}.reference_guided.fasta -V ${orgref}-${refname}.newhapreadyAll.vcf -IUPAC ${orgref}-${refname}
+
+read -p "$LINENO Enter"
 
 if [ $sampleType == "paired" ]; then
-    java -jar ${picardPath}/SamToFastq.jar INPUT=${orgref}-${refname}.dup.bam FASTQ=./${orgref}-${refname}-mapped_R1.fastq SECOND_END_FASTQ=./${orgref}-${refname}-mapped_R2.fastq
+    java -Xmx2g -jar ${picardPath}/SamToFastq.jar INPUT=${orgref}-${refname}.dup.bam FASTQ=./${orgref}-${refname}-mapped_R1.fastq SECOND_END_FASTQ=./${orgref}-${refname}-mapped_R2.fastq
 else
-    java -jar ${picardPath}/SamToFastq.jar INPUT=${orgref}-${refname}.dup.bam FASTQ=./${orgref}-${refname}-mapped_R1.fastq
+    java -Xmx2g -jar ${picardPath}/SamToFastq.jar INPUT=${orgref}-${refname}.dup.bam FASTQ=./${orgref}-${refname}-mapped_R1.fastq
 fi
 
 if [ $sampleType == "paired" ]; then
@@ -507,6 +588,13 @@ countNTs=`grep -v ">" $ref | wc | awk '{print $3}'`
 echo "*** Bamtools is getting coverage..."
 bamtools coverage -in ${orgref}-${refname}.dup.bam | awk -v x=${orgref}-${refname} 'BEGIN{OFS="\t"}{print x, $2, $3}' >> ${orgref}-${refname}-coveragefile
 
+#Mean depth of coverage
+meancov=`awk '{ sum += $3 } END { if (NR > 0) print sum / NR }' ${orgref}-${refname}-coveragefile`
+
+#Length of reference
+countNTs=`awk 'END{print NR}' ${orgref}-${refname}-coveragefile`
+
+#count positions with coverage
 covCount=`awk '{ if ($3 != 0) count++ } END { print count }' ${orgref}-${refname}-coveragefile`
 echo "covCount $covCount"
 
@@ -517,20 +605,16 @@ declare -i y=${countNTs}
 perc=`awk -v x=$x -v y=$y 'BEGIN { print(x/y)*100}'`
 echo "perc: $perc"
 
-#Average depth of coverage for the reference
-depthcov=`awk '{sum+=$3} END { print sum/NR}' ${orgref}-${refname}-coveragefile`
-echo "depthcov $depthcov"
-
 LC_NUMERIC=en_US
-printf "%-30s %'10d %11.2f%% %'10dX\n" ${orgref}-${refname} $mapCount $perc $depthcov >> ${summaryfile}.pre
+printf "%-45s %'10d %11.2f%% %'10dX\n" ${orgref}-${refname} $mapCount $perc $meancov >> ${summaryfile}.pre
 
 echo "`printf "%'.0f\n" ${mapCount}` reads aligned to ${orgref}-${refname}"
-echo "${perc}% genome coverage, $depthcov"
+echo "${perc}% genome coverage, $meancov"
 
 awk -v x=${orgref}-${refname} 'BEGIN {OFS="\t"} {print x, $2, $3}' ${orgref}-${refname}-coveragefile | grep -v "segment_all" > ${orgref}-${refname}-samplecoveragefile
 
-rm *sorted.bam*
-rm *dup.bam*
+#rm *sorted.bam*
+#rm *dup.bam*
 rm *mappedReads.bam
 rm *fasta.amb
 rm *fasta.ann
@@ -560,7 +644,7 @@ samtools faidx $ref
 
 #########################
 
-java -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
     echo "Index and dict are present, continue script"
@@ -568,7 +652,7 @@ else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
     samtools faidx $ref
-    java -jar ${picardPath}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
+    java -Xmx2g -jar ${picardPath}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
     if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
     fi
@@ -592,7 +676,7 @@ samtools view -h -b -F4 ${orgref}-${refname}.sorted.bam > ./${orgref}-${refname}
 samtools index ./${orgref}-${refname}.mappedReads.bam
 
 echo "***Marking Duplicates"
-java -Xmx4g -jar  ${picardPath}/MarkDuplicates.jar INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
+java -Xmx2g -jar  ${picardPath}/MarkDuplicates.jar INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
 
 echo "***Index ${orgref}-${refname}.dup.bam"
 samtools index ${orgref}-${refname}.dup.bam
@@ -600,36 +684,34 @@ samtools index ${orgref}-${refname}.dup.bam
 ##############################
 echo $ref
 
-java -jar ${GATKPath} -T ClipReads -R $ref -I ${orgref}-${refname}.dup.bam -o ${orgref}-${refname}.downsample.bam -filterNoBases -dcov 10
+java -Xmx2g -jar ${GATKPath} -T ClipReads -R $ref -I ${orgref}-${refname}.dup.bam -o ${orgref}-${refname}.downsample.bam -filterNoBases -dcov 10
 samtools index ${orgref}-${refname}.downsample.bam
 
 rm *UG.vcf
 
 echo "*** Calling VCFs with UnifiedGenotyper"
-java -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.UG.vcf -nct 2
+java -Xmx2g -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.UG.vcf -nct 2
 
 if [ -s ${orgref}-${refname}.UG.vcf ]; then
     echo "${orgref}-${refname}.UG.vcf present continueing script"
 else
     sleep 60
     echo "${orgref}-${refname}.UG.vcf is missing, try making again"
-    java -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.UG.vcf -nct 2
+    java -Xmx2g -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.UG.vcf -nct 2
     if [ -s ${orgref}-${refname}.UG.vcf ]; then
         echo "${orgref}-${refname}.UG.vcf present continueing script"
     else
-        echo "" >> ${emailbody}
-        echo "${orgref}-${refname}.UG.vcf failed to make, Further analysis required" >> ${emailbody}
-        email_list="Tod.P.Stuber@aphis.usda.gov"
-        echo "${orgref}-${refname}.UG.vcf failed to make, Further analysis required" | mutt -s "Sample $sampleName Reference_Set $argUsed" -- $email_list
         exit 1
     fi
 fi
 
 #########
+
 # make reference guided contig using Unified Genotyper
-java -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${refname}.readreference.fasta -V ${orgref}-${refname}.UG.vcf
+java -Xmx2g -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${refname}.readreference.fasta -V ${orgref}-${refname}.UG.vcf
 
 echo ">${refname}" > ${refname}.readreference.temp; grep -v ">" ${refname}.readreference.fasta >> ${refname}.readreference.temp; mv ${refname}.readreference.temp ${refname}.fasta
+rm ${refname}.readreference.*
 
 # Align reads to Unified Genotyper made reference.  This is the last alignment that will make the final haplotypecaller reference guided assembly
 ref="${refname}.fasta"
@@ -639,7 +721,7 @@ echo "ref: $ref and refname: $refname"
 bwa index $ref
 samtools faidx $ref
 rm ${refname}.dict
-java -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=$ref OUTPUT=${refname}.dict
+java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=$ref OUTPUT=${refname}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
     echo "Index and dict are present, continue script"
@@ -647,7 +729,7 @@ else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
     samtools faidx $ref
-    java -jar ${picardPath}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
+    java -Xmx2g -jar ${picardPath}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
     if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
     fi
@@ -671,32 +753,28 @@ samtools view -h -b -F4 ${orgref}-${refname}.sorted.bam > ./${orgref}-${refname}
 samtools index ./${orgref}-${refname}.mappedReads.bam
 
 echo "***Marking Duplicates"
-java -Xmx4g -jar  ${picardPath}/MarkDuplicates.jar INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
+java -Xmx2g -Xmx4g -jar  ${picardPath}/MarkDuplicates.jar INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
 
 echo "***Index ${orgref}-${refname}.dup.bam"
 samtools index ${orgref}-${refname}.dup.bam
-java -jar ${GATKPath} -T ClipReads -R $ref -I ${orgref}-${refname}.dup.bam -o ${orgref}-${refname}.downsample.bam -filterNoBases -dcov 10
+java -Xmx2g -jar ${GATKPath} -T ClipReads -R $ref -I ${orgref}-${refname}.dup.bam -o ${orgref}-${refname}.downsample.bam -filterNoBases -dcov 10
 samtools index ${orgref}-${refname}.downsample.bam
 ########
 
 #bam prepared now onto variant calling
-java -Xmx4g -jar ${GATKPath} -R $ref -T HaplotypeCaller -ploidy 1 -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.hapreadyAll.vcf -bamout ${orgref}-${refname}.bamout.bam -dontUseSoftClippedBases -allowNonUniqueKmersInRef
-java -Xmx4g -jar ${igvtools} index ${orgref}-${refname}.hapreadyAll.vcf
+java -Xmx2g -jar ${GATKPath} -R $ref -T HaplotypeCaller -ploidy 1 -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.hapreadyAll.vcf -bamout ${orgref}-${refname}.bamout.bam -dontUseSoftClippedBases -allowNonUniqueKmersInRef 
+java -Xmx2g -jar ${igvtools} index ${orgref}-${refname}.hapreadyAll.vcf
 
 if [ -s ${orgref}-${refname}.hapreadyAll.vcf ]; then
     echo "${orgref}-${refname}.hapreadyAll.vcf present continueing script"
 else
     sleep 60
     echo "${orgref}-${refname}.hapreadyAll.vcf is missing, try making again"
-    java -Xmx4g -jar ${GATKPath} -R $ref -T HaplotypeCaller -ploidy 1 -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.hapreadyAll.vcf -bamout ${orgref}-${refname}.bamout.bam -dontUseSoftClippedBases -allowNonUniqueKmersInRef
-    java -Xmx4g -jar ${igvtools} index ${orgref}-${refname}.hapreadyAll.vcf
+    java -Xmx2g -jar ${GATKPath} -R $ref -T HaplotypeCaller -ploidy 1 -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.hapreadyAll.vcf -bamout ${orgref}-${refname}.bamout.bam -dontUseSoftClippedBases -allowNonUniqueKmersInRef
+    java -Xmx2g -jar ${igvtools} index ${orgref}-${refname}.hapreadyAll.vcf
     if [ -s ${orgref}-${refname}.hapreadyAll.vcf ]; then
         echo "${orgref}-${refname}.hapreadyAll.vcf present continueing script"
     else
-        echo "" >> ${emailbody}
-        echo "${orgref}-${refname}.hapreadyAll.vcf failed to make, Further analysis required" >> ${emailbody}
-        email_list="Tod.P.Stuber@aphis.usda.gov"
-        echo "${orgref}-${refname}.hapreadyAll.vcf failed to make, Further analysis required" | mutt -s "Sample $sampleName Reference_Set $argUsed" -- $email_list
         exit 1
     fi
 fi
@@ -777,7 +855,7 @@ refname=${ref%.fasta}
 
 bwa index $ref
 samtools faidx $ref
-java -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
     echo "Index and dict are present, continue script"
@@ -785,7 +863,7 @@ else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
     samtools faidx $ref
-    java -jar ${picardPath}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+    java -Xmx2g -jar ${picardPath}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
     if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
     fi
@@ -807,27 +885,23 @@ rm ${refname}.sam
 rm ${refname}.raw.bam
 
 echo "*** Calling VCFs with UnifiedGenotyper"
-java -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I ${refname}.sorted.bam -o ${refname}.UG.vcf -nct 2
+java -Xmx2g -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I ${refname}.sorted.bam -o ${refname}.UG.vcf -nct 2
 
 if [ -s ${refname}.UG.vcf ]; then
     echo "${refname}.UG.vcf present continueing script"
 else
     sleep 60
     echo "${refname}.UG.vcf is missing, try making again"
-    java -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I ${refname}.sorted.bam -o ${refname}.UG.vcf -nct 2
+    java -Xmx2g -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I ${refname}.sorted.bam -o ${refname}.UG.vcf -nct 2
     if [ -s ${refname}.UG.vcf ]; then
         echo "${refname}.UG.vcf present continueing script"
     else
-        echo "" >> ${emailbody}
-        echo "${refname}.UG.vcf failed to make, Further analysis required" >> ${emailbody}
-        email_list="Tod.P.Stuber@aphis.usda.gov"
-        echo "${refname}.UG.vcf failed to make, Further analysis required" | mutt -s "Sample $sampleName Reference_Set $argUsed" -- $email_list
         exit 1
     fi
 fi
 
 # make reference guided contig
-java -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${refname}.readreference.fasta -V ${refname}.UG.vcf
+java -Xmx2g -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${refname}.readreference.fasta -V ${refname}.UG.vcf
 
 sed 's/NN//g' < ${refname}.readreference.fasta > ${refname}.readreference.temp; mv ${refname}.readreference.temp ${refname}.readreference.fasta
 
@@ -839,6 +913,7 @@ rm *fasta*
 rm *coveragefile
 rm *vcf*
 rm *bam*
+rm ${refname}.readreference.fasta
 
 }
 
@@ -851,15 +926,20 @@ cat > ./plotR.r << EOL
 
 library(ggplot2)
 library(plyr)
+library(scales)
 
 arg <- commandArgs(trailingOnly=TRUE)
 
 data <- read.csv(arg[1], header=FALSE, sep="\t")
 names(data) <- c("species", "position", "coverage")
 
-pdf("myplot.pdf", width=20, height=4)
+pdf("myplot.pdf", width=20, height=6)
 
-ggplot(data, aes(x=position, y=log(coverage), colour=species, group=species)) + geom_point(size=2.0) + ggtitle(arg[2]) + scale_colour_brewer(palette="Set1")+ theme_bw() + guides(colour = guide_legend(override.aes = list(size=10)))
+#ggplot(data, aes(x=position, y=log(coverage), colour=species, group=species)) + geom_point(size=2.0) + ggtitle(arg[2]) + scale_colour_brewer(palette="Set1")+ theme_bw() + guides(colour = guide_legend(override.aes = list(size=10)))
+
+bp <- ggplot(data, aes(x=position, y=log10(coverage), colour=species, group=species)) + geom_point(size=2.0) + ggtitle(arg[2]) + scale_colour_brewer(palette="Set1")+ theme_bw() + guides(colour = guide_legend(override.aes = list(size=10)))
+
+bp + scale_y_continuous(breaks=seq(0, 3.0, 0.5))
 
 dev.off()
 EOL
@@ -878,21 +958,158 @@ echo "Set up references"
 # Reference is set in Environment Controls
 # target will only call "fasta" files
 
+if [[ $flu == yes ]]; then
+
+function findbest () {
+
+ref=`ls | grep .fasta`
+echo "Reference Input:  $ref"
+refname=${ref%.fasta}
+
+bwa index $ref
+samtools faidx $ref
+java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+
+if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
+    echo "Index and dict are present, continue script"
+else
+    sleep 5
+    echo "Either index or dict for reference is missing, try making again"
+    samtools faidx $ref
+    java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+    if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
+        read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
+    fi
+fi
+
+#adding -B 8 will require reads to have few mismatches to align to reference.  -B 1 will allow the most mismatch per read. -A [1] may be increased to increase the number of mismatches allow
+if [[ $sampleType == "paired" ]]; then
+    bwa mem -M -B 1 -t 10 -T 20 -P -a -R @RG"\t"ID:"$refname""\t"PL:ILLUMINA"\t"PU:"$refname"_RG1_UNIT1"\t"LB:"$refname"_LIB1"\t"SM:"$refname" $ref $forReads $revReads > ${refname}.sam
+else
+    bwa mem -M -B 1 -t 10 -T 20 -P -a -R @RG"\t"ID:"$refname""\t"PL:ILLUMINA"\t"PU:"$refname"_RG1_UNIT1"\t"LB:"$refname"_LIB1"\t"SM:"$refname" $ref $forReads > ${refname}.sam
+fi
+
+samtools view -bh -F4 -T $ref ${refname}.sam > ${refname}.raw.bam
+echo "Sorting Bam"
+samtools sort ${refname}.raw.bam ${refname}.sorted
+echo "****Indexing Bam"
+samtools index ${refname}.sorted.bam
+
+#Number of nucleotides in reference with coverage
+echo "*** Bamtools is getting coverage..."
+bamtools coverage -in ${refname}.sorted.bam | awk -v x=${refname} 'BEGIN{OFS="\t"}{print x, $2, $3}' >> ${refname}-coveragefile
+
+#Mean depth of coverage
+meancov=`awk '{ sum += $3 } END { if (NR > 0) print sum / NR }' ${refname}-coveragefile`
+
+#Length of reference
+countNTs=`awk 'END{print NR}' ${refname}-coveragefile`
+
+#count positions with coverage
+covCount=`awk '{ if ($3 != 0) count++ } END { print count }' ${refname}-coveragefile`
+echo "covCount $covCount"
+
+declare -i x=${covCount}
+declare -i y=${countNTs}
+
+#Percent of reference with coverage
+perc=`awk -v x=$x -v y=$y 'BEGIN { print(x/y)*100}'`
+echo "perc: $perc"
+
+printf "%-20s %11.2f%% %'10dX\n" ${refname} $perc $meancov >> ${root}/${s}/${sampleName}.findbest
+}
+
+    cp $targetref ./
+    mkdir fastas
+    cp $targetref ./fastas
+	cd ${root}
+	mkdir segment{1..8}
+	mv segment1*fasta ./segment1/
+        mv segment2*fasta ./segment2/
+	mv segment3*fasta ./segment3/
+	mv segment4*fasta ./segment4/
+	mv segment5*fasta ./segment5/
+	mv segment6*fasta ./segment6/
+	mv segment7*fasta ./segment7/
+	mv segment8*fasta ./segment8/
+
+	mv segment1 ./segment1_PB2/
+        mv segment2 ./segment2_PB1/
+        mv segment3 ./segment3_PA/
+        mv segment4 ./segment4_HA/
+        mv segment5 ./segment5_NP/
+        mv segment6 ./segment6_NA/
+        mv segment7 ./segment7_MP/
+        mv segment8 ./segment8_NS/
+	
+	for s in segment*; do
+		(cd $root
+		cd $s
+		echo "s: $s"
+		pwd
+		for i in *fasta; do
+			(cd ${root}/${s}
+			mkdir ${i%.fasta}
+        		mv ${i} ${i%.fasta}
+			ln ${root}/*fastq* ${i%.fasta}
+        		echo "working on $sampleName $s $i"
+       			cd ${i%.fasta}; findbest) &
+	        let count+=1
+                [[ $((count%55)) -eq 0 ]] && wait
+    		done
+	wait
+	cd ${root}/$s
+	averagecov=`sed 's/%//g' ${root}/${s}/${sampleName}.findbest | sed 's/X$//' | sed 's/,//' | awk '{ sum += $2 } END { if (NR > 0) print sum / NR }'`
+	meandepth=`sed 's/%//g' ${root}/${s}/${sampleName}.findbest | sed 's/X$//' | sed 's/,//' | awk '{ sum += $3 } END { if (NR > 0) print sum / NR }'`
+	best=`sed 's/%//g' ${root}/${s}/${sampleName}.findbest | sed 's/X$//' | sed 's/,//' | awk -v x=$averagecov ' $2+1 > x {print $0}' | awk -v x=$meandepth ' $3+1 > x {print $0}' | sort -rk2,2 | head -1 | awk '{print $1}'`
+	if [ -z $best  ]; then 
+	
+	best=`sed 's/%//' ${root}/${s}/${sampleName}.findbest | sed 's/X//' | sed 's/,//' | sort -nrk2,2 -nrk3,3 | head -1 | awk '{print $1}'` 
+	
+	fi
+	echo "The best found: $best"
+	echo "The best found: $best" >> ${root}/bestrefs.txt
+	rm -r `ls | grep -v ${best}` 
+	find . -name "*gz" -exec mv {} ./ \;
+	find . -name "*fasta" -exec mv {} ./ \;
+	segmentname=${PWD##*/}  # Segment name from working directory 
+	rm -r ${best}
+	mv *fasta ${segmentname}.fasta) &
+                let count+=1
+                [[ $((count%55)) -eq 0 ]] && wait
+	done
+
+	wait
+	cd $root
+	pwd
+
+	for i in segment*; do 
+		(echo ""; echo "####### $i ########"; echo ""; cd ${root}; cd $i; alignreads) &
+                let count+=1
+                [[ $((count%55)) -eq 0 ]] && wait
+	done
+
+else
+
 if [ "$bflag" ]; then
     echo ""
     echo " *** B FLAG ON, BUG FINDING MODE, SINGLE SAMPE PROCESSING *** "
     echo ""
     for i in `ls $targetref`; do cp $i ./; done
+    mkdir fastas
+    cp $targetref ./fastas
     for i in *fasta; do
         cd ${root}
         mkdir ${i%.fasta}
         cp ${i} ${i%.fasta}
         cp *fastq ${i%.fasta}
         echo "working on $sampleName $i"
-        cd ${i%.fasta}; alignreads
+	cd ${i%.fasta}; alignreads
     done
 else
     for i in `ls $targetref`; do cp $i ./; done
+    mkdir fastas
+    cp $targetref ./fastas
     for i in *fasta; do
         (cd ${root}
         mkdir ${i%.fasta}
@@ -903,6 +1120,7 @@ else
     let count+=1
     [[ $((count%10)) -eq 0 ]] && wait
     done
+fi
 fi
 wait
 
@@ -916,15 +1134,19 @@ wait
 sleep 5
 echo "" >> ${summaryfile}
 echo "Alignment stats (reference guided):" >> ${summaryfile}
-printf "%-30s %10s %11s %10s\n" "reference used" "read count" "percent cov" "ave depth" >> ${summaryfile}
+printf "%-45s %10s %11s %10s\n" "reference used" "read count" "percent cov" "ave depth" >> ${summaryfile}
 sort -k1,1 < ${summaryfile}.pre >> ${summaryfile}
+
+currentdate=`date`
+sort -k1,1 < ${summaryfile}.pre | awk -v name="$sampleName" -v curdate="$currentdate" 'BEGIN{OFS="\t"} {print curdate, name, $1, $2, $3, $4}' >> $idscriptrunsummary
+
+sort -k1,1 < ${summaryfile}.pre | awk -v name="$sampleName" -v curdate="$currentdate" 'BEGIN{OFS="\t"} {print curdate, name, $1, $2, $3, $4}' >> /bioinfo11/TStuber/Results/viruses/idvirus_run_summary.txt
 
 echo "" >> ${emailbody}
 echo "Alignment stats (reference guided):" >> ${emailbody}
-printf "%-30s %10s %11s %10s\n" "reference used" "read count" "percent cov" "ave depth" >> ${emailbody}
+printf "%-45s %10s %11s %10s\n" "reference used" "read count" "percent cov" "ave depth" >> ${emailbody}
 sort -k1,1 < ${summaryfile}.pre >> ${emailbody}
 
-rm ${summaryfile}.pre
 #####################
 
 for i in `find . -name "*samplecoveragefile"`; do
@@ -938,10 +1160,13 @@ pwd
 
 cd $root
 
+pwd 
+
 mkdir ${sampleName}-reference_guided_assemblies
 for i in `find . -name "*reference_guided.fasta"`; do
     cp $i ${sampleName}-reference_guided_assemblies
 done
+pwd
 
 cd ${root}/${sampleName}-reference_guided_assemblies
 pwd
@@ -950,6 +1175,7 @@ for i in `ls *fasta | sort -k1,1`; do
     echo ">${i%.reference_guided.fasta}" >> ${sampleName}.consensus.reads.fasta
     awk '/^>/ {printf("\n%s\n",$0);next; } { printf("%s",$0);}  END {printf("\n");}' $i | awk 'length > x { x = length; y = $0 } END { print y }' >> ${sampleName}.consensus.reads.fasta
 done
+pwd
 
 #######################################################################################
 #|||||||||||||||||||||||||||||| Reference Set Alignment |||||||||||||||||||||||||||||||
@@ -973,7 +1199,7 @@ orgref="igvalignment"
 
 bwa index $ref
 samtools faidx $ref
-java -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
 echo "Index and dict are present, continue script"
@@ -981,7 +1207,7 @@ else
 sleep 5
 echo "Either index or dict for reference is missing, try making again"
 samtools faidx $ref
-java -jar ${picardPath}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
+java -Xmx2g -jar ${picardPath}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
 read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
 fi
@@ -1007,12 +1233,15 @@ samtools view -h -b -F4 ${orgref}-${refname}.sorted.bam > ./${orgref}-${refname}
 samtools index ./${orgref}-${refname}.mappedReads.bam
 
 echo "***Marking Duplicates"
-java -Xmx4g -jar  ${picardPath}/MarkDuplicates.jar INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
+java -Xmx2g -jar  ${picardPath}/MarkDuplicates.jar INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
 
 echo "***Index ${orgref}-${refname}.dup.bam"
 samtools index ${orgref}-${refname}.dup.bam
-java -jar ${GATKPath} -T ClipReads -R $ref -I ${orgref}-${refname}.dup.bam -o ${orgref}-${refname}.downsample.bam -filterNoBases -dcov 10
+java -Xmx2g -jar ${GATKPath} -T ClipReads -R $ref -I ${orgref}-${refname}.dup.bam -o ${orgref}-${refname}.downsample.bam -filterNoBases -dcov 10
 samtools index ${orgref}-${refname}.downsample.bam
+
+# Make a quick and simple VCF to highlight possible problem areas of the consensus
+java -Xmx2g -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.UG.vcf -nct 8
 
 #############################
 
@@ -1036,16 +1265,46 @@ wait
 
 contigcount=`grep -c ">" ${sampleName}.consensus.reads.fasta`
 sed 's/NNN//g' ${sampleName}.consensus.reads.fasta > ${sampleName}.consensusnoN.reads.fasta
+pwd
 
 echo "nt BLAST $contigcount contigs..."
 blastn -query ${sampleName}.consensusnoN.reads.fasta -db /data/BLAST/db/nt -num_threads 20 -out ${sampleName}-consensus-max1-nt.txt -max_target_seqs 1 -outfmt "6 qseqid qlen slen pident mismatch evalue bitscore stitle saccver"
 echo "" >> ${summaryfile}
+
+hsegment=`grep "segment4" ${sampleName}-consensus-max1-nt.txt | sed 's/.*\(H[0-9]\{1,2\}\).*/\1/'`
+echo "hsegment: $hsegment"
+nsegment=`grep "segment6" ${sampleName}-consensus-max1-nt.txt | sed 's/.*\(N[0-9]\{1,2\}\).*/\1/'`
+echo "nsegment: $nsegment"
+
+subtype=${hsegment}${nsegment}
+
+# echo subtype to terminal
+i=0; while [ $i -lt 11 ]; do echo "*** Subtype: $subtype"; i=$[$i+1]; done
+
+if [[ -n $subtype ]]; then
+        echo "Subtype: $subtype" >> ${summaryfile}
+	echo "Subtype: $subtype" >> $idscriptrunsummary
+	echo "Subtype: $subtype" >> /bioinfo11/TStuber/Results/viruses/idvirus_run_summary.txt
+
+fi
+
 echo "--------------------------------------------------" >> ${summaryfile}
 echo "*** NT Database ***" >> ${summaryfile}
-awk 'BEGIN{printf "%-30s %-8s %-8s %-8s %-3s %-6s %-6s %-1s\n", "query ID", "qlength", "slength", "% id", "mis", "evalue", "bscore", "Description"} {printf "%-30s %-8s %-8s %-8s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' ${sampleName}-consensus-max1-nt.txt >> ${summaryfile}
+awk 'BEGIN{printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s\n", "query ID", "qlength", "slength", "% id", "mis", "evalue", "bscore", "Description"} {printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' ${sampleName}-consensus-max1-nt.txt >> ${summaryfile}
 echo "" >> ${summaryfile}
 
-if [ $pingyrdb == yes ]; then
+sort -k1,1 < ${summaryfile}.pre > ${summaryfile}.sorted
+echo "*** ${sampleName} ${subtype}" >> /scratch/report/idemailsummary
+paste ${summaryfile}.sorted ${sampleName}-consensus-max1-nt.txt | awk 'BEGIN{printf "%-41s %-11s %-8s %-10s %-3s %-6s %-6s %-1s\n", "ID", "read count", "per cov", "ave depth", "mis", "evalue", "bscore", "Description"} {printf "%-41s %-11s %-8s %-10s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' >> /scratch/report/idemailsummary
+
+#awk 'BEGIN{printf "%-41s %-11s %-8s %-10s %-3s %-6s %-6s %-1s\n", "ID", "read count", "per cov", "ave depth", "mis", "evalue", "bscore", "Description"} {printf "%-41s %-11s %-8s %-10s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' ${summaryfile}.sorted  >> /scratch/report/idemailsummary
+
+rm ${summaryfile}.pre ${summaryfile}.sorted
+
+pingyrdb=`egrep -m 1 -o "H5N1|H5N2|H5N8" ${summaryfile}`
+echo "In the pingyrdb varable: $pingyrdb"
+
+if [[ -n $pingyrdb ]]; then
     echo "pintail-gyrfalcon BLAST $contigcount contigs..."
     blastn -query ${sampleName}.consensusnoN.reads.fasta -db /data/BLAST/blastdb-pintail-gyrfalcon/pintail-gyrfalcon.fsa -num_threads 20 -out ${sampleName}-consensus-blast_alignment-pintail-gyrfalcon.txt -outfmt 1
     blastn -query ${sampleName}.consensusnoN.reads.fasta -db /data/BLAST/blastdb-pintail-gyrfalcon/pintail-gyrfalcon.fsa -num_threads 20 -out ${sampleName}-consensus-fmt6-pintail-gyrfalcon.txt -outfmt "6 qseqid qlen slen pident mismatch evalue bitscore stitle saccver"
@@ -1101,14 +1360,14 @@ else
         # Create "here-document"
 cat >./param.txt <<EOL
 
->Seq1 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 1, polymerase PB2 (PB2) gene, complete cds.
->Seq2 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 2, polymerase PB1 (PB1) gene, complete cds.
->Seq3 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 3, polymerase PA (PA) gene, complete cds.
->Seq4 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 4, hemagglutinin (HA) gene, complete cds.
->Seq5 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 5, nucleoprotein (NP) gene, complete cds.
->Seq6 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 6, neuraminidase (NA) gene, complete cds.
->Seq7 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 7, matrix protein 2 (M2) and matrix protein 1 (M1) genes, complete cds.
->Seq8 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${argUsed})) segment 8, non-structural protein NS1 and non-structural protein NS2 (NS) gene, complete cds.
+>Seq1 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 1, polymerase PB2 (PB2) gene, complete cds.
+>Seq2 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 2, polymerase PB1 (PB1) gene, complete cds.
+>Seq3 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 3, polymerase PA (PA) gene, complete cds.
+>Seq4 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 4, hemagglutinin (HA) gene, complete cds.
+>Seq5 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 5, nucleoprotein (NP) gene, complete cds.
+>Seq6 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 6, neuraminidase (NA) gene, complete cds.
+>Seq7 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 7, matrix protein 2 (M2) and matrix protein 1 (M1) genes, complete cds.
+>Seq8 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 8, non-structural protein NS1 and non-structural protein NS2 (NS) gene, complete cds.
 
 EOL
 
@@ -1118,6 +1377,7 @@ EOL
         echo "metadata not available"
         cp ${root}/${sampleName}-reference_guided_assemblies/${sampleName}.consensus.reads.fasta ${root}/${sampleName}-submissionfile.fasta
     fi
+pwd
 
 rm *temp
 rm *information
@@ -1130,7 +1390,7 @@ cd $root
 #rm *fastq*
 echo "" >> ${summaryfile}
 echo "" >> ${summaryfile}
-echo "Files copied to: $bioinfoVCF" >> ${summaryfile}
+#echo "Files copied to: $bioinfoVCF" >> ${summaryfile}
 echo "" >> ${summaryfile}
 
 rm *headers
@@ -1169,10 +1429,14 @@ if [ -e $sampleName-Krona_identification_graphic.html ]; then
 	ls $sampleName-Krona_identification_graphic.html >> emailfiles
 fi
 
+if [ -e kraken/${sampleName}-kraken_report.txt ]; then
+        ls kraken/${sampleName}-kraken_report.txt >> emailfiles
+fi
+
 if [[ $sampleType == "paired" ]]; then
 	echo "paried data, not checking for C insert"
 else
-	if [ $pingyrdb == yes ]; then
+	if [[ -n $pingyrdb ]]; then
 		noc=`egrep -c "GAGTTGACATAAACCAGGCCACGC|GCGTGGCCTGGTTTATGTCAACTC" $forReads`
 		cinsert=`egrep -c "GAGTTGACATAAACCCAGGCCACGC|GCGTGGCCTGGGTTTATGTCAACTC" $forReads`
         insert1=`egrep -c "GAGTTGACATAAA[AGT]CCAGGCCACGC|GCGTGGCCTGG[ACT]TTTATGTCAACTC" $forReads`
@@ -1202,20 +1466,34 @@ fi
 rm *fastq*
 
 #Cleanup
-rm -r `ls | egrep -v "emailfile|emailfiles|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
+rm -r `ls | egrep -v "kraken|emailfile|emailfiles|bestrefs.txt|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
 
-if [ "$mflag" ]; then
-    email_list="tod.p.stuber@usda.gov"
-    cat ${emailbody} | mutt -s "Sample: ${sampleName}, Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
-    rm emailfiles
+pwd > ./fastas/filelocation.txt
+
+if [ "$eflag" ]; then
+	# eflag is used when script is called from idemail.sh
+	# making summary file to send in email
+	echo "Files copied to: ${bioinfoVCF}" >> /scratch/report/idemailsummary
+	echo "" >> /scratch/report/idemailsummary
+	rm emailfile*
+	echo "Copying to ${bioinfoVCF}"
+        cp -r $PWD ${bioinfoVCF}
 else
-    cat ${emailbody} | mutt -s "Sample: ${sampleName}, Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
+	# else when idvirus.sh is ran on its own
+	if [ "$mflag" ]; then
+    		email_list="tod.p.stuber@usda.gov"
+    		cat ${emailbody} | mutt -s "Sample: ${sampleName}, $subtype Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
+    		rm emailfiles
+	else
+    		echo "" >> ${emailbody}
+    		echo "Files copied to: ${bioinfoVCF}" >> ${emailbody}		
+    		cat ${emailbody} | mutt -s "Sample: ${sampleName}, $subtype Reference_Set: $argUsed" -a `cat emailfiles` -- $email_list
 
-    rm ${emailbody}
-    rm emailfiles
-    echo "Copying to ${bioinfoVCF}"
-    cp -r $PWD ${bioinfoVCF}
-
+    		rm ${emailbody}
+    		rm emailfiles
+    		echo "Copying to ${bioinfoVCF}"
+    		cp -r $PWD ${bioinfoVCF}
+	fi
 fi
 
 echo "****************************** END ******************************"

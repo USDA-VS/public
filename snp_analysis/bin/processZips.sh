@@ -105,8 +105,8 @@ elif [ $1 == suis2 ]; then
     ###################################################################
 
 elif [ $1 == suis3 ]; then
-    cp /home/shared/brucella/suis3/script_dependents/2015-07-15-B-REF-BS3-686.fasta ./
-    hqs="/home/shared/brucella/suis3/script_dependents/B-686-SNPsHighestQualitySNPs.vcf"
+    cp /home/shared/brucella/suis3/script_dependents/B-REF-BS3-686.fasta ./
+    hqs="/home/shared/brucella/suis3/script_dependents/B15-0007-highqualitysnps.vcf"
     bioinfo="/bioinfo11/TStuber/Results/brucella/suis3/newFiles"
     sharedSAN="/home/shared/brucella/suis3/newFiles"
 
@@ -232,9 +232,12 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 
 # Lineage 3
 elif [ $1 == TB3 ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb3/NC_021193.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/HQ-13-7575.vcf"
-bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/newFiles"
+#cp /home/shared/mycobacterium/tbc/snppipeline/tb3/NC_021193.fasta ./
+#hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/HQ-13-7575.vcf"
+cp /home/shared/mycobacterium/tbc/snppipeline/tb3/NC_021193it3-readreference.fasta ./
+hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/13-7575-highqualitysnps.vcf"
+
+#bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/newFiles"
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 # Run spoligoSpacerFinder.sh
@@ -334,9 +337,20 @@ bioinfo=""
 
     ###################################################################
 
+
+elif [ $1 == secd ]; then
+   cp /home/shared/virus/secd/scriptDependents/KC210145.fasta ./
+   hqs="/home/shared/virus/secd/scriptDependents/HighestQualitySNPs.vcf"
+   #bioinfo=""
+   #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+
 else
     echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, s
+<<<<<<< HEAD
 uis2, suis3, suis4, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para, h5n2"
+=======
+uis2, suis3, suis4, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para, secd"
+>>>>>>> master
     exit 1
 fi
 
@@ -388,6 +402,9 @@ bwa mem -M -t 16 -R @RG"\t"ID:"$n""\t"PL:ILLUMINA"\t"PU:"$n"_RG1_UNIT1"\t"LB:"$n
 echo "***Making Bam file"
 samtools view -bh -F4 -T $ref $n.sam > $n.raw.bam
 
+if [ $1 == secd ]; then
+        echo "secd, not assembling unmapped reads"
+else
 ####### unmapped reads #######
 #Bam with mapped and unmapped reads
 samtools view -bh -T $ref $n.sam > $n.all.bam
@@ -408,6 +425,7 @@ mv ${n}_abyss-stats ../unmappedReads
 mv *coverage* ../unmappedReads
 rm *abyss*
 ######################
+fi
 
 echo "***Sorting Bam"
 samtools sort $n.raw.bam $n.sorted
@@ -469,6 +487,9 @@ java -jar ${gatk} -T DepthOfCoverage -R $ref -I $n.preready-mem.bam -o $n.covera
 
 #########################
 
+if [ $1 == secd ]; then
+	echo "secd, not using haplotypecaller"
+else
 # http://www.broadinstitute.org/gatk/guide/tagged?tag=unifiedgenotyper
 # In group tb4b position 3336835 was not being found in some isolates.  Adding this advance flag allowed these positions to be found.
 # ploidy 2 is default
@@ -502,8 +523,12 @@ cat $n.header $n.SNPsMapzeroNoHeader.vcf > $n.unsortSNPsZeroCoverage.vcf
 java -Xmx4g -jar ${igvtools} sort $n.unsortSNPsZeroCoverage.vcf $n.SNPsZeroCoverage.vcf
 java -Xmx4g -jar ${igvtools} index $n.SNPsZeroCoverage.vcf
 
-# Add zero positions to vcf
+fi
+
+# Emit all sites to VCF, not just the SNPs and indels.  This allows making a UnifiedGenotyper VCF similar to what was used before using the Haplotypecaller.
 java -Xmx4g -jar ${gatk} -R $ref -T UnifiedGenotyper -out_mode EMIT_ALL_SITES -I ${n}.ready-mem.bam -o ${n}.allsites.vcf -nt 8
+
+# This removes all positions same as the reference.  These positions are found by removing rows were column (field) 8 begins with AN=2.  This decreases the size of the VCF considerably.  The final VCF contains all SNP, indel or zero mapped/coverage positions
 awk ' $0 ~ /#/ || $8 !~ /^AN=2;/ {print $0}' ${n}.allsites.vcf > $n.ready-mem.vcf
 java -Xmx4g -jar ${igvtools} index $n.ready-mem.vcf
 
@@ -650,6 +675,7 @@ rm ../*identifier_out2*
 mv ${startingdir}/fastq ${startingdir}/spoligo
 rm ${startingdir}/spoligo/*fastq
 rm -r ${startingdir}/temp
+ln qualityvalues/$n.stats.txt ./stats-$n.txt
 
 cp $0 ./
 
