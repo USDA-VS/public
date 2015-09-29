@@ -1653,15 +1653,15 @@ for i in *.vcf; do
     # If a group number matches a quality position in the VCF (formatedpos) then print the position
     grep "Group" "${DefiningSNPs}" > groupsnps
 
-	awk 'NR==FNR{a[$0];next}$2 in a' quality-${i%.vcf} groupsnps | awk '{print $1}' > foundpositions-${i%.vcf} 
+	awk 'NR==FNR{a[$0];next}$2 in a' quality-${i%.vcf} groupsnps | awk '{print $1}' > group-foundpositions-${i%.vcf} 
 
-    echo "This is the Group Numbers: `cat foundpositions-${i%.vcf}`"
+    echo "This is the Group Numbers: `cat group-foundpositions-${i%.vcf}`"
 
     # Typically a single group position is found, and the VCF will be placed into just one group.  It is posible that an isolate will need to go in more than one group because of were it falls on the tree.  In this case there may be 2 group, or more, group positions found.  The number of group positions found is captured in sizeGroup.
-    sizeGroup=`wc -l foundpositions-${i%.vcf} | awk '{print $1}'`
+    sizeGroup=`wc -l group-foundpositions-${i%.vcf} | awk '{print $1}'`
 
     # Loop through the number of groups positions found
-    loops=`cat foundpositions-${i%.vcf}`
+    loops=`cat group-foundpositions-${i%.vcf}`
 
     	if [ $sizeGroup -lt 1 ]; then # There was not a position found that places VCF into group
         	echo "$i Grp not found" >> section3
@@ -1686,15 +1686,15 @@ for i in *.vcf; do
     # If a group number matches a quality position in the VCF (formatedpos) then print the position
     grep "Subgroup" "${DefiningSNPs}" > subgroupsnps
 
-        awk 'NR==FNR{a[$0];next}$2 in a' quality-${i%.vcf} subgroupsnps | awk '{print $1}' > foundpositions-${i%.vcf}
+        awk 'NR==FNR{a[$0];next}$2 in a' quality-${i%.vcf} subgroupsnps | awk '{print $1}' > subgroup-foundpositions-${i%.vcf}
 
-    echo "This is the Subgroup Numbers: `cat foundpositions-${i%.vcf}`"
+    echo "This is the Subgroup Numbers: `cat subgroup-foundpositions-${i%.vcf}`"
 
     # Typically a single group position is found, and the VCF will be placed into just one group.  It is posible that an isolate will need to go in more than one group because of were it falls on the tree.  In this case there may be 2 group, or more, group positions found.  The number of group positions found is captured in sizeGroup.
-    sizeGroup=`wc -l foundpositions-${i%.vcf} | awk '{print $1}'`
+    sizeGroup=`wc -l subgroup-foundpositions-${i%.vcf} | awk '{print $1}'`
 
     # Loop through the number of groups positions found
-    loops=`cat foundpositions-${i%.vcf}`
+    loops=`cat subgroup-foundpositions-${i%.vcf}`
 
         if [ $sizeGroup -lt 1 ]; then # There was not a position found that places VCF into group
                 echo "$i was not assigned a Subgroup"
@@ -1718,15 +1718,15 @@ for i in *.vcf; do
     # If a group number matches a quality position in the VCF (formatedpos) then print the position
     grep "Clade" "${DefiningSNPs}" > cladesnps
 
-        awk 'NR==FNR{a[$0];next}$2 in a' quality-${i%.vcf} cladesnps | awk '{print $1}' > foundpositions-${i%.vcf}
+        awk 'NR==FNR{a[$0];next}$2 in a' quality-${i%.vcf} cladesnps | awk '{print $1}' > clade-foundpositions-${i%.vcf}
 
-    echo "This is the Clade Numbers: `cat foundpositions-${i%.vcf}`"
+    echo "This is the Clade Numbers: `cat clade-foundpositions-${i%.vcf}`"
 
     # Typically a single group position is found, and the VCF will be placed into just one group.  It is posible that an isolate will need to go in more than one group because of were it falls on the tree.  In this case there may be 2 group, or more, group positions found.  The number of group positions found is captured in sizeGroup.
-    sizeGroup=`wc -l foundpositions-${i%.vcf} | awk '{print $1}'`
+    sizeGroup=`wc -l clade-foundpositions-${i%.vcf} | awk '{print $1}'`
 
     # Loop through the number of groups positions found
-    loops=`cat foundpositions-${i%.vcf}`
+    loops=`cat clade-foundpositions-${i%.vcf}`
 
         if [ $sizeGroup -lt 1 ]; then # There was not a position found that places VCF into group
                 echo "$i was not assigned a Clade"
@@ -1743,12 +1743,15 @@ for i in *.vcf; do
         	mkdir -p Clade-$loops #Make groupNumber folder if one does not exist.
                 cp $i ./Clade-$loops/ #Then copy to each folder
 	fi
+echo "${i%.vcf} $(cat group-foundpositions-${i%.vcf} subgroup-foundpositions-${i%.vcf} clade-foundpositions-${i%.vcf})" | tr "\n" "\t" >> section3 
+echo "" >> section3
+
 echo ""
 rm quality-${i%.vcf}
 rm groupsnps
 rm subgroupsnps
 rm cladesnps
-rm foundpositions-${i%.vcf}
+rm *foundpositions-${i%.vcf}
 ######
 
     mkdir -p all_vcfs #Make all_vcfs folder if one does not exist.
