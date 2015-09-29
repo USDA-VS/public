@@ -53,7 +53,7 @@ mkdir ${filterdir}
 FilterDirectory=${filterdir} #Files containing positions to filter
 
 #Remove possible "## in vcf headers
-sed -i 's/^"##/##/' *vcf
+#sed -i 's/^"##/##/' *vcf
 
 ####################################################
 function filterFileCreations () {
@@ -623,9 +623,10 @@ fulDir=$PWD # Current working directory, do not change.
 
 # Count the number of chromosomes used in the reference when VCFs were made.
 #singleFile=`ls *.vcf | head -1`
-chromCount=`awk ' $0 !~ /^#/ {print $1}' *vcf | sort | uniq -d | awk 'END {print NR}'`
-awk ' $0 !~ /^#/ {print $1}' *vcf | sort | uniq -d > chroms
+echo "Counting the number of chromosomes in first 100 samples"
+chromCount=`awk ' $0 !~ /^#/ {print $1}' $(ls *vcf | head -100) | sort | uniq -d | awk 'END {print NR}'`
 echo "The number of chromosomes/segments seen in VCF: $chromCount"
+awk ' $0 !~ /^#/ {print $1}' $(ls *vcf | head -100) | sort | uniq -d > chroms
 echo "These are the chromosomes/segments found:"
 cat chroms
 
@@ -1840,29 +1841,34 @@ echo "Finding positions to filter, At line $LINENO"
 awk '{print $1}' clean_total_pos > prepositionlist
 
 for n  in `cat prepositionlist`; do
-	front=`echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
+	(front=`echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
 	back=`echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
 	echo "front: $front"
 	echo "back: $back"
 
- 	(positioncount=`awk -v f=$front -v b=$back ' $1 == f && $2 == b {count++} END {print count}' ./*vcf`
+ 	positioncount=`awk -v f=$front -v b=$back ' $1 == f && $2 == b {count++} END {print count}' ./*vcf`
     	echo "position count: $positioncount"
     	if [ $positioncount -gt 2 ]; then
 		printf "%s\t%s\n" "$front" "$back"	
-    		printf "%s\t%s\n" "$front" "$back" >> positionlist
+    		echo "$n" >> positionlist
     	fi) &
         let count+=1
         [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 
 done
-read -p "$LINENO Enter"
+wait
 
 for p in `cat positionlist`; do
 
-    (maxqual=`awk -v p=$p 'BEGIN{max=0} $2 == p {if ($6>max) max=$6} END {print max}' ./*vcf | sed 's/\..*//'`
+    	(front=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
+        back=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+        echo "front: $front"
+        echo "back: $back"
 
-    maxmap=`awk -v p=$p ' $2 == p {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'` 
-    avemap=`awk -v p=$p '$6 != "." && $2 == p {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
+	maxqual=`awk -v f=$front -v b=$back 'BEGIN{max=0} $1 == f && $2 == b {if ($6>max) max=$6} END {print max}' ./*vcf | sed 's/\..*//'`
+
+    maxmap=`awk -v f=$front -v b=$back ' $1 == f && $2 == b {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'` 
+    avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
 
 	#change maxmap from 52 to 56 2015-09-18
     if [ $maxqual -lt 800  ] || [ $maxmap -lt 56  ] || [ $avemap -lt 55 ]; then
@@ -1882,8 +1888,8 @@ for p in `cat positionlist`; do
     let count+=1
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
+wait
 fi
-read -p "$LINENO Enter"
 
 ########################################################################
 ########################################################################
