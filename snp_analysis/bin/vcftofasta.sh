@@ -1049,7 +1049,7 @@ for i in *.vcf; do
 
     # get zero position, these are only positions already in the filledcutnoN
     if [ -s ${n}.zerotokeep ]; then
-        grep -w -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}'> ${n}.zerotomerge
+        grep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}'> ${n}.zerotomerge
         # merge zero updates to filledcut
         cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > ${n}.filledcut
         rm ${n}.filledcutnoN
@@ -1084,7 +1084,7 @@ wait
 
         echo "***grepping the .filledcut files for $d"
 
-        grep -w -f select total_pos | sort -k1,1n > clean_total_pos
+        grep -f select total_pos | sort -k1,1n > clean_total_pos
         
 
 ######################## FILTER FILE CREATOR ###########################
@@ -1102,7 +1102,7 @@ filterfilecreator
             (m=`basename "$i"`
             n=`echo $m | sed $dropEXT`
             # Compare the positions in select with "isolate".cut and output position for .cut that only matched select positions
-            grep -w -f select $i | sort -k1,1n > $n.pretod
+            grep -f select $i | sort -k1,1n > $n.pretod
 
         ##############################################################
         # Change AC1s to IUPAC
@@ -1118,7 +1118,7 @@ filterfilecreator
             # get AC1 position with iupac, these are only positions already in the pretod
 
             if [ -s ${n}.actokeep ]; then
-                grep -w -f ${n}.actokeep ${n}.ac > ${n}.actomerge
+                grep -f ${n}.actokeep ${n}.ac > ${n}.actomerge
                 # merge iupac updates to filledcut
                 cat ${n}.actomerge $n.pretod | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > $n.tod
                 rm ${n}.pretod
@@ -1325,16 +1325,21 @@ echo "**** $c orgTable.sh Finished `date '+ %H:%M:%S'` ****"
 # Add map qualities to sorted table
 
 # Get just the position.  The chromosome must be removed
-positions=`awk ' NR == 1 {print $0}' $d.sortedTable.txt | tr "\t" "\n" | sed "1d" | sed 's/\(.*\)-\(.*\)/\2/'`
+positions=`awk ' NR == 1 {print $0}' $d.sortedTable.txt | tr "\t" "\n" | sed "1d"`
 
 echo "map-quality" > quality.txt
 echo "Sorted table map quality gathering for $d `date '+ %H:%M:%S'`"
 
-for p in $positions; do  
-         (avemap=`awk -v p=$p '$6 != "." && $2 == p {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
-        echo "$avemap" >> quality.txt) &
-    let count+=1
-    [[ $((count%20)) -eq 0 ]] && wait
+         for p in $positions; do
+                front=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
+                back=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+                echo "front: $front"
+                echo "back: $back"
+		avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
+        echo "$avemap" >> quality.txt
+#) &
+ #   let count+=1
+  #  [[ $((count%20)) -eq 0 ]] && wait
     done
     wait
 
@@ -1344,15 +1349,22 @@ mv $d-mapquality-orgainizedtable.txt $d.sortedTable.txt
 
 # Add map qualities to organized table
 
-positions=`awk ' NR == 1 {print $0}' $c.organizedTable.txt | tr "\t" "\n" | sed "1d" | sed 's/\(.*\)-\(.*\)/\2/'`
+positions=`awk ' NR == 1 {print $0}' $c.organizedTable.txt | tr "\t" "\n" | sed "1d" `
+
 echo "map-quality" > quality.txt
 echo "Organized table map quality gathering for $c `date '+ %H:%M:%S'`"
 
-for p in $positions; do
-         (avemap=`awk -v p=$p '$6 != "." && $2 == p {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
-	echo "$avemap" >> quality.txt) &
-    let count+=1
-    [[ $((count%30)) -eq 0 ]] && wait
+	for p in $positions; do
+         	front=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
+		back=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+		echo "front: $front"
+		echo "back: $back"
+
+		avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
+		echo "$avemap" >> quality.txt
+#) &
+ #   let count+=1
+  #  [[ $((count%30)) -eq 0 ]] && wait
     done
     wait
 
@@ -1568,10 +1580,9 @@ echo "***Marking all VCFs and removing filtering regions"
         # Clean up
 	
         rm $i.file; rm $i.catFile; rm $i.txt
-        # Removed positions
-        grep -v "Not_Included" $n.filter.vcf > $n.noPPE.vcf
-        # Change name
-        mv $n.noPPE.vcf $i) &
+        # Removed positions and clobber origingal vcf
+        grep -v "Not_Included" $n.filter.vcf > $i
+        rm $n.filter.vcf) &
      	let count+=1
       	[[ $((count%NR_CPUS)) -eq 0 ]] && wait
         done
@@ -1811,7 +1822,7 @@ for i in *.vcf; do
 
     # get zero position, these are only positions already in the filledcutnoN
     if [ -s ${n}.zerotokeep ]; then
-    grep -w -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}' > ${n}.zerotomerge
+    grep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}' > ${n}.zerotomerge
     # merge zero updates to filledcut
     cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > ${n}.filledcut
 
@@ -1866,7 +1877,7 @@ echo "***grepping the .filledcut files"
         m=`basename "$i"`
         n=`echo $m | sed $dropEXT`
 
-        grep -w -f select $i | sort -k1,1n > $n.pretod
+        grep -f select $i | sort -k1,1n > $n.pretod
 
         ##############################################################
         # Change AC1s to IUPAC
@@ -1882,7 +1893,7 @@ echo "***grepping the .filledcut files"
         # get AC1 position with iupac, these are only positions already in the pretod
 
         if [ -s ${n}.actokeep ]; then
-            grep -w -f ${n}.actokeep ${n}.ac > ${n}.actomerge
+            grep -f ${n}.actokeep ${n}.ac > ${n}.actomerge
             # merge iupac updates to filledcut
             cat ${n}.actomerge $n.pretod | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > $n.tod
             rm ${n}.pretod
@@ -1894,7 +1905,6 @@ echo "***grepping the .filledcut files"
         rm ${n}.ac
         rm ${n}.acpositions
         rm ${n}.actokeep
-        rm ${i%filledcut}vcf
         ##############################################################
 
         awk '{print $2}' $n.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > $n.fas
