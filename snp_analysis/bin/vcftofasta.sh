@@ -1635,7 +1635,6 @@ for i in *.vcf; do
     fi
 
     echo "quality-${i%.vcf}:"
-    cat quality-${i%.vcf}
 
 ##----Group
 
@@ -1648,11 +1647,9 @@ for i in *.vcf; do
 
     # Typically a single group position is found, and the VCF will be placed into just one group.  It is posible that an isolate will need to go in more than one group because of were it falls on the tree.  In this case there may be 2 group, or more, group positions found.  The number of group positions found is captured in sizeGroup.
     sizeGroup=`wc -l foundpositions-${i%.vcf} | awk '{print $1}'`
-	echo "sizeGroup: $sizeGroup"
 
     # Loop through the number of groups positions found
     loops=`cat foundpositions-${i%.vcf}`
-	echo "loops: $loops"
 
     	if [ $sizeGroup -lt 1 ]; then # There was not a position found that places VCF into group
         	echo "$i Grp not found" >> section3
@@ -1683,11 +1680,9 @@ for i in *.vcf; do
 
     # Typically a single group position is found, and the VCF will be placed into just one group.  It is posible that an isolate will need to go in more than one group because of were it falls on the tree.  In this case there may be 2 group, or more, group positions found.  The number of group positions found is captured in sizeGroup.
     sizeGroup=`wc -l foundpositions-${i%.vcf} | awk '{print $1}'`
-        echo "sizeGroup: $sizeGroup"
 
     # Loop through the number of groups positions found
     loops=`cat foundpositions-${i%.vcf}`
-        echo "loops: $loops"
 
         if [ $sizeGroup -lt 1 ]; then # There was not a position found that places VCF into group
                 echo "$i was not assigned a Subgroup"
@@ -1717,11 +1712,9 @@ for i in *.vcf; do
 
     # Typically a single group position is found, and the VCF will be placed into just one group.  It is posible that an isolate will need to go in more than one group because of were it falls on the tree.  In this case there may be 2 group, or more, group positions found.  The number of group positions found is captured in sizeGroup.
     sizeGroup=`wc -l foundpositions-${i%.vcf} | awk '{print $1}'`
-        echo "sizeGroup: $sizeGroup"
 
     # Loop through the number of groups positions found
     loops=`cat foundpositions-${i%.vcf}`
-        echo "loops: $loops"
 
         if [ $sizeGroup -lt 1 ]; then # There was not a position found that places VCF into group
                 echo "$i was not assigned a Clade"
@@ -1738,7 +1731,7 @@ for i in *.vcf; do
         	mkdir -p Clade-$loops #Make groupNumber folder if one does not exist.
                 cp $i ./Clade-$loops/ #Then copy to each folder
 	fi
-
+echo ""
 rm quality-${i%.vcf}
 rm groupsnps
 rm subgroupsnps
@@ -1836,26 +1829,33 @@ cat *filledcut | sort -k1,1n | uniq | awk '{print $1}' | uniq -d > select
 
 echo "***grepping the .filledcut files for $d"
 
-grep -w -f select total_pos | sort -k1,1n > clean_total_pos
-
+#grep -w -f select total_pos | sort -k1,1n > clean_total_pos
+# Turned this off because it typically doesn't find much when looking at all_vcf
+cp total_pos clean_total_pos
 ########################################################################
 ######################## FILTER FILE CREATOR ###########################
 ########################################################################
 if [ "$cflag" ]; then
 echo "Finding positions to filter, At line $LINENO"
-sed 's/chrom[0-9]-//' clean_total_pos | awk '{print $1}' > prepositionlist
+awk '{print $1}' clean_total_pos > prepositionlist
 
 for n  in `cat prepositionlist`; do
+	front=`echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
+	back=`echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+	echo "front: $front"
+	echo "back: $back"
 
-    (positioncount=`awk -v n=$n ' $2 == n {count++} END {print count}' ./*vcf`
-    echo "position count: $positioncount"
-    if [ $positioncount -gt 2 ]; then
-    echo "$n" >> positionlist
-    fi) &
+ 	(positioncount=`awk -v f=$front -v b=$back ' $1 == f && $2 == b {count++} END {print count}' ./*vcf`
+    	echo "position count: $positioncount"
+    	if [ $positioncount -gt 2 ]; then
+		printf "%s\t%s\n" "$front" "$back"	
+    		printf "%s\t%s\n" "$front" "$back" >> positionlist
+    	fi) &
         let count+=1
         [[ $((count%NR_CPUS)) -eq 0 ]] && wait
-done
 
+done
+read -p "$LINENO Enter"
 
 for p in `cat positionlist`; do
 
@@ -1883,6 +1883,8 @@ for p in `cat positionlist`; do
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
 fi
+read -p "$LINENO Enter"
+
 ########################################################################
 ########################################################################
 ########################################################################
