@@ -788,6 +788,67 @@ sleep 2
 
 }
 
+######################## FILTER FILE CREATOR ###########################
+
+function filterfilecreator () {
+
+if [ "$cflag" ]; then
+	echo "Finding positions to filter, At line $LINENO"
+	awk '{print $1}' clean_total_pos > prepositionlist
+
+		for n  in `cat prepositionlist`; do
+		(front=`echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
+		back=`echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+		echo "front: $front"
+		echo "back: $back"
+
+		positioncount=`awk -v f=$front -v b=$back ' $1 == f && $2 == b {count++} END {print count}' ./*vcf`
+		echo "position count: $positioncount"
+		if [ $positioncount -gt 2 ]; then
+			printf "%s\t%s\n" "$front" "$back"
+			echo "$n" >> positionlist
+		fi) &
+		let count+=1
+		[[ $((count%NR_CPUS)) -eq 0 ]] && wait
+
+		done
+	wait
+
+	for p in `cat positionlist`; do
+
+		(front=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
+		back=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+		echo "front: $front"
+		echo "back: $back"
+
+		maxqual=`awk -v f=$front -v b=$back 'BEGIN{max=0} $1 == f && $2 == b {if ($6>max) max=$6} END {print max}' ./*vcf | sed 's/\..*//'`
+
+		maxmap=`awk -v f=$front -v b=$back ' $1 == f && $2 == b {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'`
+		avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
+
+		#change maxmap from 52 to 56 2015-09-18
+		if [ $maxqual -lt 800  ] || [ $maxmap -lt 56  ] || [ $avemap -lt 55 ]; then
+			echo "maxqual $maxqual" >> filterpositiondetail
+			echo "maxmap $maxmap" >> filterpositiondetail
+			echo "avemap $avemap" >> filterpositiondetail
+			echo "position $p" >> filterpositiondetail
+			echo ""  >> filterpositiondetail
+			echo "$p" >> ${d}-filtertheseposition.txt
+
+			echo "maxqual $maxqual"
+			echo "maxmap $maxmap"
+			echo "avemap $avemap"
+			echo "position $p"
+			echo ""
+		fi) &
+		let count+=1
+		[[ $((count%NR_CPUS)) -eq 0 ]] && wait
+	done
+	wait
+fi
+
+}
+
 #################################################################################
 
 #   Function: fasta and table creation
@@ -1025,62 +1086,12 @@ wait
 
         grep -w -f select total_pos | sort -k1,1n > clean_total_pos
         
-########################################################################
+
 ######################## FILTER FILE CREATOR ###########################
+# ran if c flag called
+filterfilecreator
 ########################################################################
-if [ "$cflag" ]; then
-echo "Finding positions to filter, At line $LINENO"
 
-# Get the positions in table
-sed 's/chrom[0-9]-//' clean_total_pos | awk '{print $1}' > prepositionlist
-
-# For each position in table do...
-for n  in `cat prepositionlist`; do
-
-# Count the number of vcfs that have the position
-# Only take into account positions that are present in 3 or more vcfs and place these positions into a new list
-(positioncount=`awk -v n=$n ' $2 == n {count++} END {print count}' ./starting_files/*vcf`
-echo "position count: $positioncount"        
-if [ $positioncount -gt 2 ]; then 
-	echo "$n" >> positionlist
-fi) &
-        let count+=1
-        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
-done
-
-
-for p in `cat positionlist`; do
-
-# Get the max qual value in all vcf at position
-(maxqual=`awk -v p=$p 'BEGIN{max=0} $2 == p {if ($6>max) max=$6} END {print max}' ./starting_files/*vcf | sed 's/\..*//'`
-
-# Get the max map quality
-        maxmap=`awk -v p=$p ' $2 == p {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | sed 's/;MQ.*//' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'`
-	
-	avemap=`awk -v p=$p '$6 != "." && $2 == p {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
-
-# If the max qual is less than 800 OR the max map is less than 52 then filter position
-        if [ $maxqual -lt 800  ] || [ $maxmap -lt 56 ] || [ $avemap -lt 55 ]; then
-                echo "maxqual $maxqual" >> filterpositiondetail
-                echo "maxmap $maxmap" >> filterpositiondetail
-                echo "position $p" >> filterpositiondetail
-                echo "avemap $avemap" >> filterpositiondetail
-                echo ""  >> filterpositiondetail
-                echo "$p" >> ${d}-filtertheseposition.txt
-
-                echo "maxqual $maxqual"
-                echo "maxmap $maxmap"
-                echo "avemap $avemap"
-		echo "position $p"
-                echo ""
-        fi) &
-    	let count+=1
-    	[[ $((count%NR_CPUS)) -eq 0 ]] && wait
-done
-fi
-########################################################################
-########################################################################
-########################################################################
 
 	# Begin the table
         awk '{print $1}' clean_total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> $d.table.txt
@@ -1833,67 +1844,13 @@ echo "***grepping the .filledcut files for $d"
 #grep -w -f select total_pos | sort -k1,1n > clean_total_pos
 # Turned this off because it typically doesn't find much when looking at all_vcf
 cp total_pos clean_total_pos
-########################################################################
+
 ######################## FILTER FILE CREATOR ###########################
+# ran if c flag called
+d="all_vcf"
+filterfilecreator
 ########################################################################
-if [ "$cflag" ]; then
-echo "Finding positions to filter, At line $LINENO"
-awk '{print $1}' clean_total_pos > prepositionlist
 
-for n  in `cat prepositionlist`; do
-	(front=`echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
-	back=`echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
-	echo "front: $front"
-	echo "back: $back"
-
- 	positioncount=`awk -v f=$front -v b=$back ' $1 == f && $2 == b {count++} END {print count}' ./*vcf`
-    	echo "position count: $positioncount"
-    	if [ $positioncount -gt 2 ]; then
-		printf "%s\t%s\n" "$front" "$back"	
-    		echo "$n" >> positionlist
-    	fi) &
-        let count+=1
-        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
-
-done
-wait
-
-for p in `cat positionlist`; do
-
-    	(front=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
-        back=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
-        echo "front: $front"
-        echo "back: $back"
-
-	maxqual=`awk -v f=$front -v b=$back 'BEGIN{max=0} $1 == f && $2 == b {if ($6>max) max=$6} END {print max}' ./*vcf | sed 's/\..*//'`
-
-    maxmap=`awk -v f=$front -v b=$back ' $1 == f && $2 == b {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'` 
-    avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
-
-	#change maxmap from 52 to 56 2015-09-18
-    if [ $maxqual -lt 800  ] || [ $maxmap -lt 56  ] || [ $avemap -lt 55 ]; then
-        echo "maxqual $maxqual" >> filterpositiondetail
-        echo "maxmap $maxmap" >> filterpositiondetail
-	echo "avemap $avemap" >> filterpositiondetail
-        echo "position $p" >> filterpositiondetail
-        echo ""  >> filterpositiondetail
-        echo "$p" >> all_vcf-filtertheseposition.txt
-
-        echo "maxqual $maxqual"
-        echo "maxmap $maxmap"
-        echo "avemap $avemap"
-	echo "position $p"
-        echo ""
-    fi) &
-    let count+=1
-    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
-done
-wait
-fi
-
-########################################################################
-########################################################################
-########################################################################
 
 # Begin the table
 awk '{print $1}' clean_total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
