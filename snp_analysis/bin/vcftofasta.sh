@@ -873,12 +873,12 @@ cd ${startingdirectory}/$d/
             #Mark vcf allowing areas of the genome to be removed from the SNP analysis
             for i in *.vcf; do
                 (m=`basename "$i"`; n=`echo $m | sed $dropEXT`
-                echo "***Adding filter to $n***"
+                #echo "***Adding filter to $n***"
                 awk '$1 !~ /#/ && $10 !~ /\.\/\./ {print $2}' $i > $i.file
                 cat "${FilterDirectory}/$d.txt" $i.file >> $i.catFile
                 cat $i.catFile | sort | uniq -d > $i.txt
                 pos=`cat $i.txt | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-                echo $pos
+                #echo $pos
 
                 awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filter.vcf
                 
@@ -962,7 +962,7 @@ cd ${startingdirectory}/$d/
 	positionsfound=`cat ${n}.list total.list | sort -n | uniq -d`
 	countfind=`echo $positionsfound | wc -w`
 	#echo "positonsfound: $positionsfound  countfind: $countfind"
-    	rm ${n}.list
+    	echo "Line $LINENO"; rm ${n}.list
 	if [[ -z $positionsfound ]]; then
 		positionsfound="No positions found"
 	fi
@@ -1311,6 +1311,7 @@ rm column2
 rm readyFirstOut.txt
 rm firstOutput.txt
 echo "**** $c orgTable.sh Finished `date '+ %H:%M:%S'` ****"
+echo "Adding map qualities..."
 
 # Add map qualities to sorted table
 
@@ -1323,9 +1324,9 @@ echo "Sorted table map quality gathering for $c `date '+ %H:%M:%S'`"
                 (rownumber=`echo $p | awk '{print $1}'`
                 front=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\1/'`
                 back=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\2/'`
-                echo "rownumber: $rownumber"
-                echo "front: $front"
-                echo "back: $back"
+                #echo "rownumber: $rownumber"
+                #echo "front: $front"
+                #echo "back: $back"
                 avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
                 echo "$rownumber $avemap" >> quality.txt) &
     let count+=1
@@ -1348,9 +1349,9 @@ echo "Organized table map quality gathering for $c `date '+ %H:%M:%S'`"
 		(rownumber=`echo $p | awk '{print $1}'`
 		front=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\1/'`
 		back=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\2/'`
-		echo "rownumber: $rownumber"
-		echo "front: $front"
-		echo "back: $back"
+		#echo "rownumber: $rownumber"
+		#echo "front: $front"
+		#echo "back: $back"
 		avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
 		echo "$rownumber $avemap" >> quality.txt) &
     let count+=1
