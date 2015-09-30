@@ -1169,7 +1169,7 @@ echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 function alignTable () {
 
 # Beginning in fasta folder
-echo "$d *********"
+echo "$d ********* RAxML started"
 pwd
 
 awk '{print $0}' *.fas | sed '/root/{N;d;}' >> fastaGroup.txt
@@ -1315,57 +1315,55 @@ echo "**** $c orgTable.sh Finished `date '+ %H:%M:%S'` ****"
 # Add map qualities to sorted table
 
 # Get just the position.  The chromosome must be removed
-positions=`awk ' NR == 1 {print $0}' $d.sortedTable.txt | tr "\t" "\n" | sed "1d"`
+awk ' NR == 1 {print $0}' $d.sortedTable.txt | tr "\t" "\n" | sed "1d" | awk '{print NR, $0}' > $d-positions
 
-echo "map-quality" > quality.txt
-echo "Sorted table map quality gathering for $d `date '+ %H:%M:%S'`"
-
-         for p in $positions; do
-                front=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
-                back=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+echo "map-quality map-quality" > quality.txt
+echo "Sorted table map quality gathering for $c `date '+ %H:%M:%S'`"
+        while read p; do
+                (rownumber=`echo $p | awk '{print $1}'`
+                front=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\1/'`
+                back=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+                echo "rownumber: $rownumber"
                 echo "front: $front"
                 echo "back: $back"
-		avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
-        echo "$avemap" >> quality.txt
-#) &
- #   let count+=1
-  #  [[ $((count%20)) -eq 0 ]] && wait
-    done
+                avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
+                echo "$rownumber $avemap" >> quality.txt) &
+    let count+=1
+    [[ $((count%30)) -eq 0 ]] && wait
+    done < $d-positions
     wait
 
-tr "\n" "\t" < quality.txt > qualitytransposed.txt
-cat $d.sortedTable.txt qualitytransposed.txt | grep -v '^$' > $d-mapquality-orgainizedtable.txt
-mv $d-mapquality-orgainizedtable.txt $d.sortedTable.txt
+sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
+
+cat $d.sortedTable.txt qualitytransposed.txt | grep -v '^$' > $d-mapquality-sortedtable.txt
+mv $d-mapquality-sortedtable.txt $d.sortedTable.txt
 
 # Add map qualities to organized table
-read -p "$LINENO Enter"
 
-positions=`awk ' NR == 1 {print $0}' $c.organizedTable.txt | tr "\t" "\n" | sed "1d" `
+awk ' NR == 1 {print $0}' $c.organizedTable.txt | tr "\t" "\n" | sed "1d" | awk '{print NR, $0}' > $d-positions
 
 echo "map-quality map-quality" > quality.txt
 echo "Organized table map quality gathering for $c `date '+ %H:%M:%S'`"
-	COUNTLOOP=1	
-	for p in $positions; do
-		front=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
-		back=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+	while read p; do
+		(rownumber=`echo $p | awk '{print $1}'`
+		front=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\1/'`
+		back=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+		echo "rownumber: $rownumber"
 		echo "front: $front"
 		echo "back: $back"
 		avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
-		echo "$COUNTLOOP $avemap" >> quality.txt
-		(( COUNTLOOP++ ))
-		sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
-		#COUNTLOOP=$[$COUNTLOOP + 1]
-#) &
- #   let count+=1
-  #  [[ $((count%30)) -eq 0 ]] && wait
-    done
+		echo "$rownumber $avemap" >> quality.txt) &
+    let count+=1
+    [[ $((count%30)) -eq 0 ]] && wait
+    done < $d-positions
     wait
-read -p "$LINENO Enter"
+
+sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
 
 cat $c.organizedTable.txt qualitytransposed.txt | grep -v '^$' > $d-mapquality-orgainizedtable.txt
 mv $d-mapquality-orgainizedtable.txt $c.organizedTable.txt
 
-#rm quality.txt
+rm quality.txt
 rm qualitytransposed.txt
 
 }
@@ -2013,7 +2011,7 @@ for d in $directories; do
     echo "****************************************************"
     echo "************* Orginizing Table: $d *****************"
     echo "****************************************************"
-    alignTable #&
+    alignTable &
 pwd
 done
 else
