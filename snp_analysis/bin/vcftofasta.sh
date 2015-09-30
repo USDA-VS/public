@@ -623,7 +623,7 @@ fulDir=$PWD # Current working directory, do not change.
 
 # Count the number of chromosomes used in the reference when VCFs were made.
 #singleFile=`ls *.vcf | head -1`
-echo "Counting the number of chromosomes in first 100 samples"
+echo "Counting the number of chromosomes in first 100 samples, `date`"
 chromCount=`awk ' $0 !~ /^#/ {print $1}' $(ls *vcf | head -100) | sort | uniq -d | awk 'END {print NR}'`
 echo "The number of chromosomes/segments seen in VCF: $chromCount"
 awk ' $0 !~ /^#/ {print $1}' $(ls *vcf | head -100) | sort | uniq -d > chroms
@@ -642,7 +642,7 @@ cat ${RemoveFromAnalysis} | tr '\r' '\n' | awk '{print $1}' > /bioinfo11/TStuber
 removeList=`cat /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt`
 
 for i in $removeList; do
-    rm *${i}*
+    rm *${i}* > /dev/null 2>&1
 done
 
 rm /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt
@@ -668,7 +668,7 @@ directorytest="${PWD##*/}"
 
 for i in *; do
 	(if [[ -s $i ]] ; then
-        	echo "$i has data"
+        	echo "$i has data" > /dev/null 2>&1
         	else
 		echo ""
         	echo "$i is empty.  Fix and restart script"
@@ -707,13 +707,13 @@ function AConeCallPosition () {
 
 positionList=`awk ' { print $2 }' "${DefiningSNPs}" | awk ' NF > 0 '`
 
-echo "AConeCallPosition.sh is running"
+echo "AConeCallPosition is running `date`"
 #echo "*********************************************************************" >> section2
 #echo "Possible Mixed Isolates" > section2
 #echo "Defining SNPs that are called as AC=1" >> section2
 echo "" >> section2
 for i in *.vcf; do
-(echo "Finding possible AC1 matches for $i"; for pos in $positionList; do awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ "^"x"$" ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }' $i; done | grep "AC=1;A" | awk 'BEGIN {FS=";"} {print $1, $2}' >> section2) &
+(for pos in $positionList; do awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ "^"x"$" ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }' $i; done | grep "AC=1;A" | awk 'BEGIN {FS=";"} {print $1, $2}' >> section2) &
     let count+=1
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
@@ -777,9 +777,9 @@ echo "Finished preparing filter files"
 # Change SNPs with low QUAL values to N, based on parameter set above in variable settings
 
 function changeLowCalls () {
-
+echo "Changeing low calls, `date`"
 for i in *.vcf; do
-(echo "Changeing low calls"; base=`basename $i .vcf`; awk -v x=$lowEnd -v y=$highEnd 'BEGIN {OFS="\t"} { if ($6 >= x && $6 <= y) print $1, $2, $3, $4, "N", $6, $7, $8; else print $0 }' $i > ${base}.txt; rm $i; mv ${base}.txt ${base}.vcf) &
+(base=`basename $i .vcf`; awk -v x=$lowEnd -v y=$highEnd 'BEGIN {OFS="\t"} { if ($6 >= x && $6 <= y) print $1, $2, $3, $4, "N", $6, $7, $8; else print $0 }' $i > ${base}.txt; rm $i; mv ${base}.txt ${base}.vcf) &
     let count+=1
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
@@ -866,16 +866,13 @@ cd ${startingdirectory}/$d/
     
 	mkdir starting_files
     cp *.vcf ./starting_files
-    echo "***Grabbing vcf file names"
 
     if [ $FilterGroups == yes ]; then
-        echo "chromCount: $chromCount"
  
 	if [ $((chromCount)) -eq 1 ]; then
             #Mark vcf allowing areas of the genome to be removed from the SNP analysis
             for i in *.vcf; do
-#                (
-m=`basename "$i"`; n=`echo $m | sed $dropEXT`
+                (m=`basename "$i"`; n=`echo $m | sed $dropEXT`
                 echo "***Adding filter to $n***"
                 awk '$1 !~ /#/ && $10 !~ /\.\/\./ {print $2}' $i > $i.file
                 cat "${FilterDirectory}/$d.txt" $i.file >> $i.catFile
@@ -889,11 +886,9 @@ m=`basename "$i"`; n=`echo $m | sed $dropEXT`
                 rm $i.catFile
                 rm $i.txt
                 grep -v "Not_Included" $n.filter.vcf > $n.nomisfits.vcf
-                mv $n.nomisfits.vcf $i
-
-#)  &
-#                let count+=1
-#                [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+                mv $n.nomisfits.vcf $i)  &
+                let count+=1
+                [[ $((count%NR_CPUS)) -eq 0 ]] && wait
             done
             wait
         
@@ -907,19 +902,19 @@ m=`basename "$i"`; n=`echo $m | sed $dropEXT`
             COUNTER=0
                     for c in `cat $dircalled/chroms`; do
                         let COUNTER=COUNTER+1
-                        echo The counter is $COUNTER
-                        echo "********* In $d --> $n working on chromos $c **********"
+                        #echo The counter is $COUNTER
+                        #echo "********* In $d --> $n working on chromos $c **********"
                         awk -v c=$c 'BEGIN{OFS="\t"} $1 !~ /#/ && $10 !~ /\.\/\./ && $1 == c {print $2}' ${i}.body > $i.filepositions
                         awk -v c=$c ' $1 == c {print $2}' ${FilterDirectory}/FilterToAll.txt > $i.positionstofilter
                         cat $i.positionstofilter $i.filepositions | sort -k1,1 | uniq -d > $i.foundpositions
                         pos=`cat $i.foundpositions | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
 
                         if [[ -n $pos ]]; then
-                            echo "pos: $pos"
+                            echo "pos: $pos" > /dev/null 2>&1
                         else
-                            echo "string is zero; no findings for pos; giving pos=1"
+                            #echo "string is zero; no findings for pos; giving pos=1"
                             pos="^1$"
-                            echo $pos
+                            #echo $pos
                         fi
 
                         awk -v var1=$c -v var2=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' ${i}.body | grep "$c" > $n.filterchrom${COUNTER}.vcf
@@ -943,8 +938,6 @@ m=`basename "$i"`; n=`echo $m | sed $dropEXT`
     wait
     sleep 2
 
-    mkdir marked_files
-    mv *.filter.vcf ./marked_files
     fi
 
     # Make concatemer with the position and REF call.
@@ -962,14 +955,13 @@ m=`basename "$i"`; n=`echo $m | sed $dropEXT`
     awk '{print $1}' total_pos > total.list
 
     for i in *.vcf; do 
-#	(
-m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
+	(m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
 	# search for AC1 positions
 	awk ' $0 !~ /^#/ && $8 ~ /^AC=1/ && $6 > 0 {print $1 "-" $2}' $i > ${n}.list
 	# AC1 positions that are being found in this group
 	positionsfound=`cat ${n}.list total.list | sort -n | uniq -d`
 	countfind=`echo $positionsfound | wc -w`
-	echo "positonsfound: $positionsfound  countfind: $countfind"
+	#echo "positonsfound: $positionsfound  countfind: $countfind"
     	rm ${n}.list
 	if [[ -z $positionsfound ]]; then
 		positionsfound="No positions found"
@@ -1004,10 +996,9 @@ m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
             awk -v p="$position" '$2 == p {print $0}' $i >> $d-AC1postions.txt
         done
 
-    fi
-#)  &
-#    let count+=1
-#    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+    fi)  &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
     done
     wait
 rm total.list
@@ -1027,7 +1018,6 @@ rm delete
 for i in *.vcf; do
     (n=${i%.vcf}
     # echo the name grabbed
-    echo $n
     # Create .cut file that lists the positions and ALT calls
     awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
     #awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $1 "-" $2, $5}' $i > $n.cut
@@ -1049,7 +1039,7 @@ for i in *.vcf; do
 
     # get zero position, these are only positions already in the filledcutnoN
     if [ -s ${n}.zerotokeep ]; then
-        grep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}'> ${n}.zerotomerge
+        fgrep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}'> ${n}.zerotomerge
         # merge zero updates to filledcut
         cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > ${n}.filledcut
         rm ${n}.filledcutnoN
@@ -1064,7 +1054,7 @@ for i in *.vcf; do
     let count+=1
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
-
+wait
 #########################################################################
 
 echo "sleeping 2 seconds at line number: $LINENO"; sleep 2
@@ -1084,7 +1074,7 @@ wait
 
         echo "***grepping the .filledcut files for $d"
 
-        grep -f select total_pos | sort -k1,1n > clean_total_pos
+        fgrep -f select total_pos | sort -k1,1n > clean_total_pos
         
 
 ######################## FILTER FILE CREATOR ###########################
@@ -1102,7 +1092,7 @@ filterfilecreator
             (m=`basename "$i"`
             n=`echo $m | sed $dropEXT`
             # Compare the positions in select with "isolate".cut and output position for .cut that only matched select positions
-            grep -f select $i | sort -k1,1n > $n.pretod
+            fgrep -f select $i | sort -k1,1n > $n.pretod
 
         ##############################################################
         # Change AC1s to IUPAC
@@ -1118,7 +1108,7 @@ filterfilecreator
             # get AC1 position with iupac, these are only positions already in the pretod
 
             if [ -s ${n}.actokeep ]; then
-                grep -f ${n}.actokeep ${n}.ac > ${n}.actomerge
+                fgrep -f ${n}.actokeep ${n}.ac > ${n}.actomerge
                 # merge iupac updates to filledcut
                 cat ${n}.actomerge $n.pretod | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > $n.tod
                 rm ${n}.pretod
@@ -1170,7 +1160,7 @@ echo "sleeping 2 seconds at line number: $LINENO"; sleep 2
 	echo "***Done"
     done
     wait
-
+echo "fasta_table fuction complete for $d"
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 
 }
@@ -1348,31 +1338,34 @@ cat $d.sortedTable.txt qualitytransposed.txt | grep -v '^$' > $d-mapquality-orga
 mv $d-mapquality-orgainizedtable.txt $d.sortedTable.txt
 
 # Add map qualities to organized table
+read -p "$LINENO Enter"
 
 positions=`awk ' NR == 1 {print $0}' $c.organizedTable.txt | tr "\t" "\n" | sed "1d" `
 
-echo "map-quality" > quality.txt
+echo "map-quality map-quality" > quality.txt
 echo "Organized table map quality gathering for $c `date '+ %H:%M:%S'`"
-
+	COUNTLOOP=1	
 	for p in $positions; do
-         	front=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
+		front=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
 		back=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
 		echo "front: $front"
 		echo "back: $back"
-
 		avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
-		echo "$avemap" >> quality.txt
+		echo "$COUNTLOOP $avemap" >> quality.txt
+		(( COUNTLOOP++ ))
+		sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
+		#COUNTLOOP=$[$COUNTLOOP + 1]
 #) &
  #   let count+=1
   #  [[ $((count%30)) -eq 0 ]] && wait
     done
     wait
+read -p "$LINENO Enter"
 
-tr "\n" "\t" < quality.txt > qualitytransposed.txt
 cat $c.organizedTable.txt qualitytransposed.txt | grep -v '^$' > $d-mapquality-orgainizedtable.txt
 mv $d-mapquality-orgainizedtable.txt $c.organizedTable.txt
 
-rm quality.txt
+#rm quality.txt
 rm qualitytransposed.txt
 
 }
@@ -1459,7 +1452,7 @@ for i in *.vcf; do
     n=`echo $base | sed $tbNumberV | sed $tbNumberW`
     noExtention=`echo $base | sed $dropEXT`
     VALtest=`echo $i | grep "VAL"`
-    echo "VALtest: $VALtest"
+#    echo "VALtest: $VALtest"
 #h=`echo ${i%-AZ}`; g=`echo ${h%-Broad}`; echo $g
     #Check if a name was found in the tag file.  If no name was found, keep original name, make note in log and cp file to unnamed folder.
     if [[ -z "$p" ]]; then # new name was NOT found
@@ -1470,22 +1463,22 @@ for i in *.vcf; do
             mkdir -p FilesNotRenamed
             cp $i ./FilesNotRenamed
             mv $i ${name}.vcf
-            echo "A"
+#            echo "A"
         else
             name=${searchName}-Val
             mv $i ${name}.vcf
-            echo "B"
+#            echo "B"
         fi
     else # New name WAS found
         if [[ -z "$VALtest" ]]; then
             name=$newName
             mv $i ${name}.vcf
-            echo "C"
+#            echo "C"
         else
             name=${newName}-Val
             echo "newName is $name"
             mv $i ${name}.vcf
-            echo "D"
+#            echo "D"
         fi
     fi
 done
@@ -1497,7 +1490,7 @@ rm outfile
 #Do NOT make this a child process.  It messes changing column 1 to chrom
 echo "Making Files Unix Compatiable"
 for v in *.vcf; do
-    (dos2unix $v #Fixes files opened and saved in Excel
+    (dos2unix $v > /dev/null 2>&1 #Fixes files opened and saved in Excel
     cat $v | tr '\r' '\n' | awk -F '\t' 'BEGIN{OFS="\t";} {gsub("\"","",$5);print;}' | sed 's/\"##/##/' > $v.temp
     mv $v.temp $v) &
     let count+=1
@@ -1518,10 +1511,11 @@ wait
 
 ######################## Change AC1s to IUPAC ########################
 
+echo "Changing AC=1 to IUPAC `date`"
+
 for i in *vcf; do
 
-(echo "Changing AC=1 to IUPAC: $i"
-awk '
+(awk '
 BEGIN { OFS = "\t"}
 
 { if ($6 > 300 && $8 ~ /^AC=1;/ && $4$5 ~ /AG/ )
@@ -1559,7 +1553,7 @@ wait
 ######################## Mark Files and Remove Marked Regions ########################
 
 if [ $FilterAllVCFs == yes ]; then
-echo "***Marking all VCFs and removing filtering regions"
+echo "***Marking all VCFs and removing filtering regions, `date`"
 #echo "***Marking all VCFs and removing filtering regions was done." >> log
     # Label filter field for positions to be filtered in all VCFs
         if [ $((chromCount)) -eq 1 ]; then
@@ -1589,7 +1583,7 @@ echo "***Marking all VCFs and removing filtering regions"
         wait
 
         elif [ $((chromCount)) -gt 1 ]; then
-            echo "multiple chromosomes"
+            #echo "multiple chromosomes"
 	    for i in *.vcf; do m=`basename "$i"`; n=`echo $m | sed $dropEXT` # n is name with all right of "_" and "." removed.
             grep '^#' $i > ${i}.header
             grep -v '^#' $i > ${i}.body
@@ -1598,18 +1592,18 @@ echo "***Marking all VCFs and removing filtering regions"
 		COUNTER=0
                 for c in `cat chroms`; do
                     let COUNTER=COUNTER+1
-	 	    echo The counter is $COUNTER
-		    echo "********* In all_vcfs $n working on chromos $c **********"
+	 	    #echo The counter is $COUNTER
+		    #echo "********* In all_vcfs $n working on chromos $c **********"
 		    awk -v c=$c 'BEGIN{OFS="\t"} $1 !~ /#/ && $10 !~ /\.\/\./ && $1 == c {print $2}' ${i}.body > $i.filepositions
                     awk -v c=$c ' $1 == c {print $2}' ${FilterDirectory}/FilterToAll.txt > $i.positionstofilter
 		    cat $i.positionstofilter $i.filepositions | sort -k1,1 | uniq -d > $i.foundpositions
                     pos=`cat $i.foundpositions | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
 		    if [[ -n $pos ]]; then 	
-                    echo "pos: $pos"
+                    echo "pos: $pos" > /dev/null 2>&1
 		    else
-		    echo "string is zero; no findings for pos; giving pos=1"
+		    #echo "string is zero; no findings for pos; giving pos=1"
 		    pos="^1$"
-		    echo $pos
+		    #echo $pos
 		    fi
                     awk -v var1=$c -v var2=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' ${i}.body | grep "$c" > $n.filterchrom${COUNTER}.vcf
                 done
@@ -1801,7 +1795,6 @@ echo "***Creating normalized vcf using AC2, QUAL > 150"
 
 for i in *.vcf; do
     (n=${i%.vcf}
-    echo $n
     awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
     #awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q {print $1 "-" $2, $5}' $i > $n.cut
 
@@ -1810,7 +1803,7 @@ for i in *.vcf; do
 
     ##############################################################
     # Change zero coverage regions
-    echo "Change zero coverage regions"
+    #echo "Change zero coverage regions"
     # get positions being used
     awk '{print $1}' $n.filledcutnoN > ${n}.filledcutNumbers
 
@@ -1822,7 +1815,7 @@ for i in *.vcf; do
 
     # get zero position, these are only positions already in the filledcutnoN
     if [ -s ${n}.zerotokeep ]; then
-    grep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}' > ${n}.zerotomerge
+    fgrep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}' > ${n}.zerotomerge
     # merge zero updates to filledcut
     cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > ${n}.filledcut
 
@@ -1855,9 +1848,9 @@ cat *filledcut | sort -k1,1n | uniq | awk '{print $1}' | uniq -d > select
 
 echo "***grepping the .filledcut files for $d"
 
-#grep -w -f select total_pos | sort -k1,1n > clean_total_pos
+fgrep -f select total_pos | sort -k1,1n > clean_total_pos
 # Turned this off because it typically doesn't find much when looking at all_vcf
-cp total_pos clean_total_pos
+#cp total_pos clean_total_pos
 
 ######################## FILTER FILE CREATOR ###########################
 # ran if c flag called
@@ -1869,15 +1862,14 @@ filterfilecreator
 # Begin the table
 awk '{print $1}' clean_total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
 awk '{print $2}' clean_total_pos | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
-echo "***grepping the .filledcut files"
+echo "***grepping the .filledcut files, `date`"
 # Make the fasta files:  Fill in positions with REF if not present in .clean file
 
     for i in *.filledcut; do
-      	(echo " working on filled cut for $i"
-        m=`basename "$i"`
+      	(m=`basename "$i"`
         n=`echo $m | sed $dropEXT`
 
-        grep -f select $i | sort -k1,1n > $n.pretod
+        fgrep -f select $i | sort -k1,1n > $n.pretod
 
         ##############################################################
         # Change AC1s to IUPAC
@@ -1893,7 +1885,7 @@ echo "***grepping the .filledcut files"
         # get AC1 position with iupac, these are only positions already in the pretod
 
         if [ -s ${n}.actokeep ]; then
-            grep -f ${n}.actokeep ${n}.ac > ${n}.actomerge
+            fgrep -f ${n}.actokeep ${n}.ac > ${n}.actomerge
             # merge iupac updates to filledcut
             cat ${n}.actomerge $n.pretod | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > $n.tod
             rm ${n}.pretod
@@ -2021,7 +2013,7 @@ for d in $directories; do
     echo "****************************************************"
     echo "************* Orginizing Table: $d *****************"
     echo "****************************************************"
-    alignTable &
+    alignTable #&
 pwd
 done
 else
