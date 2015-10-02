@@ -326,7 +326,7 @@ elif [ $1 == para ]; then
 elif [ $1 == h5n2 ]; then
    cp /home/shared/virus/ai/h5n2/TY-BC-FAV10-2014.fasta ./
    hqs="/home/shared/virus/ai/h5n2/14111-1-highqualitysnps.vcf"
-   bioinfo=""
+   bioinfo="/bioinfo11/MKillian/Analysis/results/influenza/h5n2/snp_analysis/newfiles/"
    #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 elif [ $1 == h5nx ]; then

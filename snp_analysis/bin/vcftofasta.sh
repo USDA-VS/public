@@ -53,7 +53,8 @@ mkdir ${filterdir}
 FilterDirectory=${filterdir} #Files containing positions to filter
 
 #Remove possible "## in vcf headers
-#sed -i 's/^"##/##/' *vcf
+echo 'Removing possible "## in vcf headers, `date`'
+sed -i 's/^"##/##/' *vcf
 
 ####################################################
 function filterFileCreations () {
@@ -1299,7 +1300,7 @@ echo "Sorted table map quality gathering for $c `date '+ %H:%M:%S'`"
 		avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
 		echo "$rownumber $avemap" >> quality.txt) &
 	let count+=1
-	[[ $((count%30)) -eq 0 ]] && wait
+	[[ $((count%`mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 5}'a | sed 's/\..*//'`)) -eq 0 ]] && wait
 	done < $d-positions
 wait
 
@@ -1324,7 +1325,7 @@ echo "Organized table map quality gathering for $c `date '+ %H:%M:%S'`"
 		avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
 		echo "$rownumber $avemap" >> quality.txt) &
 	let count+=1
-	[[ $((count%30)) -eq 0 ]] && wait
+	[[ $((count%`mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 5}'a | sed 's/\..*//'`)) -eq 0 ]] && wait
 	done < $d-positions
 wait
 
@@ -1752,7 +1753,8 @@ cd ./all_vcfs/
 
 # Get rid of duplicates in concatemer and list all the positions and REF calls
 echo "***Making total_pos"
-cat concatemer | sort -nk1 | uniq | sort -k1.6n -k1.8n > total_pos
+#cat concatemer | sort -nk1 | uniq | sort -k1.6n -k1.8n > total_pos
+sort -k1,1 < concatemer | uniq > total_pos
 
 # Count the number of SNPs
 totalSNPs=`grep -c ".*" total_pos`
@@ -1805,7 +1807,7 @@ wait
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 wait
 
-echo "***Making the select file containing positions of interest"
+echo "***Making the select file containing positions of interest, `date`"
 # Capture only positions that have more than one SNP type called at a position
 cat *filledcut | sort -k1,1n | uniq | awk '{print $1}' | uniq -d > select
 # Compare the positions in select with total_pos and output total_pos position that match select positions
@@ -1853,7 +1855,7 @@ for i in *.filledcut; do
 	if [ -s ${n}.actokeep ]; then
 		fgrep -f ${n}.actokeep ${n}.ac > ${n}.actomerge
 		# merge iupac updates to filledcut
-		cat ${n}.actomerge $n.pretod | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > $n.tod
+		cat ${n}.actomerge $n.pretod | awk '{ if (a[$1]++ == 0) print $0; }' | sort -nk1,1 > $n.tod
 		rm ${n}.pretod
 		rm ${n}.actomerge
 	else
