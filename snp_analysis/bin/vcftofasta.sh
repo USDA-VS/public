@@ -921,7 +921,7 @@ for d in $directories; do
 
     # Get rid of duplicates in concatemer and list all the positions and REF calls
     echo "***Making total_pos"
-    cat concatemer | sort -nk1 | uniq | sort -k1.6n -k1.8n > total_pos
+    sort -k1,1 < concatemer | uniq > total_pos
 
 # Find AC1 positions also found in total_pos
     awk '{print $1}' total_pos > total.list
@@ -995,7 +995,7 @@ for i in *.vcf; do
 
     # Fill in the .cut file with REF calls at positions that were not called as SNPs
     #cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1 > $n.filledcutnoN
-    cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.8n > $n.filledcutnoN
+    cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1,1 > $n.filledcutnoN
 
     ##############################################################
     # Change zero coverage regions
@@ -1013,7 +1013,7 @@ for i in *.vcf; do
     if [ -s ${n}.zerotokeep ]; then
         fgrep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}'> ${n}.zerotomerge
         # merge zero updates to filledcut
-        cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > ${n}.filledcut
+        cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -nk1,1 > ${n}.filledcut
         rm ${n}.filledcutnoN
         rm ${n}.zerotomerge
     else
@@ -1038,7 +1038,7 @@ wait
             done
         echo "***Making the select file containing positions of interest"
         # Capture only positions that have more than one SNP type called at a position
-        cat cutConcatemer | sort -k1.6n -k1.8n | uniq | awk '{print $1}' | uniq -d > select
+        cat cutConcatemer | sort -nk1,1 | uniq | awk '{print $1}' | uniq -d > select
         # Compare the positions in select with total_pos and output total_pos position that match select positions
         # but only with positions that are in the select file.
         # This getting rid of calls that are the same for all isolates being analyzed
@@ -1768,7 +1768,7 @@ for i in *.vcf; do
     awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
 
     #cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1 > $n.filledcutnoN
-    cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.8n > $n.filledcutnoN
+    cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1,1 > $n.filledcutnoN
 
     ##############################################################
     # Change zero coverage regions
@@ -1786,7 +1786,7 @@ for i in *.vcf; do
     if [ -s ${n}.zerotokeep ]; then
     fgrep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}' > ${n}.zerotomerge
     # merge zero updates to filledcut
-    cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -k1.6n -k1.8n > ${n}.filledcut
+    cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -nk1,1 > ${n}.filledcut
     rm ${n}.filledcutnoN
     rm ${n}.zerotomerge
     else
@@ -1809,7 +1809,7 @@ wait
 
 echo "***Making the select file containing positions of interest, `date`"
 # Capture only positions that have more than one SNP type called at a position
-cat *filledcut | sort -k1,1n | uniq | awk '{print $1}' | uniq -d > select
+cat *filledcut | sort -nk1,1 | uniq | awk '{print $1}' | uniq -d > select
 # Compare the positions in select with total_pos and output total_pos position that match select positions
 # but only with positions that are in the select file.
 # This getting rid of calls that are the same for all isolates being analyzed
