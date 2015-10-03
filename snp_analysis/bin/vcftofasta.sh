@@ -860,8 +860,8 @@ for d in $directories; do
 		rm $i.file
                 rm $i.catFile
                 rm $i.txt
-                grep -v "Not_Included" $n.filter.vcf > $n.nomisfits.vcf
-                mv $n.nomisfits.vcf $i)  &
+                grep -v "Not_Included" $n.filter.vcf > $i
+                rm $n.filter.vcf)  &
                 let count+=1
                 [[ $((count%NR_CPUS)) -eq 0 ]] && wait
             done
