@@ -547,7 +547,7 @@ elif [[ $1 == h5n2 ]]; then
 
 	genotypingcodes="/bioinfo11/MKillian/Analysis/results/snp-genotypingcodes.txt"
 	# This file tells the script how to cluster VCFs
-	DefiningSNPs="/bioinfo11/MKillian/Analysis/script_dependents/snp_analysis/h5n2_Defining_SNPs.txt"
+	DefiningSNPs="/bioinfo11/MKillian/Analysis/results/influenza/h5n2/snp_analysis/script2/Defining_SNPs_H5N2.txt"
 	FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
 	FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
 	FilterDirectory="/bioinfo11/MKillian/Analysis/script_dependents/ai/h5n2/snppipeline/FilterFiles" #Files containing positions to filter
