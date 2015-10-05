@@ -550,7 +550,7 @@ elif [[ $1 == h5n2 ]]; then
 	DefiningSNPs="/bioinfo11/MKillian/Analysis/results/influenza/h5n2/snp_analysis/script2/Defining_SNPs_H5N2.txt"
 	FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
 	FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-	FilterDirectory="/bioinfo11/MKillian/Analysis/script_dependents/ai/h5n2/snppipeline/FilterFiles" #Files containing positions to filter
+	FilterDirectory="/bioinfo11/MKillian/Analysis/results/influenza/h5n2/snp_analysis/script2/FilterFiles" #Files containing positions to filter
 	RemoveFromAnalysis="bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
 	QUAL=300 # Minimum quality for calling a SNP
 	lowEnd=1
@@ -559,7 +559,7 @@ elif [[ $1 == h5n2 ]]; then
 	echo "vcftofasta.sh ran as H5N2"
 	echo "Script vcftofasta.sh ran using h5n2 variables" > section5
 	email_list="tod.p.stuber@usda.gov" #Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov
-
+	#for i in *vcf; do awk 'BEGIN{OFS="\t"}$1 ~ /seg1/ || $1 ~ /^#/ {print $0}' $i > ../h5n2_2015-10-03-seg1/${i%.vcf}-seg1.vcf; done
 
 else
 
@@ -1541,7 +1541,7 @@ echo "***Marking all VCFs and removing filtering regions, `date`"
 	# Making a vcf with positions marked that should not be included based on filter file
         awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filter.vcf
         # Clean up
-	
+
         rm $i.file; rm $i.catFile; rm $i.txt
 	# Removed positions and clobber origingal vcf
 	grep -v "Not_Included" $n.filter.vcf > $i
