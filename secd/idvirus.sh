@@ -566,7 +566,6 @@ cat header body > ${orgref}-${refname}.newhapreadyAll.vcf
 # make reference guided contig THIS IS THE FINAL REFERNCE.  THE LAST ALIGNMENT WILL BE MADE AND BLAST RESULTS WILL BE BASED ON THIS CONSENSUS SEQUENCE
 java -Xmx2g -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${orgref}-${refname}.reference_guided.fasta -V ${orgref}-${refname}.newhapreadyAll.vcf -IUPAC ${orgref}-${refname}
 
-read -p "$LINENO Enter"
 
 if [ $sampleType == "paired" ]; then
     java -Xmx2g -jar ${picardPath}/SamToFastq.jar INPUT=${orgref}-${refname}.dup.bam FASTQ=./${orgref}-${refname}-mapped_R1.fastq SECOND_END_FASTQ=./${orgref}-${refname}-mapped_R2.fastq

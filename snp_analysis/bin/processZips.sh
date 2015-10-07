@@ -195,9 +195,9 @@ elif [ $1 == ovis ]; then
     ###################################################################
 
 elif [ $1 == taylorella ]; then
-    cp /Users/Shared/_WGS/Taylorella/passage_group/references/T01-0619-PATRIC-Ref.fasta ./
-    hqs="/Users/Shared/_WGS/Taylorella/passage_group/references/etaylorella-hqs.vcf"
-    bioinfo="/bioinfo11/TStuber/Results/GenBact/Taylorella"
+    cp /home/shared/taylorella/NC018108.fasta ./
+    hqs="/home/shared/taylorella/TE-004-highqualitysnps.vcf"
+    bioinfo="/bioinfo11/TStuber/Results/gen-bact/taylorella/newFiles"
 
     ###################################################################
     ###################################################################
@@ -345,8 +345,7 @@ elif [ $1 == secd ]; then
    #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 else
-    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, s
-uis2, suis3, suis4, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para, h5n2 secd"
+    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para, h5n2 secd, taylorella"
     exit 1
 fi
 
