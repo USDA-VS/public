@@ -53,7 +53,7 @@ mkdir ${filterdir}
 FilterDirectory=${filterdir} #Files containing positions to filter
 
 #Remove possible "## in vcf headers
-echo 'Removing possible "## in vcf headers, `date`'
+echo 'Removing possible "## in vcf headers, started -->  \`date\`'
 sed -i 's/^"##/##/' *vcf
 
 ####################################################
@@ -598,7 +598,7 @@ fulDir=$PWD # Current working directory, do not change.
 
 # Count the number of chromosomes used in the reference when VCFs were made.
 #singleFile=`ls *.vcf | head -1`
-echo "Counting the number of chromosomes in first 100 samples, `date`"
+echo "Counting the number of chromosomes in first 100 samples, started -->  `date`"
 chromCount=`awk ' $0 !~ /^#/ {print $1}' $(ls *vcf | head -100) | sort | uniq -d | awk 'END {print NR}'`
 echo "The number of chromosomes/segments seen in VCF: $chromCount"
 awk ' $0 !~ /^#/ {print $1}' $(ls *vcf | head -100) | sort | uniq -d > chroms
@@ -682,7 +682,7 @@ function AConeCallPosition () {
 
 positionList=`awk ' { print $2 }' "${DefiningSNPs}" | awk ' NF > 0 '`
 
-echo "AConeCallPosition is running `date`"
+echo "AConeCallPosition is running, started -->  `date`"
 #echo "*********************************************************************" >> section2
 #echo "Possible Mixed Isolates" > section2
 #echo "Defining SNPs that are called as AC=1" >> section2
@@ -752,7 +752,7 @@ echo "Finished preparing filter files"
 # Change SNPs with low QUAL values to N, based on parameter set above in variable settings
 
 function changeLowCalls () {
-echo "Changeing low calls, `date`"
+echo "Changeing low calls, started --> `date`"
 for i in *.vcf; do
 (base=`basename $i .vcf`; awk -v x=$lowEnd -v y=$highEnd 'BEGIN {OFS="\t"} { if ($6 >= x && $6 <= y) print $1, $2, $3, $4, "N", $6, $7, $8; else print $0 }' $i > ${base}.txt; rm $i; mv ${base}.txt ${base}.vcf) &
     let count+=1
@@ -1480,7 +1480,7 @@ wait
 
 ######################## Change AC1s to IUPAC ########################
 
-echo "Changing AC=1 to IUPAC `date`"
+echo "Changing AC=1 to IUPAC, started -->  `date`"
 
 for i in *vcf; do
 
@@ -1522,7 +1522,7 @@ wait
 ######################## Mark Files and Remove Marked Regions ########################
 
 if [ $FilterAllVCFs == yes ]; then
-echo "***Marking all VCFs and removing filtering regions, `date`"
+echo "***Marking all VCFs and removing filtering regions, started -->  `date`"
 #echo "***Marking all VCFs and removing filtering regions was done." >> log
     # Label filter field for positions to be filtered in all VCFs
         if [ $((chromCount)) -eq 1 ]; then
@@ -1807,7 +1807,7 @@ wait
 echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
 wait
 
-echo "***Making the select file containing positions of interest, `date`"
+echo "***Making the select file containing positions of interest, started -->  `date`"
 # Capture only positions that have more than one SNP type called at a position
 cat *filledcut | sort -nk1,1 | uniq | awk '{print $1}' | uniq -d > select
 # Compare the positions in select with total_pos and output total_pos position that match select positions
@@ -1830,7 +1830,7 @@ filterfilecreator
 # Begin the table
 awk '{print $1}' clean_total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
 awk '{print $2}' clean_total_pos | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
-echo "***grepping the .filledcut files, `date`"
+echo "***grepping the .filledcut files, started -->  `date`"
 # Make the fasta files:  Fill in positions with REF if not present in .clean file
 
 for i in *.filledcut; do
