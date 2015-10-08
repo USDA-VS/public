@@ -848,20 +848,25 @@ for d in $directories; do
             #Mark vcf allowing areas of the genome to be removed from the SNP analysis
             for i in *.vcf; do
                 (m=`basename "$i"`; n=`echo $m | sed $dropEXT`
-		#echo "***Adding filter to $n***"
+		echo "***Adding filter to $n***"
                 awk '$1 !~ /#/ && $10 !~ /\.\/\./ {print $2}' $i > $i.file
                 cat "${FilterDirectory}/$d.txt" $i.file >> $i.catFile
                 cat $i.catFile | sort | uniq -d > $i.txt
                 pos=`cat $i.txt | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-		#echo $pos
+		if [ -z $pos ]; then
+			echo "pos is zero... adding a value"
+			pos='^1000000000$'
+			echo "pos is now $pos" 
+		else
+			#echo $pos
+		fi
 
-                awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filter.vcf
+                awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filtered.vcf
                 
 		rm $i.file
                 rm $i.catFile
                 rm $i.txt
-                grep -v "Not_Included" $n.filter.vcf > $i
-                rm $n.filter.vcf)  &
+                grep -v "Not_Included" $n.filtered.vcf > $i)  &
                 let count+=1
                 [[ $((count%NR_CPUS)) -eq 0 ]] && wait
             done
@@ -934,7 +939,7 @@ for d in $directories; do
 	positionsfound=`cat ${n}.list total.list | sort -n | uniq -d`
 	countfind=`echo $positionsfound | wc -w`
 	#echo "positonsfound: $positionsfound  countfind: $countfind"
-	echo "Line $LINENO"; rm ${n}.list
+	rm ${n}.list
 	if [[ -z $positionsfound ]]; then
 		positionsfound="No positions found"
 	fi
@@ -1047,7 +1052,6 @@ wait
         echo "***grepping the .filledcut files for $d"
 
         fgrep -f select total_pos | sort -k1,1n > clean_total_pos
-        
 
 ######################## FILTER FILE CREATOR ###########################
 # ran if c flag called
@@ -1300,7 +1304,7 @@ echo "Sorted table map quality gathering for $c `date '+ %H:%M:%S'`"
 		avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
 		echo "$rownumber $avemap" >> quality.txt) &
 	let count+=1
-	[[ $((count%`mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 5}'a | sed 's/\..*//'`)) -eq 0 ]] && wait
+	[[ $((count%`mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 15}'a | sed 's/\..*//'`)) -eq 0 ]] && wait
 	done < $d-positions
 wait
 
@@ -1325,7 +1329,7 @@ echo "Organized table map quality gathering for $c `date '+ %H:%M:%S'`"
 		avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
 		echo "$rownumber $avemap" >> quality.txt) &
 	let count+=1
-	[[ $((count%`mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 5}'a | sed 's/\..*//'`)) -eq 0 ]] && wait
+	[[ $((count%`mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 15}'a | sed 's/\..*//'`)) -eq 0 ]] && wait
 	done < $d-positions
 wait
 
@@ -1539,13 +1543,12 @@ echo "***Marking all VCFs and removing filtering regions, started -->  `date`"
         pos=`cat $i.txt | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
 
 	# Making a vcf with positions marked that should not be included based on filter file
-        awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filter.vcf
+        awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filtered.vcf
         # Clean up
 
         rm $i.file; rm $i.catFile; rm $i.txt
 	# Removed positions and clobber origingal vcf
-	grep -v "Not_Included" $n.filter.vcf > $i
-	rm $n.filter.vcf) &
+	grep -v "Not_Included" $n.filtered.vcf > $i) &
 	let count+=1
 	[[ $((count%NR_CPUS)) -eq 0 ]] && wait
 	done
@@ -1595,6 +1598,7 @@ sleep 2
 
 mkdir marked_files
 mv *.filtered.vcf ./marked_files
+
     else
     echo "***All VCF filtering was NOT done."
     echo "***All VCF filtering was NOT done." >> section5
