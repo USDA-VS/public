@@ -858,7 +858,7 @@ for d in $directories; do
 			pos='^1000000000$'
 			echo "pos is now $pos" 
 		else
-			#echo $pos
+			echo $pos
 		fi
 
                 awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filtered.vcf
@@ -1788,15 +1788,17 @@ for i in *.vcf; do
 
     # get zero position, these are only positions already in the filledcutnoN
     if [ -s ${n}.zerotokeep ]; then
+    # Zero coverage is being represented by a dash, "-"
     fgrep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}' > ${n}.zerotomerge
     # merge zero updates to filledcut
     cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -nk1,1 > ${n}.filledcut
+
     rm ${n}.filledcutnoN
     rm ${n}.zerotomerge
     else
     mv $n.filledcutnoN ${n}.filledcut
     fi
-    
+
     rm ${n}.filledcutNumbers
     rm ${n}.zeropositions
     rm ${n}.zerotokeep)  &
