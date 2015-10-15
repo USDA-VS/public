@@ -51,12 +51,8 @@ shift $(($OPTIND - 1))
 filterdir="/home/shared/${uniqdate}-FilterFiles"
 mkdir ${filterdir}
 FilterDirectory=${filterdir} #Files containing positions to filter
-
-#Remove possible "## in vcf headers
-echo 'Removing possible "## in vcf headers, started -->  \`date\`'
-sed -i 's/^"##/##/' *vcf
-
 ####################################################
+
 function filterFileCreations () {
 
 # Use to make filter files from the text pasted from the Excel worksheet.
@@ -594,19 +590,6 @@ Ncov=1 # Coverage below this value will be changed to -
 
 fulDir=$PWD # Current working directory, do not change.
 
-#################################################################################
-
-# Count the number of chromosomes used in the reference when VCFs were made.
-#singleFile=`ls *.vcf | head -1`
-echo "Counting the number of chromosomes in first 100 samples, started -->  `date`"
-chromCount=`awk ' $0 !~ /^#/ {print $1}' $(ls *vcf | head -100) | sort | uniq -d | awk 'END {print NR}'`
-echo "The number of chromosomes/segments seen in VCF: $chromCount"
-awk ' $0 !~ /^#/ {print $1}' $(ls *vcf | head -100) | sort | uniq -d > chroms
-echo "These are the chromosomes/segments found:"
-cat chroms
-
-#################################################################################
-
 # Remove selected files from comparison
 # Use file:  /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysis.txt
 
@@ -1051,8 +1034,8 @@ wait
 
         echo "***grepping the .filledcut files for $d"
 
-        fgrep -f select total_pos | sort -k1,1n > clean_total_pos
-
+        #fgrep -f select total_pos | sort -k1,1n > clean_total_pos
+	cp total_pos clean_total_pos
 ######################## FILTER FILE CREATOR ###########################
 # ran if c flag called
 filterfilecreator
@@ -1090,8 +1073,10 @@ filterfilecreator
                 rm ${n}.pretod
                 rm ${n}.actomerge
             else
+		echo "else on $n"
                 mv $n.pretod $n.tod
             fi
+
             rm ${n}.usedpostions
             rm ${n}.ac
             rm ${n}.acpositions
@@ -1400,7 +1385,25 @@ mv *.* ./starting_files
         echo "all samples will be ran"
         cp ./starting_files/* ./
 	fi
+
 rm elite
+
+#Remove possible "## in vcf headers
+echo 'Removing possible "## in vcf headers'
+sed -i 's/^"##/##/' *vcf
+
+#################################################################################
+
+# Count the number of chromosomes used in the reference when VCFs were made.
+#singleFile=`ls *.vcf | head -1`
+echo "Counting the number of chromosomes in first 100 samples, started -->  `date`"
+chromCount=`awk ' $0 !~ /^#/ {print $1}' $(ls *vcf | head -100) | sort | uniq -d | awk 'END {print NR}'`
+echo "The number of chromosomes/segments seen in VCF: $chromCount"
+awk ' $0 !~ /^#/ {print $1}' $(ls *vcf | head -100) | sort | uniq -d > chroms
+echo "These are the chromosomes/segments found:"
+cat chroms
+
+#################################################################################
 
 # Remove selected isolates from comparison
 # This is optional, and should be turned on or off based on laboratories preference
@@ -1769,27 +1772,32 @@ echo "***Creating normalized vcf using AC2, QUAL > 150"
 
 for i in *.vcf; do
     (n=${i%.vcf}
+    # for each vcf get quality snp calls
     awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.cut
-
+    
+    # normalize the calls by filling in positions with ref call if position called in another sample
     #cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1 > $n.filledcutnoN
     cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1,1 > $n.filledcutnoN
 
     ##############################################################
     # Change zero coverage regions
     #echo "Change zero coverage regions"
-    # get positions being used
+    # get only positions being used
     awk '{print $1}' $n.filledcutnoN > ${n}.filledcutNumbers
 
-    # Get zero coverage positions.
+    # for each sample get all zero coverage positions.
     awk ' $0 !~ /^#/ && $10 ~ /\.\/\./ {print $1 "-" $2}' ${i} > ${n}.zeropositions
 
     # zero duplicate positions will need to be kept
-    cat ${n}.filledcutNumbers ${n}.zeropositions | sort | uniq -d > ${n}.zerotokeep
+    # these zerotokeep need to update the filledcutnoN (normalized file)
+    #cat ${n}.filledcutNumbers ${n}.zeropositions | sort | uniq -d > ${n}.zerotokeep
+    cat ${n}.filledcutNumbers ${n}.zeropositions | sort | uniq -d | awk '{print $1, "-"}' > ${n}.zerotomerge
 
     # get zero position, these are only positions already in the filledcutnoN
-    if [ -s ${n}.zerotokeep ]; then
+    # if [ -s ${n}.zerotokeep ]; then
+    if [ -s ${n}.zerotomerge ]; then
     # Zero coverage is being represented by a dash, "-"
-    fgrep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}' > ${n}.zerotomerge
+    #fgrep -f ${n}.zerotokeep ${n}.zeropositions | awk '{print $1, "-"}' > ${n}.zerotomerge
     # merge zero updates to filledcut
     cat ${n}.zerotomerge $n.filledcutnoN | awk '{ if (a[$1]++ == 0) print $0; }' | sort -nk1,1 > ${n}.filledcut
 
