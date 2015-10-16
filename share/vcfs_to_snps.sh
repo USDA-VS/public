@@ -376,7 +376,6 @@ rm column
 rm column2
 rm readyFirstOut.txt
 rm firstOutput.txt
-echo "**** $c orgTable.sh Finished `date '+ %H:%M:%S'` ****"
 echo "Adding map qualities..."
 
 # Add map qualities to sorted table

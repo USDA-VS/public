@@ -200,7 +200,7 @@ elif [ $1 == taylorella ]; then
     bioinfo="/bioinfo11/TStuber/Results/gen-bact/taylorella/newFiles"
 
 elif [ $1 == tay1 ]; then
-    cp /home/shared/taylorella/09-0932_016441_polished_assembly.fasta ./
+    cp /home/shared/taylorella/09-0932.fasta ./
     hqs="/home/shared/taylorella/TE-004-highqualitysnps.vcf"
     bioinfo="/bioinfo11/TStuber/Results/gen-bact/taylorella/newFiles"
 
