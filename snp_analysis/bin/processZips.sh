@@ -204,6 +204,11 @@ elif [ $1 == tay1 ]; then
     hqs="/home/shared/taylorella/TE-004-highqualitysnps.vcf"
     bioinfo="/bioinfo11/TStuber/Results/gen-bact/taylorella/newFiles"
 
+elif [ $1 == tay5 ]; then
+    cp /home/shared/taylorella/92-0972-DFS5.fasta ./
+    hqs="/home/shared/taylorella/15-0094-taylorella-highqualitysnps.vcf"
+    bioinfo="/bioinfo11/TStuber/Results/gen-bact/taylorella/newFiles"
+
     ###################################################################
     ###################################################################
 
