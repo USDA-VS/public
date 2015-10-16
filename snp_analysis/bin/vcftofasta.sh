@@ -1034,8 +1034,8 @@ wait
 
         echo "***grepping the .filledcut files for $d"
 
-        #fgrep -f select total_pos | sort -k1,1n > clean_total_pos
-	cp total_pos clean_total_pos
+        fgrep -f select total_pos | sort -k1,1n > clean_total_pos
+	#cp total_pos clean_total_pos
 ######################## FILTER FILE CREATOR ###########################
 # ran if c flag called
 filterfilecreator
