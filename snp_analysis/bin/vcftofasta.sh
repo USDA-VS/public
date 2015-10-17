@@ -1137,8 +1137,10 @@ awk '{print $0}' *.fas | sed '/root/{N;d;}' >> fastaGroup.txt
 awk '{print $0}' *.fas >> RAxMLfastaGroup.txt
 
 #clustalw2 -OUTFILE=alignment.txt -RANGE=1,2 -OUTPUT=FASTA -INFILE=fastaGroup.txt & 
-/usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} -m GTRCAT -p 12345 && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf; nw_reroot RAxML_bestTree.${d} root > tableinput.${d}; nw_reroot RAxML_bestTree.${d} root > rooted_RAxML_bestTree.${d}; mv rooted_RAxML_bestTree.${d} RAxML_bestTree.${d} &
+/usr/local/bin/standard-RAxML-master/raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} -m GTRCAT -p 12345 && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf; nw_reroot RAxML_bestTree.${d} root > tableinput.${d}; nw_reroot RAxML_bestTree.${d} root > rooted_RAxML_bestTree.${d}; mv rooted_RAxML_bestTree.${d} RAxML_bestTree.${d} 
 wait
+sleep 60
+
 rm RAxML_parsimonyTree*
 for i in RAxML*Tree*; do mv $i ../${i}.tre; done
 #grep ">" alignment.txt | sed 's/>//g' > cleanedAlignment.txt
@@ -1159,6 +1161,7 @@ mv joined2.txt ../$d.sortedTable.txt
 #rm fastaGroup.txt
 rm joined.txt
 rm references.txt
+sleep 60
 
 echo "**** orgTable.sh Started ****"
 cd ..
@@ -1271,6 +1274,7 @@ rm readyFirstOut.txt
 rm firstOutput.txt
 echo "**** $c orgTable.sh Finished `date '+ %H:%M:%S'` ****"
 echo "Adding map qualities..."
+sleep 60
 
 # Add map qualities to sorted table
 
@@ -1292,6 +1296,9 @@ echo "Sorted table map quality gathering for $c `date '+ %H:%M:%S'`"
 	[[ $((count%30)) -eq 0 ]] && wait
 	done < $d-positions
 wait
+sleep 60
+wait
+sleep 60
 
 sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
 
@@ -1317,6 +1324,9 @@ echo "Organized table map quality gathering for $c `date '+ %H:%M:%S'`"
 	[[ $((count%30)) -eq 0 ]] && wait
 	done < $d-positions
 wait
+sleep 60
+wait
+sleep 60
 
 sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
 
