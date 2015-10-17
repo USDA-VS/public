@@ -1289,7 +1289,7 @@ echo "Sorted table map quality gathering for $c `date '+ %H:%M:%S'`"
 		avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
 		echo "$rownumber $avemap" >> quality.txt) &
 	let count+=1
-	[[ $((count%`mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 15}'a | sed 's/\..*//'`)) -eq 0 ]] && wait
+	[[ $((count%30)) -eq 0 ]] && wait
 	done < $d-positions
 wait
 
@@ -1314,7 +1314,7 @@ echo "Organized table map quality gathering for $c `date '+ %H:%M:%S'`"
 		avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
 		echo "$rownumber $avemap" >> quality.txt) &
 	let count+=1
-	[[ $((count%`mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 15}'a | sed 's/\..*//'`)) -eq 0 ]] && wait
+	[[ $((count%30)) -eq 0 ]] && wait
 	done < $d-positions
 wait
 
