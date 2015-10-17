@@ -4,7 +4,7 @@ Shell scripts designed for portability
 ***
 
 #script_dependents
-Example files.  For example zips_to_vcfs.sh requires a correctly formatted VCF file with high quality positions.
+Example files, such as zips_to_vcfs.sh requires a correctly formatted VCF file with high quality positions.
 
 #Table_Template.xlsx
 Copy and paste tables output from vcfs_to_snps.sh to formatted Excel file.
