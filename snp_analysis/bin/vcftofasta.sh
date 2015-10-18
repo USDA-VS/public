@@ -748,6 +748,83 @@ sleep 2
 
 #################################################################################
 
+function findpositionstofilter () {
+
+echo "`date` --> Finding positions to filter"
+# positions have already been filtered via cutting specific positions.
+cp filtered_total_pos total_pos
+awk '{print $1}' total_pos > prepositionlist
+for n  in `cat prepositionlist`; do
+	(front=`echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
+	back=`echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+	#echo "front: $front"
+	#echo "back: $back"
+
+	positioncount=`awk -v f=$front -v b=$back ' $1 == f && $2 == b {count++} END {print count}' ./*vcf`
+	#echo "position count: $positioncount"
+	if [ $positioncount -gt 2 ]; then
+		#printf "%s\t%s\n" "$front" "$back"
+		echo "$n" >> positionlist
+	else
+		echo $n >> ${d}-DONOT_filtertheseposition.txt
+	fi) &
+	let count+=1
+	[[ $((count%NR_CPUS)) -eq 0 ]] && wait
+done
+wait
+
+echo "`date` --> Filtering..."
+for p in `cat positionlist`; do
+	(front=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
+	back=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+	#echo "front: $front"
+	#echo "back: $back"
+
+	maxqual=`awk -v f=$front -v b=$back 'BEGIN{max=0} $1 == f && $2 == b {if ($6>max) max=$6} END {print max}' ./*vcf | sed 's/\..*//'`
+
+	avequal=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $6}' ./*vcf | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
+
+	maxmap=`awk -v f=$front -v b=$back ' $1 == f && $2 == b {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'`
+
+	avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
+
+	#change maxmap from 52 to 56 2015-09-18
+	if [ $maxqual -lt 1300  ] || [ $avequal -lt 800 ] || [ $maxmap -lt 58  ] || [ $avemap -lt 57 ]; then
+		echo "maxqual $maxqual" >> filterpositiondetail
+		echo "avequal $avequal" >> filterpositiondetail
+		echo "maxmap $maxmap" >> filterpositiondetail
+		echo "avemap $avemap" >> filterpositiondetail
+		echo "position $p" >> filterpositiondetail
+		echo ""  >> filterpositiondetail
+		echo "$p" >> ${d}-filtertheseposition.txt
+	else
+		echo "$p" >> ${d}-DONOT_filtertheseposition.txt
+		#echo "maxqual $maxqual"
+		#echo "maxmap $maxmap"
+		#echo "avemap $avemap"
+		#echo "position $p"
+		#echo ""
+	fi) &
+	let count+=1
+	[[ $((count%NR_CPUS)) -eq 0 ]] && wait
+done
+wait
+sleep 10
+rm positionlist
+rm prepositionlist
+
+rm total_pos
+
+# Filter VCF files
+# cat total_pos ${d}-DONOT_filtertheseposition.txt | sort -k1,1n | uniq -d > filtered_total_pos
+# fgrep -f filtered_total_pos total_alt > filtered_total_alt
+#mv total_alt filtered_total_alt
+#rm ${d}-DONOT_filtertheseposition.txt
+
+}
+
+#################################################################################
+
 #   Function: fasta and table creation
 function fasta_table () {
 
@@ -849,90 +926,21 @@ for i in *.vcf; do
 done
 
 # Get rid of duplicates in concatemer and list all the positions and REF calls
-sort -k1,1 < concatemer | uniq > total_alt
-awk '{print $1}' total_alt > total_pos
+sort -k1,1 < concatemer | uniq > filtered_total_alt
+awk '{print $1}' total_alt > filtered_total_pos
 
 # Count the number of SNPs
-totalSNPs=`wc -l  total_pos`
+totalSNPs=`wc -l  filtered_total_pos`
 echo "Total SNPs: $totalSNPs"
 
 ######################## FILTER FILE CREATOR ###########################
-# filter poor QUAL and Map Quality
-
 if [ "$cflag" ]; then
-	echo "`date` --> Finding positions to filter"
-	awk '{print $1}' total_pos > prepositionlist
-	for n  in `cat prepositionlist`; do
-		(front=`echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
-		back=`echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
-		#echo "front: $front"
-		#echo "back: $back"
-
-		positioncount=`awk -v f=$front -v b=$back ' $1 == f && $2 == b {count++} END {print count}' ./*vcf`
-		#echo "position count: $positioncount"
-		if [ $positioncount -gt 2 ]; then
-			#printf "%s\t%s\n" "$front" "$back"
-			echo "$n" >> positionlist
-		else
-			echo $n >> ${d}-DONOT_filtertheseposition.txt
-		fi) &
-		let count+=1
-		[[ $((count%NR_CPUS)) -eq 0 ]] && wait
-
-	done
-	wait
-
-	echo "`date` --> Filtering..."
-	for p in `cat positionlist`; do
-		(front=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
-		back=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
-		#echo "front: $front"
-		#echo "back: $back"
-
-		maxqual=`awk -v f=$front -v b=$back 'BEGIN{max=0} $1 == f && $2 == b {if ($6>max) max=$6} END {print max}' ./*vcf | sed 's/\..*//'`
-
-		avequal=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $6}' ./*vcf | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
-
-		maxmap=`awk -v f=$front -v b=$back ' $1 == f && $2 == b {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'`
-
-		avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
-
-		#change maxmap from 52 to 56 2015-09-18
-		if [ $maxqual -lt 1300  ] || [ $avequal -lt 800 ] || [ $maxmap -lt 58  ] || [ $avemap -lt 57 ]; then
-			echo "maxqual $maxqual" >> filterpositiondetail
-			echo "avequal $avequal" >> filterpositiondetail
-			echo "maxmap $maxmap" >> filterpositiondetail
-			echo "avemap $avemap" >> filterpositiondetail
-			echo "position $p" >> filterpositiondetail
-			echo ""  >> filterpositiondetail
-			echo "$p" >> ${d}-filtertheseposition.txt
-		else
-			echo "$p" >> ${d}-DONOT_filtertheseposition.txt
-			#echo "maxqual $maxqual"
-			#echo "maxmap $maxmap"
-			#echo "avemap $avemap"
-			#echo "position $p"
-			#echo ""
-		fi) &
-		let count+=1
-		[[ $((count%NR_CPUS)) -eq 0 ]] && wait
-	done
-	wait
-	sleep 10
-	rm positionlist
-	rm prepositionlist
-
-	# Filter VCF files
-	# cat total_pos ${d}-DONOT_filtertheseposition.txt | sort -k1,1n | uniq -d > filtered_total_pos
-	# fgrep -f filtered_total_pos total_alt > filtered_total_alt
-	mv total_alt filtered_total_alt
-	#rm ${d}-DONOT_filtertheseposition.txt
+	findpositionstofilter
 fi
-
-########################################################################
+#########################################################################
 
 # Find AC1 positions also found in total_pos
-awk '{print $1}' total_pos > total.list
+awk '{print $1}' filtered_total_pos > total.list
 
     for i in *.vcf; do
 	(m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
@@ -985,7 +993,7 @@ rm total.list
 rm delete
 # Count the number of SNPs
 
-totalSNPs=`grep -c ".*" total_pos`
+totalSNPs=`grep -c ".*" filtered_total_pos`
 echo "$d total SNPs: $totalSNPs" >> ../../section4
 
 echo "***Creating normalized vcf using AC2, QUAL > $QUAL"
@@ -1038,12 +1046,6 @@ done
 wait
 sleep 5
 wait
-####################
-####################
-####################
-####################
-####################
-####################
 
 echo "`date` --> Finding parsimony informative positions"
 # Capture only positions that have more than one SNP type called at a position
@@ -1527,8 +1529,7 @@ wait
 
 if [ $FilterAllVCFs == yes ]; then
 echo "***Marking all VCFs and removing filtering regions, started -->  `date`"
-#echo "***Marking all VCFs and removing filtering regions was done." >> log
-    # Label filter field for positions to be filtered in all VCFs
+	# Label filter field for positions to be filtered in all VCFs
         if [ $((chromCount)) -eq 1 ]; then
         for i in *.vcf; do
         (m=`basename "$i"`; n=`echo $m | sed $dropEXT`; echo "********* $n **********"
@@ -1537,7 +1538,7 @@ echo "***Marking all VCFs and removing filtering regions, started -->  `date`"
         # Combine with positions that will be filtered
         cat "${FilterDirectory}/FilterToAll.txt" $i.file >> $i.catFile
         
-# Output any duplicate positions, aka decreasing positions to be marked and used by awk
+	# Output any duplicate positions, aka decreasing positions to be marked and used by awk
         cat $i.catFile | sort | uniq -d > $i.txt
         # preparing postions
         pos=`cat $i.txt | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
@@ -1757,12 +1758,12 @@ for i in *.vcf; do
 done
 
 # Get rid of duplicates in concatemer and list all the positions and REF calls
-sort -k1,1 < concatemer | uniq > total_alt
-awk '{print $1}' total_alt > total_pos
+sort -k1,1 < concatemer | uniq > filtered_total_alt
+awk '{print $1}' total_alt > filtered_total_pos
 
 # Count the number of SNPs
-totalSNPs=`wc -l  total_pos`
-echo "Total SNPs: $totalSNPs"
+totalSNPs=`wc -l  filtered_total_pos`
+echo "Total filtered SNPs: $totalSNPs"
 
 for i in *.vcf; do
 	(n=${i%.vcf}
@@ -1803,49 +1804,31 @@ done
 wait
 sleep 5
 wait
-####################
-####################
-####################
-####################
-####################
-####################
 
-#########################################################################
-
-echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
-wait
-
-echo "***Making the select file containing positions of interest, started -->  `date`"
+echo "`date` --> Finding parsimony informative positions"
 # Capture only positions that have more than one SNP type called at a position
-cat *filledcut | sort -nk1,1 | uniq | awk '{print $1}' | uniq -d > select
-# Compare the positions in select with total_pos and output total_pos position that match select positions
-# but only with positions that are in the select file.
-# This getting rid of calls that are the same for all isolates being analyzed
+cat *zerofilteredsnps_alt | sort -nk1,1 | uniq | awk '{print $1}' | uniq -d > parsimony_informative
+# This removes calls that are the same for all isolates being analyzed
 
-echo "***grepping the .filledcut files for $d"
-
-fgrep -f select total_pos | sort -k1,1n > clean_total_pos
-# Turned this off because it typically doesn't find much when looking at all_vcf
-#cp total_pos clean_total_pos
+# If many SNPs fgrep may not do much and be slow
+fgrep -f parsimony_informative filtered_total_alt | sort -k1,1n > parsimony_filtered_total_alt
+awk '{print $1}' parsimony_filtered_total_alt > parsimony_filtered_total_pos
 
 ######################## FILTER FILE CREATOR ###########################
-# ran if c flag called
-d="all_vcf"
-filterfilecreator
-########################################################################
+if [ "$cflag" ]; then
+	d="all_vcf"
+	findpositionstofilter
+fi
+#########################################################################
 
+# Create table and fasta
+awk '{print $1}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt
+awk '{print $2}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt
 
-# Begin the table
-awk '{print $1}' clean_total_pos | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
-awk '{print $2}' clean_total_pos | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt
-echo "***grepping the .filledcut files, started -->  `date`"
-# Make the fasta files:  Fill in positions with REF if not present in .clean file
+for i in *zerofilteredsnps_alt; do
+	(m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
 
-for i in *.filledcut; do
-	(m=`basename "$i"`
-	n=`echo $m | sed $dropEXT`
-
-	fgrep -f select $i | sort -k1,1n > $n.pretod
+	fgrep -f parsimony_filtered_total_pos $i | sort -k1,1n > $n.pretod
 
 	##############################################################
 	# Change AC1s to IUPAC
@@ -1853,7 +1836,7 @@ for i in *.filledcut; do
 	# get positions being used
 	awk '{print $1}' ${n}.pretod > ${n}.usedpostions
 	# get AC1 positions and iupac calls  that were changed to iupac
-	awk ' $0 !~ /#/ && $6 > 300 && $8 ~ /^AC=1;/ {print $1 "-" $2, $5}' ${i%filledcut}vcf > ${n}.ac
+	awk -v Q="$QUAL" ' $0 !~ /#/ && $6 > Q && $8 ~ /^AC=1;/ {print $1 "-" $2, $5}' ${i%zerofilteredsnps_alt}vcf > ${n}.ac
 	# get just positions of those AC1 grabbed above
 	awk '{print $1}' ${n}.ac > ${n}.acpositions
 	# AC duplicate positions will need to be kept
@@ -1867,6 +1850,7 @@ for i in *.filledcut; do
 		rm ${n}.pretod
 		rm ${n}.actomerge
 	else
+		#echo "else done"
 		mv $n.pretod $n.tod
 	fi
 	rm ${n}.usedpostions
@@ -1877,37 +1861,37 @@ for i in *.filledcut; do
 
 	awk '{print $2}' $n.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > $n.fas
 	# Add each isolate to the table
-	awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> all_vcfs.table.txt) &
+	awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt ) &
 	let count+=1
 	[[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
 
 wait
-echo "sleeping 5 seconds at line number: $LINENO"; sleep 5
+sleep 5
 
-echo "grepping filledcut files is finished"#Make a reference fasta sequence
-#Make a reference fasta sequence
-awk '{print $2}' clean_total_pos > root
+#Create root sequence
+awk '{print $2}' parsimony_filtered_total_alt > root
 cat root | tr -cd "[:print:]" | sed "s/^/>root;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > root.fas
 echo "" >> root.fas
 
 totalSNPs=`grep -c ".*" total_pos`
-echo "Total informative SNPs: $totalSNPs" >> ../section4
+echo "Total informative SNPs: $totalSNPs"
 
 #Clean-up
-mkdir starting_files
-echo "***Cleaning folder"
-mv *.vcf ./starting_files
-rm *.cut
-rm *.filledcut
-rm *.filledcutnoN
 rm concatemer
-rm cutConcatemer
 rm *.tod
 mkdir fasta
 mv *.fas ./fasta
-#rm total_pos
+rm total_pos
 rm root
+rm *vcf
+rm filtered_total_alt
+rm filtered_total_pos
+rm parsimony_filtered_total_alt
+rm parsimony_filtered_total_pos
+rm parsimony_informative
+rm total_alt
+rm *zerofilteredsnps_alt
 
 if [ "$eflag" -o "$aflag" ]; then
 	d="all_vcfs"
