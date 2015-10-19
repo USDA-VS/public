@@ -894,7 +894,7 @@ else
 				#echo "string is zero; no findings for pos; giving pos=1"
 				pos="^1$"
 				#echo $pos
-		fi
+			fi
 
 			awk -v var1=$c -v var2=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' ${i}.body | grep "$c" > $n.filterchrom${COUNTER}.vcf
 		done
@@ -1129,7 +1129,6 @@ rm total_alt
 rm *zerofilteredsnps_alt
 
 }
-
 #****************************************************************
 function alignTable () {
 
