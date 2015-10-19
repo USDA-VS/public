@@ -843,80 +843,79 @@ mkdir starting_files
 cp *.vcf ./starting_files
 echo "***Grabbing vcf file names"
 
-if [ $FilterGroups == yes ]; then
- if [ $((chromCount)) -eq 1 ]; then
-    #Mark vcf allowing areas of the genome to be removed from the SNP analysis
-    for i in *.vcf; do
-	(m=`basename "$i"`; n=`echo $m | sed $dropEXT`
-	echo "***Adding filter to $n***"
-	awk '$1 !~ /#/ && $10 !~ /\.\/\./ {print $2}' $i > $i.file
-	cat "${FilterDirectory}/$d.txt" $i.file >> $i.catFile
-	cat $i.catFile | sort | uniq -d > $i.txt
-	pos=`cat $i.txt | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-	if [ -z $pos ]; then
-		echo "pos is zero... adding a value"
-		pos='^1000000000$'
-		echo "pos is now $pos" 
-	else
-		echo $pos
+	if [ $FilterGroups == yes ]; then
+		if [ $((chromCount)) -eq 1 ]; then
+			#Mark vcf allowing areas of the genome to be removed from the SNP analysis
+			for i in *.vcf; do
+				(m=`basename "$i"`; n=`echo $m | sed $dropEXT`
+				echo "***Adding filter to $n***"
+				awk '$1 !~ /#/ && $10 !~ /\.\/\./ {print $2}' $i > $i.file
+				cat "${FilterDirectory}/$d.txt" $i.file >> $i.catFile
+				cat $i.catFile | sort | uniq -d > $i.txt
+				pos=`cat $i.txt | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+				if [ -z $pos ]; then
+					echo "pos is zero... adding a value"
+					pos='^1000000000$'
+					echo "pos is now $pos" 
+				else
+					echo $pos
+				fi
+
+				awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filtered.vcf
+
+				rm $i.file
+				rm $i.catFile
+				rm $i.txt
+				grep -v "Not_Included" $n.filtered.vcf > $i)  &
+				let count+=1
+				[[ $((count%NR_CPUS)) -eq 0 ]] && wait
+			done
+			wait
+		else
+			#Mark vcf allowing areas of the genome to be removed from the SNP analysis
+			for i in *.vcf; do m=`basename "$i"`; n=`echo $m | sed $dropEXT` # n is name with all right of "_" and "." removed.
+				grep '^#' $i > ${i}.header
+				grep -v '^#' $i > ${i}.body
+				#Mark vcf allowing areas of the genome to be removed from the SNP analysis
+				# Iterate through chrom number range
+				COUNTER=0
+				for c in `cat $dircalled/chroms`; do
+					let COUNTER=COUNTER+1
+					#echo The counter is $COUNTER
+					#echo "********* In $d --> $n working on chromos $c **********"
+					awk -v c=$c 'BEGIN{OFS="\t"} $1 !~ /#/ && $10 !~ /\.\/\./ && $1 == c {print $2}' ${i}.body > $i.filepositions
+					awk -v c=$c ' $1 == c {print $2}' ${FilterDirectory}/FilterToAll.txt > $i.positionstofilter
+					cat $i.positionstofilter $i.filepositions | sort -k1,1 | uniq -d > $i.foundpositions
+					pos=`cat $i.foundpositions | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+
+					if [[ -n $pos ]]; then
+						echo "pos: $pos" > /dev/null 2>&1
+					else
+						#echo "string is zero; no findings for pos; giving pos=1"
+						pos="^1$"
+						#echo $pos
+					fi
+
+					awk -v var1=$c -v var2=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' ${i}.body | grep "$c" > $n.filterchrom${COUNTER}.vcf
+				done
+				cat ${i}.header $n.filterchrom*.vcf > $n.filtered.vcf
+				grep -v "Not_Included" $n.filtered.vcf > $i
+
+				rm ${i}.header
+				rm ${i}.body
+				rm $i.filepositions
+				rm $i.positionstofilter
+				rm $n.filterchrom*.vcf
+				rm $i.foundpositions
+
+			done
+		fi
+	mkdir marked_files
+	mv *.filtered.vcf ./marked_files
+	wait
+	sleep 2
+
 	fi
-
-	awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filtered.vcf
-	
-	rm $i.file
-	rm $i.catFile
-	rm $i.txt
-	grep -v "Not_Included" $n.filtered.vcf > $i)  &
-	let count+=1
-	[[ $((count%NR_CPUS)) -eq 0 ]] && wait
-    done
-    wait
-else
-	#Mark vcf allowing areas of the genome to be removed from the SNP analysis
-	for i in *.vcf; do m=`basename "$i"`; n=`echo $m | sed $dropEXT` # n is name with all right of "_" and "." removed.
-		grep '^#' $i > ${i}.header
-		grep -v '^#' $i > ${i}.body
-		#Mark vcf allowing areas of the genome to be removed from the SNP analysis
-		# Iterate through chrom number range
-		COUNTER=0
-		for c in `cat $dircalled/chroms`; do
-			let COUNTER=COUNTER+1
-			#echo The counter is $COUNTER
-			#echo "********* In $d --> $n working on chromos $c **********"
-			awk -v c=$c 'BEGIN{OFS="\t"} $1 !~ /#/ && $10 !~ /\.\/\./ && $1 == c {print $2}' ${i}.body > $i.filepositions
-			awk -v c=$c ' $1 == c {print $2}' ${FilterDirectory}/FilterToAll.txt > $i.positionstofilter
-			cat $i.positionstofilter $i.filepositions | sort -k1,1 | uniq -d > $i.foundpositions
-			pos=`cat $i.foundpositions | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-
-			if [[ -n $pos ]]; then
-				echo "pos: $pos" > /dev/null 2>&1
-			else
-				#echo "string is zero; no findings for pos; giving pos=1"
-				pos="^1$"
-				#echo $pos
-			fi
-
-			awk -v var1=$c -v var2=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' ${i}.body | grep "$c" > $n.filterchrom${COUNTER}.vcf
-		done
-		cat ${i}.header $n.filterchrom*.vcf > $n.filtered.vcf
-		grep -v "Not_Included" $n.filtered.vcf > $i
-
-		rm ${i}.header
-		rm ${i}.body
-		rm $i.filepositions
-		rm $i.positionstofilter
-		rm $n.filterchrom*.vcf
-		rm $i.foundpositions
-
-	done
-fi
-mkdir marked_files
-mv *.filtered.vcf ./marked_files
-
-wait
-sleep 2
-
-fi
 
 # Make concatemer with the position and REF call.
 # Factor in possible multiple chromosomes
