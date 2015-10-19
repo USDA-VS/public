@@ -14,6 +14,10 @@ Paradigm
 4) SNPs observed in a single isolate are less informative than SNPs seen in multiple isolates and therefore established in a population
 
 END
+echo ""
+echo "****************************** START ******************************"
+echo ""
+
 echo "Start Time: `date`" > sectiontime
 starttime=`date +%s`
 argUsed="$1"
@@ -70,13 +74,14 @@ output="${filterdir}"
 
 let columns=columns+1
 rm ${output}*
-echo "Number of columns: $columns"
+echo "Filter sets: $columns"
+echo "Extracting from Excel to text files..."
 
 count=1
 while [ $count -lt ${columns} ]; do
-    echo ${count}
+    #echo ${count}
     filename=`awk -v x=$count 'BEGIN{FS=OFS="\t"}{print $x}' $filterFile | head -n1`
-    echo "Filename: $filename"
+    #echo "Filename: $filename"
     awk -v x=$count 'BEGIN{FS=OFS="\t"} FNR>1 {print $x}' $filterFile | grep -v "^$" > ${output}/${filename}.list
     let count=count+1
 done
@@ -841,14 +846,12 @@ echo "Directory:  $dir"
 
 mkdir starting_files
 cp *.vcf ./starting_files
-echo "***Grabbing vcf file names"
 
 	if [ $FilterGroups == yes ]; then
 		if [ $((chromCount)) -eq 1 ]; then
 			#Mark vcf allowing areas of the genome to be removed from the SNP analysis
 			for i in *.vcf; do
 				(m=`basename "$i"`; n=`echo $m | sed $dropEXT`
-				echo "***Adding filter to $n***"
 				awk '$1 !~ /#/ && $10 !~ /\.\/\./ {print $2}' $i > $i.file
 				cat "${FilterDirectory}/$d.txt" $i.file >> $i.catFile
 				cat $i.catFile | sort | uniq -d > $i.txt
@@ -856,9 +859,6 @@ echo "***Grabbing vcf file names"
 				if [ -z $pos ]; then
 					echo "pos is zero... adding a value"
 					pos='^1000000000$'
-					echo "pos is now $pos" 
-				else
-					echo $pos
 				fi
 
 				awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filtered.vcf
@@ -893,7 +893,6 @@ echo "***Grabbing vcf file names"
 					else
 						#echo "string is zero; no findings for pos; giving pos=1"
 						pos="^1$"
-						#echo $pos
 					fi
 
 					awk -v var1=$c -v var2=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' ${i}.body | grep "$c" > $n.filterchrom${COUNTER}.vcf
@@ -926,11 +925,10 @@ done
 
 # Get rid of duplicates in concatemer and list all the positions and REF calls
 sort -k1,1 < concatemer | uniq > filtered_total_alt
-awk '{print $1}' total_alt > filtered_total_pos
+awk '{print $1}' filtered_total_alt > filtered_total_pos
 
 # Count the number of SNPs
 totalSNPs=`wc -l  filtered_total_pos`
-echo "Total SNPs: $totalSNPs"
 
 ######################## FILTER FILE CREATOR ###########################
 if [ "$cflag" ]; then
@@ -1000,8 +998,6 @@ echo "***Creating normalized vcf using AC2, QUAL > $QUAL"
 
 #########################################################################
 # Count the number of SNPs
-totalSNPs=`wc -l total_pos`
-echo "Total SNPs: $totalSNPs"
 filteredSNPs=`wc -l filtered_total_pos`
 echo "Total SNPs after filtering $filteredSNPs"
 
@@ -1108,7 +1104,7 @@ awk '{print $2}' parsimony_filtered_total_alt > root
 cat root | tr -cd "[:print:]" | sed "s/^/>root;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > root.fas
 echo "" >> root.fas
 
-totalSNPs=`grep -c ".*" total_pos`
+totalSNPs=`grep -c ".*" parsimony_filtered_total_pos`
 echo "Total informative SNPs: $totalSNPs"
 
 #Clean-up
@@ -1116,7 +1112,6 @@ rm concatemer
 rm *.tod
 mkdir fasta
 mv *.fas ./fasta
-rm total_pos
 rm root
 rm *vcf
 rm filtered_total_alt
@@ -1124,15 +1119,14 @@ rm filtered_total_pos
 rm parsimony_filtered_total_alt
 rm parsimony_filtered_total_pos
 rm parsimony_informative
-rm total_alt
 rm *zerofilteredsnps_alt
-
+done
 }
 #****************************************************************
 function alignTable () {
 
 # Beginning in fasta folder
-echo "$d ********* RAxML started"
+echo "`date` --> RAxML started $d"
 
 awk '{print $0}' *.fas | sed '/root/{N;d;}' >> fastaGroup.txt
 awk '{print $0}' *.fas >> RAxMLfastaGroup.txt
@@ -1330,7 +1324,7 @@ rm $d-positions
 #################################################################################
 #################################################################################
 #################################################################################
-echo "****************************** START ******************************"
+###################################### START ####################################
 #################################################################################
 #################################################################################
 #################################################################################
@@ -1461,6 +1455,8 @@ rm outfile
 #Fix validated (VAL) vcf files.  This is used in vcftofasta scripts to prepare validated vcf files opened and saved in Excel.
 #Create list of isolates containing "VAL"
 #Do NOT make this a child process.  It messes changing column 1 to chrom
+
+echo "#############################"
 echo "Making Files Unix Compatiable"
 for v in *.vcf; do
     (dos2unix $v > /dev/null 2>&1 #Fixes files opened and saved in Excel
@@ -1526,11 +1522,11 @@ wait
 ######################## Mark Files and Remove Marked Regions ########################
 
 if [ $FilterAllVCFs == yes ]; then
-echo "***Marking all VCFs and removing filtering regions, started -->  `date`"
+echo "`date` --> Marking all VCFs and removing filtering region"
 	# Label filter field for positions to be filtered in all VCFs
         if [ $((chromCount)) -eq 1 ]; then
         for i in *.vcf; do
-        (m=`basename "$i"`; n=`echo $m | sed $dropEXT`; echo "********* $n **********"
+        (m=`basename "$i"`; n=`echo $m | sed $dropEXT`
         # Get usable positions in the VCF
         awk '$1 !~ /#/ && $10 !~ /\.\/\./ {print $2}' $i > $i.file
         # Combine with positions that will be filtered
@@ -1750,6 +1746,7 @@ cd ./all_vcfs/
 # Make concatemer with the position and REF call.
 # Factor in possible multiple chromosomes
 # Get rid of duplicates in concatemer and list all the positions and REF calls
+echo "`date` --> Gathering SNP positions"
 
 for i in *.vcf; do
 	awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
@@ -1757,7 +1754,7 @@ done
 
 # Get rid of duplicates in concatemer and list all the positions and REF calls
 sort -k1,1 < concatemer | uniq > filtered_total_alt
-awk '{print $1}' total_alt > filtered_total_pos
+awk '{print $1}' filtered_total_alt > filtered_total_pos
 
 # Count the number of SNPs
 totalSNPs=`wc -l  filtered_total_pos`
@@ -1807,7 +1804,6 @@ echo "`date` --> Finding parsimony informative positions"
 # Capture only positions that have more than one SNP type called at a position
 cat *zerofilteredsnps_alt | sort -nk1,1 | uniq | awk '{print $1}' | uniq -d > parsimony_informative
 # This removes calls that are the same for all isolates being analyzed
-
 # If many SNPs fgrep may not do much and be slow
 fgrep -f parsimony_informative filtered_total_alt | sort -k1,1n > parsimony_filtered_total_alt
 awk '{print $1}' parsimony_filtered_total_alt > parsimony_filtered_total_pos
@@ -1872,7 +1868,7 @@ awk '{print $2}' parsimony_filtered_total_alt > root
 cat root | tr -cd "[:print:]" | sed "s/^/>root;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > root.fas
 echo "" >> root.fas
 
-totalSNPs=`grep -c ".*" total_pos`
+totalSNPs=`grep -c ".*" parsimony_filtered_total_pos`
 echo "Total informative SNPs: $totalSNPs"
 
 #Clean-up
@@ -1880,7 +1876,6 @@ rm concatemer
 rm *.tod
 mkdir fasta
 mv *.fas ./fasta
-rm total_pos
 rm root
 rm *vcf
 rm filtered_total_alt
@@ -1888,7 +1883,6 @@ rm filtered_total_pos
 rm parsimony_filtered_total_alt
 rm parsimony_filtered_total_pos
 rm parsimony_informative
-rm total_alt
 rm *zerofilteredsnps_alt
 
 if [ "$eflag" -o "$aflag" ]; then
@@ -1896,31 +1890,28 @@ if [ "$eflag" -o "$aflag" ]; then
         cd ./fasta
         alignTable
 else
-	echo "Tree not for all_vcf not ran"
+	echo "Tree not ran for all_vcf"
 fi
-
-echo "***Done"
-echo "Full Directory: ${fulDir}"
 
 ##################### End: All vcf folder #####################
 
-echo "***************************************************"
-echo "***************** STARTING Groups *****************"
-echo "***************************************************"
+#echo "***************************************************"
+#echo "***************** STARTING Groups *****************"
+#echo "***************************************************"
 # Change directory to all_groups
 cd ${fulDir}/all_groups
 fasta_table &  
 
-echo "***************************************************"
-echo "**************** STARTING SUBGROUPS ***************"
-echo "***************************************************"
+#echo "***************************************************"
+#echo "**************** STARTING SUBGROUPS ***************"
+#echo "***************************************************"
 # Change directory to all_subgroups
 cd ${fulDir}/all_subgroups
 fasta_table &
 
-echo "***************************************************"
-echo "***************** STARTING CLADES *****************"
-echo "***************************************************"
+#echo "***************************************************"
+#echo "***************** STARTING CLADES *****************"
+#echo "***************************************************"
 # Change directory to all_clades
 cd ${fulDir}/all_clades
 fasta_table &
@@ -1932,9 +1923,9 @@ cp ${DefiningSNPs} ./
 cp /home/shared/Table_Template.xlsx ./
 cp "$0" "$PWD"
 
-echo "***************************************************"
-echo "********** STARTING all_clades Alignment **********"
-echo "***************************************************"
+#echo "***************************************************"
+#echo "********** STARTING all_clades Alignment **********"
+#echo "***************************************************"
 cd ${fulDir}/all_clades
 
 workingdir=`basename $PWD`
@@ -1944,9 +1935,9 @@ then
 directories=`ls`
 for d in $directories; do
     cd ${fulDir}/all_clades/${d}/fasta
-    echo "****************************************************"
-    echo "************* Orginizing Table: $d *****************"
-    echo "****************************************************"
+    #echo "****************************************************"
+    #echo "************* Orginizing Table: $d *****************"
+    #echo "****************************************************"
 	alignTable & 
 
     pwd
@@ -1956,9 +1947,9 @@ else
 echo "*** $workingdir not found ***"
 fi
 
-echo "***************************************************"
-echo "********** STARTING all_groups Alignment **********"
-echo "***************************************************"
+#echo "***************************************************"
+#echo "********** STARTING all_groups Alignment **********"
+#echo "***************************************************"
 cd ${fulDir}/all_groups
 
 workingdir=`basename $PWD`
@@ -1968,9 +1959,9 @@ then
 directories=`ls`
 for d in $directories; do
     cd ${fulDir}/all_groups/${d}/fasta
-    echo "****************************************************"
-    echo "************* Orginizing Table: $d *****************"
-    echo "****************************************************"
+    #echo "****************************************************"
+    #echo "************* Orginizing Table: $d *****************"
+    #echo "****************************************************"
     alignTable &
 pwd
 done
@@ -1978,9 +1969,9 @@ else
 echo "*** $workingdir not found ***"
 fi
 
-echo "***************************************************"
-echo "******** STARTING all_subgroups Alignment *********"
-echo "***************************************************"
+#echo "***************************************************"
+#echo "******** STARTING all_subgroups Alignment *********"
+#echo "***************************************************"
 cd ${fulDir}/all_subgroups
 
 workingdir=`basename $PWD`
@@ -1991,9 +1982,9 @@ then
 directories=`ls`
 for d in $directories; do
     cd ${fulDir}/all_subgroups/$d/fasta
-    echo "****************************************************"
-    echo "************* Orginizing Table: $d *****************"
-    echo "****************************************************"
+    #echo "****************************************************"
+    #echo "************* Orginizing Table: $d *****************"
+    #echo "****************************************************"
     alignTable &
 pwd
 done
@@ -2086,7 +2077,6 @@ rm csection1
 
 echo "Copying to ${bioinfoVCF}"
 cp -r $PWD ${bioinfoVCF}
-echo "******* $LINENO, $PWD"
 fileName=`basename $0`
 
 if [ "$mflag" ]; then
@@ -2097,10 +2087,9 @@ if [ "$mflag" ]; then
 fi
 rm mytempfile
 rm email_log.html
-
+echo ""
 echo "****************************** END ******************************"
-pwd
-
+echo ""
 #
 #  Created by Stuber, Tod P - APHIS on 5/3/2014.
 #2015-04-20#
