@@ -857,7 +857,7 @@ cp *.vcf ./starting_files
 				cat $i.catFile | sort | uniq -d > $i.txt
 				pos=`cat $i.txt | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
 				if [ -z $pos ]; then
-					echo "pos is zero... adding a value"
+					#echo "pos is zero... adding a value"
 					pos='^1000000000$'
 				fi
 
@@ -1120,6 +1120,8 @@ rm parsimony_filtered_total_alt
 rm parsimony_filtered_total_pos
 rm parsimony_informative
 rm *zerofilteredsnps_alt
+
+cp /home/shared/Table_Template.xlsx ./${d}-Table_Template.xlsx
 done
 }
 #****************************************************************
@@ -1743,6 +1745,8 @@ mv ./Clade*/ ./all_clades/
 
 ##################### Start: All vcf folder #####################
 cd ./all_vcfs/
+d="all_vcfs"
+
 # Make concatemer with the position and REF call.
 # Factor in possible multiple chromosomes
 # Get rid of duplicates in concatemer and list all the positions and REF calls
@@ -1810,7 +1814,7 @@ awk '{print $1}' parsimony_filtered_total_alt > parsimony_filtered_total_pos
 
 ######################## FILTER FILE CREATOR ###########################
 if [ "$cflag" ]; then
-	d="all_vcf"
+	d="all_vcfs"
 	findpositionstofilter
 fi
 #########################################################################
@@ -1890,7 +1894,7 @@ if [ "$eflag" -o "$aflag" ]; then
         cd ./fasta
         alignTable
 else
-	echo "Tree not ran for all_vcf"
+	echo "Tree not ran for all_vcfs"
 fi
 
 ##################### End: All vcf folder #####################
