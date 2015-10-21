@@ -1284,8 +1284,9 @@ while read p; do
 	#echo "back: $back"
 	avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
 	echo "$rownumber $avemap" >> quality.txt) &
+	CPU_NR=$(mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 15}'a | sed 's/\..*//')
 	let count+=1
-	[[ $((count%10)) -eq 0 ]] && wait
+	[[ $((count%CPU_NR)) -eq 0 ]] && wait
 	done < $d-positions
 
 sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
@@ -1308,8 +1309,9 @@ while read p; do
 	#echo "back: $back"
 	avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
 	echo "$rownumber $avemap" >> quality.txt) &
+        CPU_NR=$(mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 15}'a | sed 's/\..*//')
 	let count+=1
-	[[ $((count%10)) -eq 0 ]] && wait
+	[[ $((count%CPU_NR)) -eq 0 ]] && wait
 	done < $d-positions
 
 sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
