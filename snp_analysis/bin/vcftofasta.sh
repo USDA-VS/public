@@ -1288,7 +1288,7 @@ while read p; do
 	let count+=1
 	[[ $((count%CPU_NR)) -eq 0 ]] && wait
 	done < $d-positions
-
+wait
 sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
 
 cat $d.sortedTable.txt qualitytransposed.txt | grep -v '^$' > $d-mapquality-sortedtable.txt
@@ -1313,7 +1313,7 @@ while read p; do
 	let count+=1
 	[[ $((count%CPU_NR)) -eq 0 ]] && wait
 	done < $d-positions
-
+wait
 sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
 
 cat $c.organizedTable.txt qualitytransposed.txt | grep -v '^$' > $d-mapquality-orgainizedtable.txt
@@ -1748,6 +1748,9 @@ mv ./Clade*/ ./all_clades/
 ##################### Start: All vcf folder #####################
 cd ./all_vcfs/
 d="all_vcfs"
+
+mkdir starting_files
+cp *vcf starting_files
 
 # Make concatemer with the position and REF call.
 # Factor in possible multiple chromosomes
