@@ -884,14 +884,13 @@ cp *.vcf ./starting_files
 					#echo The counter is $COUNTER
 					#echo "********* In $d --> $n working on chromos $c **********"
 					awk -v c=$c 'BEGIN{OFS="\t"} $1 !~ /#/ && $10 !~ /\.\/\./ && $1 == c {print $2}' ${i}.body > $i.filepositions
-					awk -v c=$c ' $1 == c {print $2}' ${FilterDirectory}/FilterToAll.txt > $i.positionstofilter
+					awk -v c=$c ' $1 == c {print $2}' ${FilterDirectory}/${d}.txt > $i.positionstofilter
 					cat $i.positionstofilter $i.filepositions | sort -k1,1 | uniq -d > $i.foundpositions
 					pos=`cat $i.foundpositions | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
-
 					if [[ -n $pos ]]; then
 						echo "pos: $pos" > /dev/null 2>&1
 					else
-						#echo "string is zero; no findings for pos; giving pos=1"
+					#	echo "string is zero; no findings for pos; giving pos=1"
 						pos="^1$"
 					fi
 
@@ -899,7 +898,6 @@ cp *.vcf ./starting_files
 				done
 				cat ${i}.header $n.filterchrom*.vcf > $n.filtered.vcf
 				grep -v "Not_Included" $n.filtered.vcf > $i
-
 				rm ${i}.header
 				rm ${i}.body
 				rm $i.filepositions
@@ -1909,7 +1907,7 @@ fi
 #echo "***************************************************"
 # Change directory to all_groups
 cd ${fulDir}/all_groups
-fasta_table &  
+fasta_table #&  
 
 #echo "***************************************************"
 #echo "**************** STARTING SUBGROUPS ***************"
@@ -1955,6 +1953,7 @@ done
 else
 echo "*** $workingdir not found ***"
 fi
+wait
 
 #echo "***************************************************"
 #echo "********** STARTING all_groups Alignment **********"
@@ -1977,7 +1976,7 @@ done
 else
 echo "*** $workingdir not found ***"
 fi
-
+wait
 #echo "***************************************************"
 #echo "******** STARTING all_subgroups Alignment *********"
 #echo "***************************************************"
