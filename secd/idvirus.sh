@@ -1,5 +1,7 @@
 #!/bin/sh
 
+alias pause='read -p "$LINENO Enter"'
+
 root=`pwd`
 flu=no
 
@@ -238,6 +240,7 @@ fi
 echo "" > $root/${sampleName}.summaryfile
 echo "" > $root/${sampleName}.detailfile
 summaryfile="$root/${sampleName}.summaryfile"
+mytex="$root/${sampleName}.tex"
 detailfile="$root/${sampleName}.detailfile"
 emailbody=${root}/emailfile
 echo "Sample: ${sampleName}" >> $summaryfile
@@ -246,6 +249,33 @@ echo "Sample: ${sampleName}" >> $emailbody
 echo "Reference_Set: $argUsed" >> $summaryfile
 echo "Reference_Set: $argUsed" >> $detailfile
 echo "Reference_Set: $argUsed" >> $emailbody
+
+#here-document
+#latex preamble
+cat << EOL > $mytex
+\documentclass[a4paper,11pt]{article}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{graphicx}
+\usepackage[table]{xcolor}
+\usepackage{floatrow}
+\floatsetup[table]{capposition=top}
+\usepackage{caption}
+\captionsetup{labelformat=empty,justification=justified,singlelinecheck=false}
+
+\renewcommand{\thepage}{Appendix --  page \arabic{page}}
+
+\begin{document}
+
+\includegraphics[scale=0.2]{/home/tstuber/report_doc/usdalogo.png}
+
+
+\today
+
+\vspace{5mm}
+\textbf{Identification Report:  ${sampleName}} 
+
+\textbf{XXXXXHNTYPEXXXXXXX}
+EOL
 
 #######################################################################################
 #######################################################################################
@@ -270,10 +300,10 @@ if [[ $sampleType == "paired" ]]; then
 fi
 
 #Calculate count of reads in each file
-forCount=`grep -c '^+$' $forReads`
+forCount=`grep -c '^+$' $forReads | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta'`
 echo "R1 read count: $forCount"
 if [[ $sampleType == "paired" ]]; then
-    revCount=`grep -c '^+$' $revReads`
+    revCount=`grep -c '^+$' $revReads | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta'`
 fi
 
 if [[ $sampleType == "paired" ]]; then
@@ -286,6 +316,27 @@ else
     echo "Single fastq file size: ${forFileSize}, read count: $forCount" >> $summaryfile
     echo "Single fastq file size: ${forFileSize}, read count: $forCount" >> $emailbody
 fi
+
+forsize=`ls -lh $forReads | awk '{print $5}'`
+revsize=`ls -lh $revReads | awk '{print $5}'`
+n=`echo $forFile | sed 's/[._].*//'`
+
+echo "" >> $mytex
+echo "\vspace{5mm}" >> $mytex
+echo "" >> $mytex
+
+echo "\begin{table}[h]" >> $mytex
+echo "\begin{tabular}{ l | p{7cm} | p{7cm} }" >> $mytex
+echo "\hline" >> $mytex
+echo "file name & $forFile & $revFile \\\\ " | sed "s/$n[._]//g" | sed 's/_/\\_/g' >> $mytex
+echo "\hline \hline" >> $mytex
+echo "read count & $forCount & $revCount \\\\ " >> $mytex
+echo "\hline" >> $mytex
+echo "file size & $forsize & $revsize \\\\ " >> $mytex
+echo "\hline" >> $mytex
+echo "\end{tabular}" >> $mytex
+echo "\caption{\textbf{File Stats}}" >> $mytex
+echo "\end{table}" >> $mytex
 
 #######################################################################################
 #|||||||||||||||||||||||||||||||||||| Kraken ||||||||||||||||||||||||||||||||||||||||||
@@ -1136,6 +1187,21 @@ echo "Alignment stats (reference guided):" >> ${summaryfile}
 printf "%-45s %10s %11s %10s\n" "reference used" "read count" "percent cov" "ave depth" >> ${summaryfile}
 sort -k1,1 < ${summaryfile}.pre >> ${summaryfile}
 
+echo "" >> $mytex
+echo "\vspace{5mm}" >> $mytex
+echo "" >> $mytex
+
+echo "\begin{table}[h]" >> $mytex
+echo "\begin{tabular}{ l | l | l | l }" >> $mytex
+echo "\hline" >> $mytex
+echo "reference used & read count & percent cov & ave depth \\\\" >> $mytex
+echo "\hline" >> $mytex
+awk 'BEGIN{OFS="\t"}{print $1, $2, $3, $4}' ${summaryfile}.pre | sort -k1,1 | tr "\t" "&" | sed 's/&/ & /g' | sed 's:$: \\\\:' | sed 's/[_]/\\_/g' | sed 's/[%]/\\%/g' >> $mytex
+echo "\hline" >> $mytex
+echo "\end{tabular}" >> $mytex
+echo "\caption{\textbf{Alignment stats (reference guided)}}" >> $mytex
+echo "\end{table}" >> $mytex
+
 currentdate=`date`
 sort -k1,1 < ${summaryfile}.pre | awk -v name="$sampleName" -v curdate="$currentdate" 'BEGIN{OFS="\t"} {print curdate, name, $1, $2, $3, $4}' >> $idscriptrunsummary
 
@@ -1268,6 +1334,8 @@ pwd
 
 echo "nt BLAST $contigcount contigs..."
 blastn -query ${sampleName}.consensusnoN.reads.fasta -db /data/BLAST/db/nt -num_threads 20 -out ${sampleName}-consensus-max1-nt.txt -max_target_seqs 1 -outfmt "6 qseqid qlen slen pident mismatch evalue bitscore stitle saccver"
+
+
 echo "" >> ${summaryfile}
 
 hsegment=`grep "segment4" ${sampleName}-consensus-max1-nt.txt | sed 's/.*\(H[0-9]\{1,2\}\).*/\1/'`
@@ -1284,11 +1352,30 @@ if [[ -n $subtype ]]; then
         echo "Subtype: $subtype" >> ${summaryfile}
 	echo "Subtype: $subtype" >> $idscriptrunsummary
 	echo "Subtype: $subtype" >> /bioinfo11/TStuber/Results/viruses/idvirus_run_summary.txt
-
+	
+	sed -i "s/XXXXXHNTYPEXXXXXXX/subtype: $subtype/" $mytex
 fi
 
 echo "--------------------------------------------------" >> ${summaryfile}
 echo "*** NT Database ***" >> ${summaryfile}
+
+
+echo "" >> $mytex
+echo "\vspace{5mm}" >> $mytex
+echo "" >> $mytex
+
+echo "\begin{table}[h]" >> $mytex
+echo "\tiny" >> $mytex
+echo "\begin{tabular}{ p{4cm} | l | l | l | l | l | l | p{4cm} }" >> $mytex
+echo "\hline" >> $mytex
+echo "ID & read count & per cov & ave depth & mis & evalue & bscore & Description \\\\" >> $mytex
+echo "\hline" >> $mytex
+cut -f1-8 ${sampleName}-consensus-max1-nt.txt | tr "\t" "&" | sed 's/&/ & /g' | sed 's:$: \\\\:' | sed 's/_/\\_/g' >> $mytex
+echo "\hline" >> $mytex
+echo "\end{tabular}" >> $mytex
+echo "\caption{\textbf{NT Database}}" >> $mytex
+echo "\end{table}" >> $mytex
+
 awk 'BEGIN{printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s\n", "query ID", "qlength", "slength", "% id", "mis", "evalue", "bscore", "Description"} {printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' ${sampleName}-consensus-max1-nt.txt >> ${summaryfile}
 echo "" >> ${summaryfile}
 
@@ -1309,7 +1396,25 @@ if [[ -n $pingyrdb ]]; then
     blastn -query ${sampleName}.consensusnoN.reads.fasta -db /data/BLAST/blastdb-pintail-gyrfalcon/pintail-gyrfalcon.fsa -num_threads 20 -out ${sampleName}-consensus-fmt6-pintail-gyrfalcon.txt -outfmt "6 qseqid qlen slen pident mismatch evalue bitscore stitle saccver"
     echo "--------------------------------------------------" >> ${summaryfile}
     echo "*** Pintail/Gyrfalcon Database ***" >> ${summaryfile}
+
     awk 'BEGIN{printf "%-30s %-8s %-8s %-8s %-3s %-6s %-6s %-1s\n", "query ID", "qlength", "slength", "% id", "mis", "evalue", "bscore", "Description"} {printf "%-30s %-8s %-8s %-8s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' ${sampleName}-consensus-fmt6-pintail-gyrfalcon.txt >> ${summaryfile}
+
+echo "" >> $mytex
+echo "\vspace{5mm}" >> $mytex
+echo "" >> $mytex
+
+echo "\begin{table}[h]" >> $mytex
+echo "\tiny" >> $mytex
+echo "\begin{tabular}{ p{4cm} | l | l | l | l | l | l | p{4cm} }" >> $mytex
+echo "\hline" >> $mytex
+echo "ID & read count & per cov & ave depth & mis & evalue & bscore & Description \\\\" >> $mytex
+echo "\hline" >> $mytex
+cut -f1-8 ${sampleName}-consensus-fmt6-pintail-gyrfalcon.txt | tr "\t" "&" | sed 's/&/ & /g' | sed 's:$: \\\\:' | sed 's/_/\\_/g' >> $mytex
+echo "\hline" >> $mytex
+echo "\end{tabular}" >> $mytex
+echo "\caption{\textbf{Pintail/Gyrfalcon Database}}" >> $mytex
+echo "\end{table}" >> $mytex
+
 fi
 
 ###########################
@@ -1385,7 +1490,27 @@ rm param.txt
 fi
 
 ###########################
+
 cd $root
+cp ${sampleName}.assembly_graph.pdf graphic.pdf
+
+echo "\vspace{5mm}" >> $mytex
+echo "" >> $mytex
+
+echo "\begin{figure}" >> $mytex
+echo "\begin{flushleft}" >> $mytex
+echo "\textbf{Coverage Graph}\par\medskip" >> $mytex
+echo "\end{flushleft}" >> $mytex
+
+echo "\includegraphics[width=450pt]{graphic.pdf}" >> $mytex
+echo "" >> $mytex
+echo "\end{figure}" >> $mytex
+echo "" >> $mytex
+echo "\end{document}" >> $mytex
+echo "" >> $mytex
+
+pdflatex $mytex
+
 #rm *fastq*
 echo "" >> ${summaryfile}
 echo "" >> ${summaryfile}
@@ -1428,6 +1553,10 @@ if [ -e $sampleName-Krona_identification_graphic.html ]; then
 	ls $sampleName-Krona_identification_graphic.html >> emailfiles
 fi
 
+if [ -e $sampleName.pdf ]; then
+        ls $sampleName.pdf >> emailfiles
+fi
+
 if [ -e kraken/${sampleName}-kraken_report.txt ]; then
         ls kraken/${sampleName}-kraken_report.txt >> emailfiles
 fi
@@ -1465,7 +1594,7 @@ fi
 rm *fastq*
 
 #Cleanup
-rm -r `ls | egrep -v "kraken|emailfile|emailfiles|bestrefs.txt|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
+rm -r `ls | egrep -v "$myfile|${myfile.tex}.pdf|kraken|emailfile|emailfiles|bestrefs.txt|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
 
 pwd > ./fastas/filelocation.txt
 
