@@ -253,7 +253,7 @@ echo "Reference_Set: $argUsed" >> $emailbody
 #here-document
 #latex preamble
 cat << EOL > $mytex
-\documentclass[a4paper,11pt]{article}
+\documentclass[a4paper,10pt]{article}
 \usepackage[margin=0.5in]{geometry}
 \usepackage{graphicx}
 \usepackage[table]{xcolor}
@@ -261,6 +261,8 @@ cat << EOL > $mytex
 \floatsetup[table]{capposition=top}
 \usepackage{caption}
 \captionsetup{labelformat=empty,justification=justified,singlelinecheck=false}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
 
 \renewcommand{\thepage}{Appendix --  page \arabic{page}}
 
@@ -335,7 +337,7 @@ echo "\hline" >> $mytex
 echo "file size & $forsize & $revsize \\\\ " >> $mytex
 echo "\hline" >> $mytex
 echo "\end{tabular}" >> $mytex
-echo "\caption{\textbf{File Stats}}" >> $mytex
+echo "\caption{\textbf{File stats}}" >> $mytex
 echo "\end{table}" >> $mytex
 
 #######################################################################################
@@ -1196,8 +1198,8 @@ echo "\begin{tabular}{ l | l | l | l }" >> $mytex
 echo "\hline" >> $mytex
 echo "reference used & read count & percent cov & ave depth \\\\" >> $mytex
 echo "\hline" >> $mytex
-awk 'BEGIN{OFS="\t"}{print $1, $2, $3, $4}' ${summaryfile}.pre | sort -k1,1 | tr "\t" "&" | sed 's/&/ & /g' | sed 's:$: \\\\:' | sed 's/[_]/\\_/g' | sed 's/[%]/\\%/g' >> $mytex
 echo "\hline" >> $mytex
+awk 'BEGIN{OFS="\t"}{print $1, $2, $3, $4}' ${summaryfile}.pre | sort -k1,1 | tr "\t" "&" | sed 's/&/ & /g' | sed 's:$: \\\\ \\hline:' | sed 's/[_]/\\_/g' | sed 's/[%]/\\%/g' >> $mytex
 echo "\end{tabular}" >> $mytex
 echo "\caption{\textbf{Alignment stats (reference guided)}}" >> $mytex
 echo "\end{table}" >> $mytex
@@ -1352,12 +1354,12 @@ if [[ -n $subtype ]]; then
         echo "Subtype: $subtype" >> ${summaryfile}
 	echo "Subtype: $subtype" >> $idscriptrunsummary
 	echo "Subtype: $subtype" >> /bioinfo11/TStuber/Results/viruses/idvirus_run_summary.txt
-	
-	sed -i "s/XXXXXHNTYPEXXXXXXX/subtype: $subtype/" $mytex
+
+	sed -i "s/XXXXXHNTYPEXXXXXXX/Subtype: $subtype/" $mytex
 fi
 
 echo "--------------------------------------------------" >> ${summaryfile}
-echo "*** NT Database ***" >> ${summaryfile}
+echo "*** NT database ***" >> ${summaryfile}
 
 
 echo "" >> $mytex
@@ -1370,10 +1372,10 @@ echo "\begin{tabular}{ p{4cm} | l | l | l | l | l | l | p{4cm} }" >> $mytex
 echo "\hline" >> $mytex
 echo "ID & read count & per cov & ave depth & mis & evalue & bscore & Description \\\\" >> $mytex
 echo "\hline" >> $mytex
-cut -f1-8 ${sampleName}-consensus-max1-nt.txt | tr "\t" "&" | sed 's/&/ & /g' | sed 's:$: \\\\:' | sed 's/_/\\_/g' >> $mytex
 echo "\hline" >> $mytex
+cut -f1-8 ${sampleName}-consensus-max1-nt.txt | tr "\t" "&" | sed 's/&/ & /g' | sed 's:$: \\\\ \\hline:' | sed 's/_/\\_/g' >> $mytex
 echo "\end{tabular}" >> $mytex
-echo "\caption{\textbf{NT Database}}" >> $mytex
+echo "\caption{\textbf{NT database}}" >> $mytex
 echo "\end{table}" >> $mytex
 
 awk 'BEGIN{printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s\n", "query ID", "qlength", "slength", "% id", "mis", "evalue", "bscore", "Description"} {printf "%-45s %-8s %-8s %-8s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' ${sampleName}-consensus-max1-nt.txt >> ${summaryfile}
@@ -1395,7 +1397,7 @@ if [[ -n $pingyrdb ]]; then
     blastn -query ${sampleName}.consensusnoN.reads.fasta -db /data/BLAST/blastdb-pintail-gyrfalcon/pintail-gyrfalcon.fsa -num_threads 20 -out ${sampleName}-consensus-blast_alignment-pintail-gyrfalcon.txt -outfmt 1
     blastn -query ${sampleName}.consensusnoN.reads.fasta -db /data/BLAST/blastdb-pintail-gyrfalcon/pintail-gyrfalcon.fsa -num_threads 20 -out ${sampleName}-consensus-fmt6-pintail-gyrfalcon.txt -outfmt "6 qseqid qlen slen pident mismatch evalue bitscore stitle saccver"
     echo "--------------------------------------------------" >> ${summaryfile}
-    echo "*** Pintail/Gyrfalcon Database ***" >> ${summaryfile}
+    echo "*** Pintail/Gyrfalcon database ***" >> ${summaryfile}
 
     awk 'BEGIN{printf "%-30s %-8s %-8s %-8s %-3s %-6s %-6s %-1s\n", "query ID", "qlength", "slength", "% id", "mis", "evalue", "bscore", "Description"} {printf "%-30s %-8s %-8s %-8s %-3s %-6s %-6s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s %-1s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27}' ${sampleName}-consensus-fmt6-pintail-gyrfalcon.txt >> ${summaryfile}
 
@@ -1409,10 +1411,10 @@ echo "\begin{tabular}{ p{4cm} | l | l | l | l | l | l | p{4cm} }" >> $mytex
 echo "\hline" >> $mytex
 echo "ID & read count & per cov & ave depth & mis & evalue & bscore & Description \\\\" >> $mytex
 echo "\hline" >> $mytex
-cut -f1-8 ${sampleName}-consensus-fmt6-pintail-gyrfalcon.txt | tr "\t" "&" | sed 's/&/ & /g' | sed 's:$: \\\\:' | sed 's/_/\\_/g' >> $mytex
 echo "\hline" >> $mytex
+cut -f1-8 ${sampleName}-consensus-fmt6-pintail-gyrfalcon.txt | tr "\t" "&" | sed 's/&/ & /g' | sed 's:$: \\\\ \\hline:' | sed 's/_/\\_/g' >> $mytex
 echo "\end{tabular}" >> $mytex
-echo "\caption{\textbf{Pintail/Gyrfalcon Database}}" >> $mytex
+echo "\caption{\textbf{Pintail/Gyrfalcon database}}" >> $mytex
 echo "\end{table}" >> $mytex
 
 fi
@@ -1510,6 +1512,7 @@ echo "\end{document}" >> $mytex
 echo "" >> $mytex
 
 pdflatex $mytex
+mv $sampleName.pdf ${sampleName}-report.pdf
 
 #rm *fastq*
 echo "" >> ${summaryfile}
@@ -1531,14 +1534,10 @@ echo "******* $LINENO, $PWD"
 fileName=`basename $0`
 cp ${sampleName}-reference_guided_assemblies/${sampleName}-consensus-blast_alignment-pintail-gyrfalcon.txt ${root}
 
-enscript ${summaryfile} -B -j -r -f "Courier5" -o - | ps2pdf - ${sampleName}-report.pdf
+#enscript ${summaryfile} -B -j -r -f "Courier5" -o - | ps2pdf - ${sampleName}-report.pdf
 
 if [ -e ${sampleName}-report.pdf ]; then
 	ls ${sampleName}-report.pdf > emailfiles
-fi
-
-if [ -e ${sampleName}.assembly_graph.pdf ]; then
-	ls ${sampleName}.assembly_graph.pdf >> emailfiles
 fi
 
 if [ -e ${root}/${sampleName}-submissionfile.fasta ]; then
@@ -1551,10 +1550,6 @@ fi
 
 if [ -e $sampleName-Krona_identification_graphic.html ]; then 
 	ls $sampleName-Krona_identification_graphic.html >> emailfiles
-fi
-
-if [ -e $sampleName.pdf ]; then
-        ls $sampleName.pdf >> emailfiles
 fi
 
 if [ -e kraken/${sampleName}-kraken_report.txt ]; then
