@@ -907,8 +907,7 @@ cp *.vcf ./starting_files
 
 			done
 		fi
-	mkdir marked_files
-	mv *.filtered.vcf ./marked_files
+	rm *.filtered.vcf
 	wait
 	sleep 2
 
@@ -1320,6 +1319,7 @@ mv $d-mapquality-orgainizedtable.txt $c.organizedTable.txt
 rm quality.txt
 rm qualitytransposed.txt
 rm $d-positions
+rm -r ./starting_files
 
 }
 
@@ -1593,8 +1593,7 @@ echo "`date` --> Marking all VCFs and removing filtering region"
 wait
 sleep 2
 
-mkdir marked_files
-mv *.filtered.vcf ./marked_files
+rm *.filtered.vcf 
 
     else
     echo "***All VCF filtering was NOT done."

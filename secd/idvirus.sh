@@ -258,6 +258,7 @@ cat << EOL > $mytex
 \usepackage{graphicx}
 \usepackage[table]{xcolor}
 \usepackage{floatrow}
+\usepackage{float}
 \floatsetup[table]{capposition=top}
 \usepackage{caption}
 \captionsetup{labelformat=empty,justification=justified,singlelinecheck=false}
@@ -327,7 +328,7 @@ echo "" >> $mytex
 echo "\vspace{5mm}" >> $mytex
 echo "" >> $mytex
 
-echo "\begin{table}[h]" >> $mytex
+echo "\begin{table}[H]" >> $mytex
 echo "\begin{tabular}{ l | p{7cm} | p{7cm} }" >> $mytex
 echo "\hline" >> $mytex
 echo "file name & $forFile & $revFile \\\\ " | sed "s/$n[._]//g" | sed 's/_/\\_/g' >> $mytex
@@ -1193,7 +1194,7 @@ echo "" >> $mytex
 echo "\vspace{5mm}" >> $mytex
 echo "" >> $mytex
 
-echo "\begin{table}[h]" >> $mytex
+echo "\begin{table}[H]" >> $mytex
 echo "\begin{tabular}{ l | l | l | l }" >> $mytex
 echo "\hline" >> $mytex
 echo "reference used & read count & percent cov & ave depth \\\\" >> $mytex
@@ -1356,6 +1357,8 @@ if [[ -n $subtype ]]; then
 	echo "Subtype: $subtype" >> /bioinfo11/TStuber/Results/viruses/idvirus_run_summary.txt
 
 	sed -i "s/XXXXXHNTYPEXXXXXXX/Subtype: $subtype/" $mytex
+else
+	sed -i "s/XXXXXHNTYPEXXXXXXX/$argUsed/" $mytex
 fi
 
 echo "--------------------------------------------------" >> ${summaryfile}
@@ -1366,7 +1369,7 @@ echo "" >> $mytex
 echo "\vspace{5mm}" >> $mytex
 echo "" >> $mytex
 
-echo "\begin{table}[h]" >> $mytex
+echo "\begin{table}[H]" >> $mytex
 echo "\tiny" >> $mytex
 echo "\begin{tabular}{ p{4cm} | l | l | l | l | l | l | p{4cm} }" >> $mytex
 echo "\hline" >> $mytex
@@ -1405,7 +1408,7 @@ echo "" >> $mytex
 echo "\vspace{5mm}" >> $mytex
 echo "" >> $mytex
 
-echo "\begin{table}[h]" >> $mytex
+echo "\begin{table}[H]" >> $mytex
 echo "\tiny" >> $mytex
 echo "\begin{tabular}{ p{4cm} | l | l | l | l | l | l | p{4cm} }" >> $mytex
 echo "\hline" >> $mytex
@@ -1499,7 +1502,7 @@ cp ${sampleName}.assembly_graph.pdf graphic.pdf
 echo "\vspace{5mm}" >> $mytex
 echo "" >> $mytex
 
-echo "\begin{figure}" >> $mytex
+echo "\begin{figure}[H]" >> $mytex
 echo "\begin{flushleft}" >> $mytex
 echo "\textbf{Coverage Graph}\par\medskip" >> $mytex
 echo "\end{flushleft}" >> $mytex
