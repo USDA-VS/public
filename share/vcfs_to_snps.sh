@@ -472,11 +472,11 @@ fi
 mkdir starting_files
 cp *vcf starting_files
 
-# Remove VCFs with mean depth < 40X.
+# Remove VCFs with mean depth < 20X.
 COUNTER=0
 for i in *vcf; do 
 	meandepth=`awk '$6 != "." {print $8}' $i | sed 's/.*;DP=\(...\).*/\1/' | sed 's/[;FS]//' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
-	if [ $meandepth -lt 40 ]; then
+	if [ $meandepth -lt 20 ]; then
 		echo "$i only ${meandepth}X mean depth and has been removed from comparision"
 		rm $i
 		let COUNTER=COUNTER+1

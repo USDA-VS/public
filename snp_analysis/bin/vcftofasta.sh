@@ -2082,7 +2082,7 @@ rm ssection4
 rm csection1
 #rm -r ${FilterDirectory}
 
-echo "Copying to ${bioinfoVCF}"
+echo "Copy to ${bioinfoVCF}"
 cp -r $PWD ${bioinfoVCF}
 fileName=`basename $0`
 
