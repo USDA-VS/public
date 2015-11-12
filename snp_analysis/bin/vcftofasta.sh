@@ -1133,7 +1133,7 @@ echo "`date` --> RAxML started $d"
 awk '{print $0}' *.fas | sed '/root/{N;d;}' >> fastaGroup.txt
 awk '{print $0}' *.fas >> RAxMLfastaGroup.txt
 
-raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} -m GTRCAT -p 12345 &>/dev/null && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg -A ../${d}-tree.pdf; nw_reroot RAxML_bestTree.${d} root > tableinput.${d}; nw_reroot RAxML_bestTree.${d} root > rooted_RAxML_bestTree.${d}; mv rooted_RAxML_bestTree.${d} RAxML_bestTree.${d}
+raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} -m GTRCAT -p 12345 &>/dev/null && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf; nw_reroot RAxML_bestTree.${d} root > tableinput.${d}; nw_reroot RAxML_bestTree.${d} root > rooted_RAxML_bestTree.${d}; mv rooted_RAxML_bestTree.${d} RAxML_bestTree.${d}
 wait
 rm RAxML_parsimonyTree*
 for i in RAxML*Tree*; do mv $i ../${i}.tre; done
@@ -1385,8 +1385,8 @@ mv *.* ./starting_files
 rm elite
 
 #Remove possible "## in vcf headers
-echo 'Removing possible "## in vcf headers'
-sed -i 's/^"##/##/' *vcf
+#echo 'Removing possible "## in vcf headers'
+#sed -i 's/^"##/##/' *vcf
 
 #################################################################################
 
@@ -1465,7 +1465,7 @@ echo "#############################"
 echo "Making Files Unix Compatiable"
 for v in *.vcf; do
     (dos2unix $v > /dev/null 2>&1 #Fixes files opened and saved in Excel
-    cat $v | tr '\r' '\n' | awk -F '\t' 'BEGIN{OFS="\t";} {gsub("\"","",$5);print;}' | sed 's/\"##/##/' > $v.temp
+    cat $v | tr '\r' '\n' | awk -F '\t' 'BEGIN{OFS="\t";} {gsub("\"","",$5);print;}' | sed 's/\"##/##/' | sed 's/\"AC=/AC=/' > $v.temp
     mv $v.temp $v) &
     let count+=1
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
