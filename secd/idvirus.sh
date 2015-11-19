@@ -454,6 +454,7 @@ java -Xmx2g -jar  ${picardPath}/MarkDuplicates.jar INPUT=${refname}.mappedReads.
 
 echo "***Index $refname.dup.bam"
 samtools index $refname.dup.bam
+pause
 
 echo "*** Calling VCFs with UnifiedGenotyper"
 java -Xmx2g -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I $refname.dup.bam -o ${refname}.UG.vcf -nct 2
@@ -470,9 +471,11 @@ else
         exit 1
     fi
 fi
+pause
 
 # make reference guided contig
 java -Xmx2g -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${refname}.readreference.fasta -V ${refname}.UG.vcf
+pause
 
 #echo ">${refname}" > ${refname}.readreference.temp; awk ' $8 ~ /^AN=2/ {print $4} ' ${refname}.UG.vcf | tr -d [:space:] >> ${refname}.readreference.temp; echo "" >> ${refname}.readreference.temp; mv ${refname}.readreference.temp ${refname}.readreference.fasta
 
@@ -1100,6 +1103,19 @@ printf "%-20s %11.2f%% %'10dX\n" ${refname} $perc $meancov >> ${root}/${s}/${sam
 		cd $s
 		echo "s: $s"
 		pwd
+		if [ "$bflag" ]; then
+   		echo ""
+    		echo " *** B FLAG ON, BUG FINDING MODE, SINGLE SAMPE PROCESSING *** "
+    		echo ""
+		for i in *fasta; do
+                        cd ${root}/${s}
+                        mkdir ${i%.fasta}
+                        mv ${i} ${i%.fasta}
+                        ln ${root}/*fastq* ${i%.fasta}
+                        echo "working on $sampleName $s $i"
+                        cd ${i%.fasta}; findbest
+                done
+		else
 		for i in *fasta; do
 			(cd ${root}/${s}
 			mkdir ${i%.fasta}
@@ -1110,6 +1126,7 @@ printf "%-20s %11.2f%% %'10dX\n" ${refname} $perc $meancov >> ${root}/${s}/${sam
 	        let count+=1
                 [[ $((count%55)) -eq 0 ]] && wait
     		done
+		fi
 	wait
 	cd ${root}/$s
 	averagecov=`sed 's/%//g' ${root}/${s}/${sampleName}.findbest | sed 's/X$//' | sed 's/,//' | awk '{ sum += $2 } END { if (NR > 0) print sum / NR }'`

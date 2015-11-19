@@ -549,7 +549,7 @@ elif [[ $1 == h5n2 ]]; then
 	genotypingcodes="/bioinfo11/MKillian/Analysis/results/snp-genotypingcodes.txt"
 	# This file tells the script how to cluster VCFs
 	DefiningSNPs="/bioinfo11/MKillian/Analysis/results/influenza/h5n2/snp_analysis/script2/Defining_SNPs_H5N2.txt"
-	FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
+	FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
 	FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
 	FilterDirectory="/bioinfo11/MKillian/Analysis/results/influenza/h5n2/snp_analysis/script2/FilterFiles" #Files containing positions to filter
 	RemoveFromAnalysis="bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
@@ -1373,7 +1373,7 @@ mv *.* ./starting_files
         cp ./starting_files/$name ./
         done
 
-        for i in `find ./starting_files/ -mtime -10`; do
+        for i in `find ./starting_files/ -mtime -1`; do
         cp $i ./
         done
 
@@ -1385,12 +1385,13 @@ mv *.* ./starting_files
 rm elite
 
 #Remove possible "## in vcf headers
-#echo 'Removing possible "## in vcf headers'
-#sed -i 's/^"##/##/' *vcf
+echo 'Removing possible "## in vcf headers'
+sed -i 's/^"##/##/' *vcf
 
 #################################################################################
 
 # Count the number of chromosomes used in the reference when VCFs were made.
+p
 #singleFile=`ls *.vcf | head -1`
 echo "Counting the number of chromosomes in first 100 samples, started -->  `date`"
 chromCount=`awk ' $0 !~ /^#/ {print $1}' $(ls *vcf | head -100) | sort | uniq -d | awk 'END {print NR}'`
