@@ -472,6 +472,12 @@ fi
 mkdir starting_files
 cp *vcf starting_files
 
+for i in *vcf; do
+	dos2unix $i >/dev/null 2>&1
+	tr '\r' '\n' < $i | sed 's/"##/##/' > $i.temp
+	mv $i.temp $i
+done
+
 # Remove VCFs with mean depth < 20X.
 COUNTER=0
 for i in *vcf; do 
