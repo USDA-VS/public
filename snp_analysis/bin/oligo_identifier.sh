@@ -111,10 +111,10 @@ echo $tbbinary
 echo $parabinary
 
 #count every occurance of 1 in binary.
-check=`echo $brucbinary | grep -o "1"`
+check=`echo $brucbinary | grep -o "1" | wc -l`
 echo "Brucella check= $check"
 
-if [[ $check > 1 ]]; then
+if [[ $check > 0 ]]; then
 	echo "Brucella species found"
 	tagname=`grep $n /bioinfo11/TStuber/Results/_Brucella/bruc_tags.txt`
 	i=$brucbinary
@@ -205,10 +205,10 @@ if [[ $check > 1 ]]; then
 fi
 
 #count every occurance of 1 in binary.
-check=`echo $tbbinary | grep -o "1"`
+check=`echo $tbbinary | grep -o "1" | wc -l`
 echo "TB complex check= $check"
 
-if [[ $check > 1 ]]; then
+if [[ $check > 0 ]]; then
         echo "TB complex species found"
         tagname=`grep $n /bioinfo11/TStuber/Results/_Mycobacterium/Untitled.txt`
 	i=$tbbinary
@@ -296,7 +296,7 @@ if [[ $check > 1 ]]; then
 fi
 
 #count every occurance of 1 in binary.
-check=`echo $parabinary | grep -c "1"`
+check=`echo $parabinary | grep -o "1" | wc -l`
 echo "M. paratb check= $check"
 
 if [[ $check > 0 ]]; then
