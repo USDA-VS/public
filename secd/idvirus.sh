@@ -987,15 +987,17 @@ library(scales)
 arg <- commandArgs(trailingOnly=TRUE)
 
 data <- read.csv(arg[1], header=FALSE, sep="\t")
-names(data) <- c("species", "position", "coverage")
+names(data) <- c("Species", "position", "coverage")
 
 pdf("myplot.pdf", width=20, height=6)
 
 #ggplot(data, aes(x=position, y=log(coverage), colour=species, group=species)) + geom_point(size=2.0) + ggtitle(arg[2]) + scale_colour_brewer(palette="Set1")+ theme_bw() + guides(colour = guide_legend(override.aes = list(size=10)))
 
-bp <- ggplot(data, aes(x=position, y=log10(coverage), colour=species, group=species)) + geom_point(size=2.0) + ggtitle(arg[2]) + scale_colour_brewer(palette="Set1")+ theme_bw() + guides(colour = guide_legend(override.aes = list(size=10)))
+#bp <- ggplot(data, aes(x=position, y=log10(coverage), colour=species, group=species)) + geom_point(size=2.0) + ggtitle(arg[2]) + scale_colour_brewer(palette="Set1")+ theme_bw() + guides(colour = guide_legend(override.aes = list(size=10)))
 
-bp + scale_y_continuous(breaks=seq(0, 3.0, 0.5))
+#bp + scale_y_continuous(breaks=seq(0, 3.0, 0.5))
+
+ggplot(data, aes(x=position, y=coverage, colour=Species, group=Species)) + geom_point(size=1.0) + ggtitle(arg[2]) + scale_colour_brewer(palette="Set1")+ theme_bw() + guides(colour = guide_legend(override.aes = list(size=8)))+ scale_y_log10() + theme(axis.title.x = element_text(colour="grey20",size=20,angle=0,hjust=.5,vjust=0,face="plain"), axis.title.y = element_text(colour="grey20",size=20,angle=90,hjust=.5,vjust=.5,face="plain"), title = element_text(colour="grey20",size=20,angle=0,hjust=.5,vjust=.5,face="plain")) + ylab("Depth of Coverage") + xlab("Position")
 
 dev.off()
 EOL
