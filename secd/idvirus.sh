@@ -84,7 +84,7 @@ elif [[ $1 == testflu ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
     krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/home/tstuber/virus_seeds/circovirus_picornavirus/*fasta
-    #bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/aiall/newfiles"
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/aiall/newfiles"
     echo "idvirus.sh ran targeting $1"
     echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov" # Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
