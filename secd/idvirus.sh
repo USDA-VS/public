@@ -463,7 +463,6 @@ java -Xmx2g -jar  ${picardPath} MarkDuplicates INPUT=${refname}.mappedReads.bam 
 
 echo "***Index $refname.dup.bam"
 samtools index $refname.dup.bam
-pause
 
 echo "*** Calling VCFs with UnifiedGenotyper"
 java -Xmx2g -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I $refname.dup.bam -o ${refname}.UG.vcf -nct 2
@@ -480,11 +479,9 @@ else
         exit 1
     fi
 fi
-pause
 
 # make reference guided contig
 java -Xmx2g -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${refname}.readreference.fasta -V ${refname}.UG.vcf
-pause
 
 #echo ">${refname}" > ${refname}.readreference.temp; awk ' $8 ~ /^AN=2/ {print $4} ' ${refname}.UG.vcf | tr -d [:space:] >> ${refname}.readreference.temp; echo "" >> ${refname}.readreference.temp; mv ${refname}.readreference.temp ${refname}.readreference.fasta
 
@@ -1617,7 +1614,6 @@ else
 		echo "pingyrdb not being referenced, therefore not checking for C insert"
 	fi
 fi
-pause
 
 rm *fastq*
 
