@@ -6,19 +6,7 @@ root=`pwd`
 flu=no
 
 #PATHs
-
-#Specify Picard being used
-CREATESEQUENCEDICTIONARY=`which CreateSequenceDictionary.jar`
-if [[ -z $CREATESEQUENCEDICTIONARY ]]; then
-	echo "New Picard version being used"
-	picardPath='/usr/local/bin/picard-tools-1.141/picard.jar'
-else
-	echo "Old Picard version being used"
-	picardPath='/usr/local/bin/picard-tools-1.117/'
-
-fi
-pause
-
+picardPath='/usr/local/bin/picard-tools-1.141/picard.jar'
 GATKPath='/usr/local/bin/GenomeAnalysisTK/GenomeAnalysisTK.jar'
 pythonGetFasta="/home/tstuber/workspace/stuber/python_scripts/GetFASTAbyGI.py"
 
