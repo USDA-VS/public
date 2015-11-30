@@ -6,7 +6,19 @@ root=`pwd`
 flu=no
 
 #PATHs
-picardPath='/usr/local/bin/picard-tools-1.117/'
+
+#Specify Picard being used
+CREATESEQUENCEDICTIONARY=`which CreateSequenceDictionary.jar`
+if [[ -z $CREATESEQUENCEDICTIONARY ]]; then
+	echo "New Picard version being used"
+	picardPath='/usr/local/bin/picard-tools-1.141/picard.jar'
+else
+	echo "Old Picard version being used"
+	picardPath='/usr/local/bin/picard-tools-1.117/'
+
+fi
+pause
+
 GATKPath='/usr/local/bin/GenomeAnalysisTK/GenomeAnalysisTK.jar'
 pythonGetFasta="/home/tstuber/workspace/stuber/python_scripts/GetFASTAbyGI.py"
 
@@ -428,7 +440,7 @@ refname=${ref%.fasta}
 ##
 bwa index $ref
 samtools faidx $ref
-java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
     echo "Index and dict are present, continue script"
@@ -436,7 +448,7 @@ else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
     samtools faidx $ref
-    java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+    java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
     if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
     fi
@@ -459,7 +471,7 @@ rm ${refname}.raw.bam
 samtools view -h -b -F4 ${refname}.sorted.bam > ./$refname.mappedReads.bam
 
 echo "***Marking Duplicates"
-java -Xmx2g -jar  ${picardPath}/MarkDuplicates.jar INPUT=${refname}.mappedReads.bam OUTPUT=$refname.dup.bam METRICS_FILE=$refname.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
+java -Xmx2g -jar  ${picardPath} MarkDuplicates INPUT=${refname}.mappedReads.bam OUTPUT=$refname.dup.bam METRICS_FILE=$refname.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
 
 echo "***Index $refname.dup.bam"
 samtools index $refname.dup.bam
@@ -634,9 +646,9 @@ java -Xmx2g -jar ${GATKPath} -T FastaAlternateReferenceMaker -R $ref -o ${orgref
 
 
 if [ $sampleType == "paired" ]; then
-    java -Xmx2g -jar ${picardPath}/SamToFastq.jar INPUT=${orgref}-${refname}.dup.bam FASTQ=./${orgref}-${refname}-mapped_R1.fastq SECOND_END_FASTQ=./${orgref}-${refname}-mapped_R2.fastq
+    java -Xmx2g -jar ${picardPath} SamToFastq INPUT=${orgref}-${refname}.dup.bam FASTQ=./${orgref}-${refname}-mapped_R1.fastq SECOND_END_FASTQ=./${orgref}-${refname}-mapped_R2.fastq
 else
-    java -Xmx2g -jar ${picardPath}/SamToFastq.jar INPUT=${orgref}-${refname}.dup.bam FASTQ=./${orgref}-${refname}-mapped_R1.fastq
+    java -Xmx2g -jar ${picardPath} SamToFastq INPUT=${orgref}-${refname}.dup.bam FASTQ=./${orgref}-${refname}-mapped_R1.fastq
 fi
 
 if [ $sampleType == "paired" ]; then
@@ -709,7 +721,7 @@ samtools faidx $ref
 
 #########################
 
-java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
     echo "Index and dict are present, continue script"
@@ -717,7 +729,7 @@ else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
     samtools faidx $ref
-    java -Xmx2g -jar ${picardPath}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
+    java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
     if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
     fi
@@ -741,7 +753,7 @@ samtools view -h -b -F4 ${orgref}-${refname}.sorted.bam > ./${orgref}-${refname}
 samtools index ./${orgref}-${refname}.mappedReads.bam
 
 echo "***Marking Duplicates"
-java -Xmx2g -jar  ${picardPath}/MarkDuplicates.jar INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
+java -Xmx2g -jar  ${picardPath} MarkDuplicates INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
 
 echo "***Index ${orgref}-${refname}.dup.bam"
 samtools index ${orgref}-${refname}.dup.bam
@@ -786,7 +798,7 @@ echo "ref: $ref and refname: $refname"
 bwa index $ref
 samtools faidx $ref
 rm ${refname}.dict
-java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=$ref OUTPUT=${refname}.dict
+java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=$ref OUTPUT=${refname}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
     echo "Index and dict are present, continue script"
@@ -794,7 +806,7 @@ else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
     samtools faidx $ref
-    java -Xmx2g -jar ${picardPath}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
+    java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
     if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
     fi
@@ -818,7 +830,7 @@ samtools view -h -b -F4 ${orgref}-${refname}.sorted.bam > ./${orgref}-${refname}
 samtools index ./${orgref}-${refname}.mappedReads.bam
 
 echo "***Marking Duplicates"
-java -Xmx2g -Xmx4g -jar  ${picardPath}/MarkDuplicates.jar INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
+java -Xmx2g -Xmx4g -jar  ${picardPath} MarkDuplicates INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
 
 echo "***Index ${orgref}-${refname}.dup.bam"
 samtools index ${orgref}-${refname}.dup.bam
@@ -920,7 +932,7 @@ refname=${ref%.fasta}
 
 bwa index $ref
 samtools faidx $ref
-java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
     echo "Index and dict are present, continue script"
@@ -928,7 +940,7 @@ else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
     samtools faidx $ref
-    java -Xmx2g -jar ${picardPath}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+    java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
     if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
     fi
@@ -1035,7 +1047,7 @@ refname=${ref%.fasta}
 
 bwa index $ref
 samtools faidx $ref
-java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
     echo "Index and dict are present, continue script"
@@ -1043,7 +1055,7 @@ else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
     samtools faidx $ref
-    java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+    java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
     if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
     fi
@@ -1295,7 +1307,7 @@ orgref="igvalignment"
 
 bwa index $ref
 samtools faidx $ref
-java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
 echo "Index and dict are present, continue script"
@@ -1303,7 +1315,7 @@ else
 sleep 5
 echo "Either index or dict for reference is missing, try making again"
 samtools faidx $ref
-java -Xmx2g -jar ${picardPath}CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
+java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
 read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
 fi
@@ -1329,7 +1341,7 @@ samtools view -h -b -F4 ${orgref}-${refname}.sorted.bam > ./${orgref}-${refname}
 samtools index ./${orgref}-${refname}.mappedReads.bam
 
 echo "***Marking Duplicates"
-java -Xmx2g -jar  ${picardPath}/MarkDuplicates.jar INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
+java -Xmx2g -jar  ${picardPath} MarkDuplicates INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
 
 echo "***Index ${orgref}-${refname}.dup.bam"
 samtools index ${orgref}-${refname}.dup.bam
@@ -1617,6 +1629,8 @@ else
 		echo "pingyrdb not being referenced, therefore not checking for C insert"
 	fi
 fi
+pause
+
 rm *fastq*
 
 #Cleanup
