@@ -2084,6 +2084,8 @@ rm section5
 rm sectiontime
 rm ssection4
 rm csection1
+rm -r all_vcfs/starting_files
+zip -r starting_files.zip starting_files && rm -r starting_files
 #rm -r ${FilterDirectory}
 
 echo "Copy to ${bioinfoVCF}"
