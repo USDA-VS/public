@@ -1554,12 +1554,13 @@ echo "\includegraphics[width=450pt]{graphic.pdf}" >> $mytex
 echo "" >> $mytex
 echo "\end{figure}" >> $mytex
 echo "" >> $mytex
-echo "\end{document}" >> $mytex
-echo "" >> $mytex
 
 #add file and alignment stats
 cat ${mytex}.filestats >> $mytex
 cat ${mytex}.alignmentstats >> $mytex
+
+echo "\end{document}" >> $mytex
+echo "" >> $mytex
 
 pdflatex $mytex
 mv $sampleName.pdf ${sampleName}-report.pdf
