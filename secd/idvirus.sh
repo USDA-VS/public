@@ -1555,6 +1555,7 @@ echo "" >> $mytex
 echo "\end{figure}" >> $mytex
 echo "" >> $mytex
 
+
 #add file and alignment stats
 cat ${mytex}.filestats >> $mytex
 cat ${mytex}.alignmentstats >> $mytex
@@ -1640,6 +1641,16 @@ fi
 
 rm *fastq*
 
+rm ${sampleName}.assembly_graph.pdf
+rm ${sampleName}.aux
+rm ${sampleName}.log
+rm ${sampleName}.tex.alignmentstats
+rm ${sampleName}.tex.filestats
+rm allsamplecoveragefile
+rm bestrefs.txt
+rm graphic.pdf
+rm writelist
+
 #Cleanup
 rm -r `ls | egrep -v "$myfile|${myfile.tex}.pdf|kraken|emailfile|emailfiles|bestrefs.txt|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
 
@@ -1671,6 +1682,7 @@ else
 	fi
 fi
 
+rm
 echo "****************************** END ******************************"
 pwd
 
