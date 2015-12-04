@@ -293,8 +293,11 @@ cat << EOL > $mytex
 \renewcommand{\familydefault}{\sfdefault}
 \usepackage{lastpage}
 \usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
 
-\renewcommand{\thepage}{Appendix --  page \arabic{page} of \pageref{LastPage}}
+\cfoot{Appendix --  page \thepage\ of \pageref{LastPage}}
 
 \begin{document}
 
@@ -1566,6 +1569,7 @@ echo "\end{document}" >> $mytex
 echo "" >> $mytex
 
 pdflatex $mytex
+pdflatex $mytex
 mv $sampleName.pdf ${sampleName}-report.pdf
 
 #rm *fastq*
@@ -1650,7 +1654,6 @@ rm ${sampleName}.tex.alignmentstats
 rm ${sampleName}.tex.filestats
 rm allsamplecoveragefile
 rm bestrefs.txt
-rm graphic.pdf
 rm writelist
 
 #Cleanup
