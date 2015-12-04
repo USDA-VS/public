@@ -291,8 +291,10 @@ cat << EOL > $mytex
 \captionsetup{labelformat=empty,justification=justified,singlelinecheck=false}
 \usepackage{helvet}
 \renewcommand{\familydefault}{\sfdefault}
+\usepackage{lastpage}
+\usepackage{fancyhdr}
 
-\renewcommand{\thepage}{Appendix --  page \arabic{page}}
+\renewcommand{\thepage}{Appendix --  page \arabic{page} of \pageref{LastPage}}
 
 \begin{document}
 
