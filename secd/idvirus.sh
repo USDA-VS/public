@@ -351,22 +351,22 @@ forsize=`ls -lh $forReads | awk '{print $5}'`
 revsize=`ls -lh $revReads | awk '{print $5}'`
 n=`echo $forFile | sed 's/[._].*//'`
 
-echo "" >> $mytex
-echo "\vspace{5mm}" >> $mytex
-echo "" >> $mytex
+echo "" >> ${mytex}.filestats
+echo "\vspace{5mm}" >> ${mytex}.filestats
+echo "" >> ${mytex}.filestats
 
-echo "\begin{table}[H]" >> $mytex
-echo "\begin{tabular}{ l | p{7cm} | p{7cm} }" >> $mytex
-echo "\hline" >> $mytex
-echo "file name & $forFile & $revFile \\\\ " | sed "s/$n[._]//g" | sed 's/_/\\_/g' >> $mytex
-echo "\hline \hline" >> $mytex
-echo "read count & $forCount & $revCount \\\\ " >> $mytex
-echo "\hline" >> $mytex
-echo "file size & $forsize & $revsize \\\\ " >> $mytex
-echo "\hline" >> $mytex
-echo "\end{tabular}" >> $mytex
-echo "\caption{\textbf{File stats}}" >> $mytex
-echo "\end{table}" >> $mytex
+echo "\begin{table}[H]" >> ${mytex}.filestats
+echo "\begin{tabular}{ l | p{7cm} | p{7cm} }" >> ${mytex}.filestats
+echo "\hline" >> ${mytex}.filestats
+echo "file name & $forFile & $revFile \\\\ " | sed "s/$n[._]//g" | sed 's/_/\\_/g' >> ${mytex}.filestats
+echo "\hline \hline" >> ${mytex}.filestats
+echo "read count & $forCount & $revCount \\\\ " >> ${mytex}.filestats
+echo "\hline" >> ${mytex}.filestats
+echo "file size & $forsize & $revsize \\\\ " >> ${mytex}.filestats
+echo "\hline" >> ${mytex}.filestats
+echo "\end{tabular}" >> ${mytex}.filestats
+echo "\caption{\textbf{File stats}}" >> ${mytex}.filestats
+echo "\end{table}" >> ${mytex}.filestats
 
 #######################################################################################
 #|||||||||||||||||||||||||||||||||||| Kraken ||||||||||||||||||||||||||||||||||||||||||
@@ -1233,20 +1233,20 @@ echo "Alignment stats (reference guided):" >> ${summaryfile}
 printf "%-45s %10s %11s %10s\n" "reference used" "read count" "percent cov" "ave depth" >> ${summaryfile}
 sort -k1,1 < ${summaryfile}.pre >> ${summaryfile}
 
-echo "" >> $mytex
-echo "\vspace{5mm}" >> $mytex
-echo "" >> $mytex
+echo "" >> ${mytex}.alignmentstats
+echo "\vspace{5mm}" >> ${mytex}.alignmentstats
+echo "" >> ${mytex}.alignmentstats
 
-echo "\begin{table}[H]" >> $mytex
-echo "\begin{tabular}{ l | l | l | l }" >> $mytex
-echo "\hline" >> $mytex
-echo "reference used & read count & percent cov & ave depth \\\\" >> $mytex
-echo "\hline" >> $mytex
-echo "\hline" >> $mytex
-awk 'BEGIN{OFS="\t"}{print $1, $2, $3, $4}' ${summaryfile}.pre | sort -k1,1 | tr "\t" "&" | sed 's/&/ & /g' | sed 's:$: \\\\ \\hline:' | sed 's/[_]/\\_/g' | sed 's/[%]/\\%/g' >> $mytex
-echo "\end{tabular}" >> $mytex
-echo "\caption{\textbf{Alignment stats (reference guided)}}" >> $mytex
-echo "\end{table}" >> $mytex
+echo "\begin{table}[H]" >> ${mytex}.alignmentstats
+echo "\begin{tabular}{ l | l | l | l }" >> ${mytex}.alignmentstats
+echo "\hline" >> ${mytex}.alignmentstats
+echo "reference used & read count & percent cov & ave depth \\\\" >> ${mytex}.alignmentstats
+echo "\hline" >> ${mytex}.alignmentstats
+echo "\hline" >> ${mytex}.alignmentstats
+awk 'BEGIN{OFS="\t"}{print $1, $2, $3, $4}' ${summaryfile}.pre | sort -k1,1 | tr "\t" "&" | sed 's/&/ & /g' | sed 's:$: \\\\ \\hline:' | sed 's/[_]/\\_/g' | sed 's/[%]/\\%/g' >> ${mytex}.alignmentstats
+echo "\end{tabular}" >> ${mytex}.alignmentstats
+echo "\caption{\textbf{Alignment stats (reference guided)}}" >> ${mytex}.alignmentstats
+echo "\end{table}" >> ${mytex}.alignmentstats
 
 currentdate=`date`
 sort -k1,1 < ${summaryfile}.pre | awk -v name="$sampleName" -v curdate="$currentdate" 'BEGIN{OFS="\t"} {print curdate, name, $1, $2, $3, $4}' >> $idscriptrunsummary
@@ -1554,6 +1554,12 @@ echo "\includegraphics[width=450pt]{graphic.pdf}" >> $mytex
 echo "" >> $mytex
 echo "\end{figure}" >> $mytex
 echo "" >> $mytex
+
+
+#add file and alignment stats
+cat ${mytex}.filestats >> $mytex
+cat ${mytex}.alignmentstats >> $mytex
+
 echo "\end{document}" >> $mytex
 echo "" >> $mytex
 
@@ -1635,6 +1641,16 @@ fi
 
 rm *fastq*
 
+rm ${sampleName}.assembly_graph.pdf
+rm ${sampleName}.aux
+rm ${sampleName}.log
+rm ${sampleName}.tex.alignmentstats
+rm ${sampleName}.tex.filestats
+rm allsamplecoveragefile
+rm bestrefs.txt
+rm graphic.pdf
+rm writelist
+
 #Cleanup
 rm -r `ls | egrep -v "$myfile|${myfile.tex}.pdf|kraken|emailfile|emailfiles|bestrefs.txt|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
 
@@ -1666,6 +1682,7 @@ else
 	fi
 fi
 
+rm
 echo "****************************** END ******************************"
 pwd
 
