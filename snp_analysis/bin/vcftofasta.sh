@@ -17,6 +17,7 @@ END
 echo ""
 echo "****************************** START ******************************"
 echo ""
+alias pause='read -p "$LINENO Enter"'
 
 echo "Start Time: `date`" > sectiontime
 starttime=`date +%s`
@@ -1391,7 +1392,6 @@ sed -i 's/^"##/##/' *vcf
 #################################################################################
 
 # Count the number of chromosomes used in the reference when VCFs were made.
-p
 #singleFile=`ls *.vcf | head -1`
 echo "Counting the number of chromosomes in first 100 samples, started -->  `date`"
 chromCount=`awk ' $0 !~ /^#/ {print $1}' $(ls *vcf | head -100) | sort | uniq -d | awk 'END {print NR}'`
@@ -1526,6 +1526,7 @@ mv ${i%vcf}temp $i) &
 done
 wait
 ######################## Mark Files and Remove Marked Regions ########################
+echo "chromCount:  $chromCount"
 
 if [ $FilterAllVCFs == yes ]; then
 echo "`date` --> Marking all VCFs and removing filtering region"
@@ -1542,6 +1543,11 @@ echo "`date` --> Marking all VCFs and removing filtering region"
         cat $i.catFile | sort | uniq -d > $i.txt
         # preparing postions
         pos=`cat $i.txt | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+	
+	# If no positions found to be filtered a filler is needed or all positions will get marked as "Not_Included"
+	if [ -z $pos ]; then
+		pos="100000000"
+	fi
 
 	# Making a vcf with positions marked that should not be included based on filter file
         awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filtered.vcf
