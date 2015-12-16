@@ -790,6 +790,10 @@ else
     fi
 fi
 
+if [[ $flu == yes ]]; then
+        awk -v oref=$orgref 'BEGIN{OFS="\t"} $6 > 300 && $8 ~ /^AC=1/ {count++} END{print oref, count}' ${orgref}-${refname}.UG.vcf >> ${root}/ac1count
+fi
+
 #########
 
 # make reference guided contig using Unified Genotyper
@@ -1560,10 +1564,32 @@ echo "" >> $mytex
 echo "\end{figure}" >> $mytex
 echo "" >> $mytex
 
-
 #add file and alignment stats
 cat ${mytex}.filestats >> $mytex
 cat ${mytex}.alignmentstats >> $mytex
+
+#---
+# if flu then add a table to report that shows the if suspected mix segment
+if [[ $flu == yes ]]; then
+        awk 'BEGIN {OFS="\t"} {if ($2 > 10) print $1, "mix"; else print $1, "pure"}' ${root}/ac1count | sort > ${root}/sortedac1count
+        echo "" >> ${mytex}.acstats
+        echo "\vspace{5mm}" >> ${mytex}.acstats
+        echo "" >> ${mytex}.acstats
+
+        echo "\begin{table}[H]" >> ${mytex}.acstats
+        echo "\begin{tabular}{ l | l }" >> ${mytex}.acstats
+        echo "\hline" >> ${mytex}.acstats
+        echo "segment & findings \\\\" >> ${mytex}.acstats
+        echo "\hline" >> ${mytex}.acstats 
+        echo "\hline" >> ${mytex}.acstats
+        awk 'BEGIN{OFS="\t"}{print $1, $2}' ${root}/sortedac1count | sort -k1,1 | tr "\t" "&" | sed 's/&/ & /g' | sed 's:$: \\\\ \\hline:' | sed 's/[_]/\\_/g' | sed 's/[%]/\\%/g' >> ${mytex}.acstats
+        echo "\end{tabular}" >> ${mytex}.acstats
+        echo "\caption{\textbf{Mix Test Results}}" >> ${mytex}.acstats
+        echo "\end{table}" >> ${mytex}.acstats
+
+        cat ${mytex}.acstats >> $mytex
+fi
+#---
 
 echo "\end{document}" >> $mytex
 echo "" >> $mytex
