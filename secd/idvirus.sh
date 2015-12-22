@@ -1693,8 +1693,8 @@ if [ "$eflag" ]; then
 	echo "Files copied to: ${bioinfoVCF}" >> /scratch/report/idemailsummary
 	echo "" >> /scratch/report/idemailsummary
 	rm emailfile*
-#	echo "Copying to ${bioinfoVCF}"
-#        cp -r $PWD ${bioinfoVCF}
+	echo "Copying to ${bioinfoVCF}"
+        cp -r $PWD ${bioinfoVCF}
 else
 	# else when idvirus.sh is ran on its own
 	if [ "$mflag" ]; then
