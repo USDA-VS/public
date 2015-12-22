@@ -60,8 +60,8 @@ if [ $1 == ab1 ]; then
     ###################################################################
 
 elif [ $1 == mel ]; then
-    cp /home/shared/brucella/melitensis/script_dependents/BmelitensisM5-90.fasta ./
-    hqs="/home/shared/brucella/melitensis/script_dependents/melHighestQualitySNPs.vcf"
+    cp /home/shared/brucella/melitensis/script_dependents/NC_00331c.fasta ./
+    hqs="/home/shared/brucella/melitensis/script_dependents/B-REF-BM1-RESTRICTED-CDC-Rev1-highqualitysnps.vcf"
     bioinfo="/bioinfo11/TStuber/Results/brucella/melitensis/newFiles"
     sharedSAN="/home/shared/brucella/melitensis/newFiles"
 
