@@ -1376,7 +1376,7 @@ mv *.* ./starting_files
         cp ./starting_files/$name ./
         done
 
-        for i in `find ./starting_files/ -mtime -8`; do
+        for i in `find ./starting_files/ -mtime -15`; do
         cp $i ./
         done
 
