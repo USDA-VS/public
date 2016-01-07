@@ -1838,7 +1838,8 @@ awk '{print $1}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_pos"
 awk '{print $2}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt
 
 for i in *zerofilteredsnps_alt; do
-	(m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
+#	(
+m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
 
 	fgrep -f parsimony_filtered_total_pos $i | sort -k1,1n > $n.pretod
 
@@ -1873,9 +1874,9 @@ for i in *zerofilteredsnps_alt; do
 
 	awk '{print $2}' $n.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > $n.fas
 	# Add each isolate to the table
-	awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt ) &
-	let count+=1
-	[[ $((count%NR_CPUS)) -eq 0 ]] && wait
+	awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt #) &
+	#let count+=1
+	#[[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
 
 wait
