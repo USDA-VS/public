@@ -213,6 +213,19 @@ elif [ $1 == tay5 ]; then
     ###################################################################
 
 ###################################################################
+# mtb ancestral strain
+elif [ $1 == anc ]; then
+cp /home/shared/mycobacterium/tbc/mtb-ancestor.fasta ./
+hqs="/home/shared/mycobacterium/tbc/15-5316-highqualitysnps.vcf"
+bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/ancestral/newfiles"
+#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+
+# Run spoligoSpacerFinder.sh
+#echo "Starting spoligoSpacerFinder.sh"
+#${SPOLIGOSPACERFINDER} &
+#echo "Moving forward from spoligoSpacerFinder.sh"
+
+###################################################################
 # Lineage 1
 elif [ $1 == TB1 ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb1/NC_017528.fasta ./
@@ -355,7 +368,7 @@ elif [ $1 == secd ]; then
    #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 else
-    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para, h5n2 secd, taylorella"
+    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para, h5n2 secd, taylorella, anc"
     exit 1
 fi
 

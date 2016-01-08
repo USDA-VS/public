@@ -1694,7 +1694,7 @@ if [ "$eflag" ]; then
 	echo "" >> /scratch/report/idemailsummary
 	rm emailfile*
 	echo "Copying to ${bioinfoVCF}"
-        cp -r $PWD ${bioinfoVCF}
+        cp -r $PWD ${bioinfoVCF} &
 else
 	# else when idvirus.sh is ran on its own
 	if [ "$mflag" ]; then
@@ -1709,7 +1709,7 @@ else
     		rm ${emailbody}
     		rm emailfiles
     		echo "Copying to ${bioinfoVCF}"
-    		cp -r $PWD ${bioinfoVCF}
+    		cp -r $PWD ${bioinfoVCF} &
 	fi
 fi
 
