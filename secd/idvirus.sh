@@ -1425,7 +1425,7 @@ echo "\begin{table}[H]" >> $mytex
 echo "\tiny" >> $mytex
 echo "\begin{tabular}{ p{4cm} | l | l | l | l | l | l | p{4cm} }" >> $mytex
 echo "\hline" >> $mytex
-echo "ID & read count & per cov & ave depth & mis & evalue & bscore & Description \\\\" >> $mytex
+echo "ID & qlength & slength & \\% id & mis & evalue & bscore & Description \\\\" >> $mytex
 echo "\hline" >> $mytex
 echo "\hline" >> $mytex
 cut -f1-8 ${sampleName}-consensus-max1-nt.txt | tr "\t" "&" | sed 's/&/ & /g' | sed 's:$: \\\\ \\hline:' | sed 's/_/\\_/g' >> $mytex
@@ -1464,7 +1464,7 @@ echo "\begin{table}[H]" >> $mytex
 echo "\tiny" >> $mytex
 echo "\begin{tabular}{ p{4cm} | l | l | l | l | l | l | p{4cm} }" >> $mytex
 echo "\hline" >> $mytex
-echo "ID & read count & per cov & ave depth & mis & evalue & bscore & Description \\\\" >> $mytex
+echo "ID & qlength & slength & \\% id & mis & evalue & bscore & Description \\\\" >> $mytex
 echo "\hline" >> $mytex
 echo "\hline" >> $mytex
 cut -f1-8 ${sampleName}-consensus-fmt6-pintail-gyrfalcon.txt | tr "\t" "&" | sed 's/&/ & /g' | sed 's:$: \\\\ \\hline:' | sed 's/_/\\_/g' >> $mytex
