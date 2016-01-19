@@ -677,7 +677,7 @@ bamtools coverage -in ${orgref}-${refname}.dup.bam | awk -v x=${orgref}-${refnam
 meancov=`awk '{ sum += $3 } END { if (NR > 0) print sum / NR }' ${orgref}-${refname}-coveragefile`
 
 #Length of reference
-countNTs=`awk 'END{print NR}' ${orgref}-${refname}-coveragefile`
+#countNTs=`awk 'END{print NR}' ${orgref}-${refname}-coveragefile`
 
 #count positions with coverage
 covCount=`awk '{ if ($3 != 0) count++ } END { print count }' ${orgref}-${refname}-coveragefile`
@@ -685,6 +685,9 @@ echo "covCount $covCount"
 
 declare -i x=${covCount}
 declare -i y=${countNTs}
+
+echo "----------------------> ${orgref} covCount: $x"
+echo "----------------------> ${orgref} countNTs: $y"
 
 #Percent of reference with coverage
 perc=`awk -v x=$x -v y=$y 'BEGIN { print(x/y)*100}'`

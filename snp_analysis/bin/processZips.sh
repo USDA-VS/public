@@ -257,8 +257,10 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 elif [ $1 == TB3 ]; then
 #cp /home/shared/mycobacterium/tbc/snppipeline/tb3/NC_021193.fasta ./
 #hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/HQ-13-7575.vcf"
-cp /home/shared/mycobacterium/tbc/snppipeline/tb3/NC_021193it3-readreference.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/13-7575-highqualitysnps.vcf"
+#cp /home/shared/mycobacterium/tbc/snppipeline/tb3/NC_021193it3-readreference.fasta ./
+#hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/13-7575-highqualitysnps.vcf"
+cp /home/shared/mycobacterium/tbc/mtb-ancestor.fasta ./
+hqs="/home/shared/mycobacterium/tbc/15-5316-highqualitysnps.vcf"
 
 #bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/newFiles"
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
