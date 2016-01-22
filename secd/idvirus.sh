@@ -98,7 +98,7 @@ elif [[ $1 == flu ]]; then
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
     echo "idvirus.sh ran targeting $1"
     echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" 
+    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov" 
 
 elif [[ $1 == allflu ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
