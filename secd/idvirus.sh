@@ -8,7 +8,7 @@ flu=no
 #PATHs
 picardPath='/usr/local/bin/picard-tools-1.141/picard.jar'
 GATKPath='/usr/local/bin/GenomeAnalysisTK/GenomeAnalysisTK.jar'
-pythonGetFasta="/home/tstuber/workspace/stuber/python_scripts/GetFASTAbyGI.py"
+pythonGetFasta="GetFASTAbyGI.py"
 
 # NCBI downloaded reference location
 mydb="/data/mydb"
@@ -301,7 +301,7 @@ cat << EOL > $mytex
 
 \begin{document}
 
-\includegraphics[scale=0.2]{/home/tstuber/report_doc/usdalogo.png}
+\includegraphics[scale=0.2]{/home/shared/usdalogo.png}
 
 
 \today
