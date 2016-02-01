@@ -8,7 +8,7 @@ flu=no
 #PATHs
 picardPath='/usr/local/bin/picard-tools-1.141/picard.jar'
 GATKPath='/usr/local/bin/GenomeAnalysisTK/GenomeAnalysisTK.jar'
-pythonGetFasta="GetFASTAbyGI.py"
+pythonGetFasta=`which GetFASTAbyGI.py`
 
 # NCBI downloaded reference location
 mydb="/data/mydb"
@@ -556,7 +556,7 @@ echo "acc $acc"
 echo "writeFile $writeFile"
 pwd
 
-python -u ${pythonGetFasta} $acc $writeFile
+python -u "${pythonGetFasta}" $acc $writeFile
 wait
 
 ls ${mydb} >  ${mydb}/list.txt
@@ -573,7 +573,7 @@ if [[ -z "$p" ]]; then
         echo "Try downloading again"
         sleep 20
         echo "Running python script to grab fasta file"
-        python -u ${pythonGetFasta} $acc $writeFile
+        python -u "${pythonGetFasta}" $acc $writeFile
         grep -v "Resource temporarily unavailable" $writeFile > $writeFile.temp; mv $writeFile.temp $writeFile
         sleep 5
         if [ ! -s $writeFile ]; then
@@ -582,7 +582,7 @@ if [[ -z "$p" ]]; then
             echo "Try downloading again"
             sleep 120
             echo "Running python script to grab fasta file"
-            python -u ${pythonGetFasta} $acc $writeFile
+            python -u "${pythonGetFasta}" $acc $writeFile
             grep -v "Resource temporarily unavailable" $writeFile > $writeFile.temp; mv $writeFile.temp $writeFile
             sleep 5
             if [ ! -s $writeFile ]; then
@@ -591,7 +591,7 @@ if [[ -z "$p" ]]; then
                 echo "Try downloading again"
                 sleep 320
                 echo "Running python script to grab fasta file"
-                python -u ${pythonGetFasta} $acc $writeFile
+                python -u "${pythonGetFasta}" $acc $writeFile
                 grep -v "Resource temporarily unavailable" $writeFile > $writeFile.temp; mv $writeFile.temp $writeFile
                 sleep 5
                 if [ ! -s $writeFile ]; then
@@ -885,7 +885,7 @@ echo "acc $acc"
 echo "writeFile $writeFile"
 pwd
 
-python -u ${pythonGetFasta} $acc $writeFile
+python -u "${pythonGetFasta}" $acc $writeFile
 wait
 
 ls ${mydb} >  ${mydb}/list.txt
@@ -902,7 +902,7 @@ if [[ -z "$p" ]]; then
         echo "Try downloading again"
         sleep 20
         echo "Running python script to grab fasta file"
-        python -u ${pythonGetFasta} $acc $writeFile
+        python -u "${pythonGetFasta}" $acc $writeFile
         grep -v "Resource temporarily unavailable" $writeFile > $writeFile.temp; mv $writeFile.temp $writeFile
         sleep 5
         if [ ! -s $writeFile ]; then
@@ -911,7 +911,7 @@ if [[ -z "$p" ]]; then
             echo "Try downloading again"
             sleep 120
             echo "Running python script to grab fasta file"
-            python -u ${pythonGetFasta} $acc $writeFile
+            python -u "${pythonGetFasta}" $acc $writeFile
             grep -v "Resource temporarily unavailable" $writeFile > $writeFile.temp; mv $writeFile.temp $writeFile
             sleep 5
             if [ ! -s $writeFile ]; then
@@ -920,7 +920,7 @@ if [[ -z "$p" ]]; then
                 echo "Try downloading again"
                 sleep 320
                 echo "Running python script to grab fasta file"
-                python -u ${pythonGetFasta} $acc $writeFile
+                python -u "${pythonGetFasta}" $acc $writeFile
                 grep -v "Resource temporarily unavailable" $writeFile > $writeFile.temp; mv $writeFile.temp $writeFile
                 sleep 5
                 if [ ! -s $writeFile ]; then
