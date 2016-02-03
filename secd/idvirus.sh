@@ -92,7 +92,8 @@ elif [[ $1 == testflu ]]; then
 elif [[ $1 == flu ]]; then
     flu=yes
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
+    #krakenDatabase="/home/shared/databases/kraken/std/"
+    krakenDatabase="/home/shared/databases/kraken/flu_jhu/fludb_20150820_with_hosts"
     pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/flu/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
@@ -391,10 +392,15 @@ if [ "$kflag" ]; then
     echo "*** Krona transforming Kraken output to graph"
 
     # Run Krona
-    cut -f2,3 $sampleName-output.txt > $sampleName-kronaInput.txt;
-    /usr/local/bin/ktImportTaxonomy $sampleName-kronaInput.txt;
-    mv taxonomy.krona.html $sampleName-Krona_identification_graphic.html;
-    mv taxonomy.krona.html.files $sampleName-taxonomy.krona.html.files
+    #cut -f2,3 $sampleName-output.txt > $sampleName-kronaInput.txt;
+    #/usr/local/bin/ktImportTaxonomy $sampleName-kronaInput.txt;
+    #mv taxonomy.krona.html $sampleName-Krona_identification_graphic.html;
+    #mv taxonomy.krona.html.files $sampleName-taxonomy.krona.html.files
+
+echo "------> Building Krona Graph..."
+date
+
+    kraken2krona.sh -i $sampleName-output.txt -k ${krakenDatabase} -o $sampleName-jhu-output.txt -r $sampleName-jhu-Krona_id_graphic.html
 
     # Set variables and paths
     output=`ls *-output.txt`
@@ -405,28 +411,31 @@ if [ "$kflag" ]; then
     if [[ $sampleType == "paired" ]]; then
         printf "%s, %s file size, %'.0f reads\n" ${revFile} ${revFileSize} ${revCount}
     fi
-
+forCount=`grep -c '^+$' $forReads`
+echo "forCount: $forCount"
     declare -i x=${forCount}
     declare -i y=${revCount}
-
+echo "x: $x"
+echo "y: $y"    
     echo "" | awk -v x=$x -v y=$y '{printf "Total single end read count: %'\''d\n", x+y}'
 
     #Section of results summary that calculates number of reads per type of organism (ex: ssRNA virus)
     echo "Summary of Kraken Findings"
     cRead=`grep -c "^C" $output`
-    uRead=`grep -c "^U" $output`
+    #uRead=`grep -c "^U" $output`
     virusreport=`awk ' $5 == "10239" {print $2}' $report`
-    let allReads=cRead+uRead
+    #let allReads=`wc -l $output | awk '{print $1}'`
     echo "allReads: $allReads"
 
     if [ -z $virusreport ]; then
         virusreport="zero"
     fi
     declare -i v=${virusreport}
-    declare -i z=${allReads}
+    #declare -i z=${allReads}
+    declare -i z=${forCount}
     echo "v is $v"
     echo "z is $z"
-
+    
     pvRead=`awk -v v=$v -v z=$z 'BEGIN { print (v / z)*100 }'`
 
     echo "`printf "%'.0f\n" ${virusreport}` virus reads --> ${pvRead}% of total reads" >> $summaryfile
@@ -1623,24 +1632,28 @@ cp ${sampleName}-reference_guided_assemblies/${sampleName}-consensus-blast_align
 
 #enscript ${summaryfile} -B -j -r -f "Courier5" -o - | ps2pdf - ${sampleName}-report.pdf
 
-if [ -e ${sampleName}-report.pdf ]; then
-	ls ${sampleName}-report.pdf > emailfiles
+if [ -e ${root}/${sampleName}-report.pdf ]; then
+	ls ${root}/${sampleName}-report.pdf > emailfiles
 fi
 
 if [ -e ${root}/${sampleName}-submissionfile.fasta ]; then
 	ls ${root}/${sampleName}-submissionfile.fasta >> emailfiles
 fi
 
-if [ -e ${sampleName}-consensus-blast_alignment-pintail-gyrfalcon.txt ]; then
-	ls ${sampleName}-consensus-blast_alignment-pintail-gyrfalcon.txt >> emailfiles
+if [ -e ${root}/${sampleName}-consensus-blast_alignment-pintail-gyrfalcon.txt ]; then
+	ls ${root}/${sampleName}-consensus-blast_alignment-pintail-gyrfalcon.txt >> emailfiles
 fi
 
-if [ -e $sampleName-Krona_identification_graphic.html ]; then 
-	ls $sampleName-Krona_identification_graphic.html >> emailfiles
+if [ -e ${root}/$sampleName-jhu-Krona_id_graphic.html ]; then 
+	ls ${root}/$sampleName-jhu-Krona_id_graphic.html >> emailfiles
 fi
 
-if [ -e kraken/${sampleName}-kraken_report.txt ]; then
-        ls kraken/${sampleName}-kraken_report.txt >> emailfiles
+if [ -e ${root}/$sampleName-Krona_identification_graphic.html ]; then 
+	ls ${root}/$sampleName-Krona_identification_graphic.html >> emailfiles
+fi
+
+if [ -e ${root}/kraken/${sampleName}-kraken_report.txt ]; then
+        ls ${root}/kraken/${sampleName}-kraken_report.txt >> emailfiles
 fi
 
 if [[ $sampleType == "paired" ]]; then
@@ -1686,9 +1699,13 @@ rm bestrefs.txt
 rm writelist
 
 #Cleanup
-rm -r `ls | egrep -v "$myfile|${myfile.tex}.pdf|kraken|emailfile|emailfiles|bestrefs.txt|$0|igv_alignment|originalreads|summaryfile|report.pdf|Krona_identification_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
+rm -r `ls | egrep -v "$myfile|${myfile.tex}.pdf|kraken|emailfile|emailfiles|bestrefs.txt|$0|igv_alignment|originalreads|summaryfile|report.pdf|_graphic.html|-consensus-blast_alignment-pintail-gyrfalcon.txt|-submissionfile.fasta|assembly_graph.pdf"`
 
 pwd > ./fastas/filelocation.txt
+
+echo "$sampleName"
+echo "$subtype"
+echo "$argUsed"
 
 if [ "$eflag" ]; then
 	# eflag is used when script is called from idemail.sh
