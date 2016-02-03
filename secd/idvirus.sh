@@ -406,17 +406,18 @@ date
     output=`ls *-output.txt`
     report=`ls *kraken_report.txt`
 
-    printf "%s, %s file size, %'.0f reads\n" ${forFile} ${forFileSize} ${forCount}
+    printf "%s, %s file size, %s reads\n" ${forFile} ${forFileSize} ${forCount}
 
     if [[ $sampleType == "paired" ]]; then
-        printf "%s, %s file size, %'.0f reads\n" ${revFile} ${revFileSize} ${revCount}
+        printf "%s, %s file size, %s reads\n" ${revFile} ${revFileSize} ${revCount}
     fi
-forCount=`grep -c '^+$' $forReads`
-echo "forCount: $forCount"
+
+    forCount=`grep -c '^+$' $forReads`
+    echo "forCount: $forCount"
     declare -i x=${forCount}
     declare -i y=${revCount}
-echo "x: $x"
-echo "y: $y"    
+    echo "x: $x"
+    echo "y: $y"
     echo "" | awk -v x=$x -v y=$y '{printf "Total single end read count: %'\''d\n", x+y}'
 
     #Section of results summary that calculates number of reads per type of organism (ex: ssRNA virus)
