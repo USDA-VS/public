@@ -1457,7 +1457,7 @@ paste ${summaryfile}.sorted ${sampleName}-consensus-max1-nt.txt | awk 'BEGIN{pri
 
 rm ${summaryfile}.pre ${summaryfile}.sorted
 
-pingyrdb=`egrep -m 1 -o "H5N1|H5N2|H5N8" ${summaryfile}`
+pingyrdb=`echo ${subtype} | egrep -m 1 -o "H5N1|H5N2|H5N8"`
 echo "In the pingyrdb varable: $pingyrdb"
 
 if [[ -n $pingyrdb ]]; then
