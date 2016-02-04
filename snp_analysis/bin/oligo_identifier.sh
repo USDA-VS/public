@@ -210,7 +210,7 @@ echo "TB complex check= $check"
 
 if [[ $check > 0 ]]; then
         echo "TB complex species found"
-        tagname=`grep $n /bioinfo11/TStuber/Results/_Mycobacterium/Untitled.txt`
+        tagname=`grep $n /bioinfo11/TStuber/Results/mycobacterium/Untitled.txt`
 	i=$tbbinary
 
         if [ $i == 11101111 ] || [ $i == 11101101 ]
@@ -301,7 +301,7 @@ echo "M. paratb check= $check"
 
 if [[ $check > 0 ]]; then
 echo "MAC species found"
-tagname=`grep $n /bioinfo11/TStuber/Results/_Mycobacterium/Untitled.txt`
+tagname=`grep $n /bioinfo11/TStuber/Results/mycobacterium/Untitled.txt`
 i=$parabinary
 
     if [ $i == 1 ]; then
