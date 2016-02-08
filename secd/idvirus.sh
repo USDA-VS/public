@@ -222,7 +222,7 @@ elif [[ $1 == herpes ]]; then
 
 else
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: gen, testflu, allflu, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav, bvd, newcastle, prrsvpox, herpes"
+    echo "Incorrect argument!  Must use one of the following arguments: gen, testflu, allflu, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav, bvd, newcastle, prrsv, herpes"
     echo ""
     echo "Set optional flags"
     echo -e '   flag -m will email just "M"e'
