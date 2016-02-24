@@ -13,12 +13,14 @@ pythonGetFasta=`which GetFASTAbyGI.py`
 # NCBI downloaded reference location
 mydb="/data/mydb"
 #Delete files in local database that may be empty
-dzdo chmod 755 * ${mydb}/*
+date > $root/001_mygb_existance_vijay.log
+echo "======================================" >> $root/001_mygb_existance_vijay.log
+dzdo chmod 755 -R  * ${mydb}/*
 for i in ${mydb}/*; do
 	if [ -s $i ]; then
-        	echo "file $i exists"
+        	echo "file $i exists" >> $root/001_mygb_existance_vijay.log
 	else
-        	echo "file $i is empty and has been deleted"
+        	echo "file $i is empty and has been deleted" >> $root/001_mygb_existance_vijay.log
 		rm -f $i
 	fi
 done
@@ -59,166 +61,92 @@ pingyrdb=""
 #######################################################################################
 #|||||||||||||||||||||||||||||| Environment Controls ||||||||||||||||||||||||||||||||||
 #######################################################################################
+#Fixed Variables	...Vijay
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
+    genotypingcodes1="NEED TO SET"
+    krakenDatabase="/home/shared/databases/kraken/std/"
+    krakenDatabase1="/home/shared/databases/kraken/stdPlusSECD"
+    krakenDatabase2="/home/shared/databases/kraken/flu_jhu/fludb_20150820_with_hosts" 
+    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
+    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 if [[ $1 == sivall ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/sivall/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == gen ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/gen/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
-
 
 elif [[ $1 == testflu ]]; then
     flu=yes
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/home/tstuber/virus_seeds/circovirus_picornavirus/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/aiall/newfiles"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov" # Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == flu ]]; then
     flu=yes
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    #krakenDatabase="/home/shared/databases/kraken/std/"
-    krakenDatabase="/home/shared/databases/kraken/flu_jhu/fludb_20150820_with_hosts"
+    krakenDatabase=$krakenDatabase2
     pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/flu/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Boojala.Vijay.Reddy@aphis.usda.gov Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov" 
+    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov" 
 
 elif [[ $1 == allflu ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/allflu/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == h5n2 ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
     pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h5n2/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
-    echo "idvirus.sh rran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == h5n8 ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
     pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h5n8/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
-    echo "idvirus.sh rran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == secd ]]; then
-    genotypingcodes="NEED TO SET"
-    krakenDatabase="/home/shared/databases/kraken/stdPlusSECD"
+    genotypingcodes=$genotypingcodes1
+    krakenDatabase=$krakenDatabase1
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/secd/*fasta
     bioinfoVCF="/bioinfo11/TStuber/Results/viruses/secd/newfiles"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == reo ]]; then
-    genotypingcodes="NEED TO SET"
-    krakenDatabase="/home/shared/databases/kraken/std/"
+    genotypingcodes=$genotypingcodes1
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/reo/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/reo/newfiles"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == vsv ]]; then
-    genotypingcodes="NEED TO SET"
-    krakenDatabase="/home/shared/databases/kraken/std/"
+    genotypingcodes=$genotypingcodes1
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/vsv/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/vsv/newfiles"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == isav ]]; then
-    genotypingcodes="NEED TO SET"
-    krakenDatabase="/home/shared/databases/kraken/std/"
+    genotypingcodes=$genotypingcodes1
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/isav/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/isav/newfiles"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == bvd ]]; then
-    genotypingcodes="NEED TO SET"
-    krakenDatabase="/home/shared/databases/kraken/std/"
+    genotypingcodes=$genotypingcodes1
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/bvd/*fasta
     bioinfoVCF="/bioinfo11/KBrien/newfiles"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Kaitlin.E.Brien@aphis.usda.gov"
 
 elif [[ $1 == h11n9 ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h11n9/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/h11n9/identification"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == newcastle ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/newcastle/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/newcastle"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == prrsv ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/prrsv/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/prrsv"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == pox ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/pox/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/pox"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == herpes ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/herpes/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/herpes"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 else
     echo ""
@@ -235,6 +163,7 @@ else
 
 fi
 
+echo "Script idvirus.sh ran targeting $1"
 echo "Core number being used: $NR_CPUS"
 sleep 4
 
@@ -265,12 +194,13 @@ else
     echo "Forward Reads:  $forReads"
 fi
 
-echo "" > $root/${sampleName}.summaryfile
-echo "" > $root/${sampleName}.detailfile
 summaryfile="$root/${sampleName}.summaryfile"
 mytex="$root/${sampleName}.tex"
 detailfile="$root/${sampleName}.detailfile"
 emailbody=${root}/emailfile
+
+echo "" > $summaryfile
+echo "" > $detailfile
 echo "Sample: ${sampleName}" >> $summaryfile
 echo "Sample: ${sampleName}" >> $detailfile
 echo "Sample: ${sampleName}" >> $emailbody
@@ -455,21 +385,21 @@ echo " ********************** ALIGNMENT INTERATION 1 STARTED *******************
 echo ""
 
 ref=`ls | grep .fasta`
-echo "Reference Input:  $ref"
+echo "Reference Input:  $ref" >> $root/002_working_segments_vijay.log
 orgref=${ref%.fasta}
 refname=${ref%.fasta}
 ##
-bwa index $ref
-samtools faidx $ref
-java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
+bwa index $ref >> $root/002_working_segments_vijay.log
+samtools faidx $ref >> $root/002_working_segments_vijay.log
+java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict  >> $root/002_working_segments_vijay.log
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
     echo "Index and dict are present, continue script"
 else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
-    samtools faidx $ref
-    java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
+    samtools faidx $ref >> $root/002_working_segments_vijay.log
+    java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict >> $root/002_working_segments_vijay.log
     if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
     fi
@@ -484,18 +414,18 @@ fi
 
 samtools view -bh -F4 -T $ref ${refname}.sam > ${refname}.raw.bam
 echo "Sorting Bam"
-samtools sort ${refname}.raw.bam ${refname}.sorted
+samtools sort ${refname}.raw.bam ${refname}.sorted >> $root/002_working_segments_vijay.log
 echo "****Indexing Bam"
-samtools index ${refname}.sorted.bam
+samtools index ${refname}.sorted.bam >> $root/002_working_segments_vijay.log
 rm ${refname}.sam
 rm ${refname}.raw.bam
 samtools view -h -b -F4 ${refname}.sorted.bam > ./$refname.mappedReads.bam
 
 echo "***Marking Duplicates"
-java -Xmx2g -jar  ${picardPath} MarkDuplicates INPUT=${refname}.mappedReads.bam OUTPUT=$refname.dup.bam METRICS_FILE=$refname.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
+java -Xmx2g -jar  ${picardPath} MarkDuplicates INPUT=${refname}.mappedReads.bam OUTPUT=$refname.dup.bam METRICS_FILE=$refname.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true  >> $root/002_working_segments_vijay.log
 
 echo "***Index $refname.dup.bam"
-samtools index $refname.dup.bam
+samtools index $refname.dup.bam >> $root/002_working_segments_vijay.log
 
 echo "*** Calling VCFs with UnifiedGenotyper"
 java -Xmx2g -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -out_mode EMIT_ALL_SITES -I $refname.dup.bam -o ${refname}.UG.vcf -nct 2
@@ -623,7 +553,7 @@ writefilelist=${root}/writelist
 grep ">" $writeFile >> $writefilelist
 export $writefilelist
 
-echo "Reference Input:  $ref"
+echo "Reference Input:  $ref" >> $root/002_working_segments_vijay.log
 
 refname=${ref%.fasta}
 echo "*** refname $refname"
@@ -737,8 +667,8 @@ mv *coveragefile alignment
 #######################################################################################
 function lastalign () {
 # Align Last Time
-bwa index $ref
-samtools faidx $ref
+bwa index $ref >> $root/002_working_segments_vijay.log
+samtools faidx $ref >> $root/002_working_segments_vijay.log
 
 #########################
 
@@ -749,7 +679,7 @@ if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
 else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
-    samtools faidx $ref
+    samtools faidx $ref >> $root/002_working_segments_vijay.log
     java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
     if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
@@ -765,25 +695,25 @@ fi
 
 samtools view -bh -F4 -T $ref ${orgref}-${refname}.sam > ${orgref}-${refname}.raw.bam
 echo "Sorting Bam"
-samtools sort ${orgref}-${refname}.raw.bam ${orgref}-${refname}.sorted
+samtools sort ${orgref}-${refname}.raw.bam ${orgref}-${refname}.sorted >> $root/002_working_segments_vijay.log
 echo "****Indexing Bam"
-samtools index ${orgref}-${refname}.sorted.bam
+samtools index ${orgref}-${refname}.sorted.bam >> $root/002_working_segments_vijay.log
 rm ${orgref}-${refname}.sam
 rm ${orgref}-${refname}.raw.bam
 samtools view -h -b -F4 ${orgref}-${refname}.sorted.bam > ./${orgref}-${refname}.mappedReads.bam
-samtools index ./${orgref}-${refname}.mappedReads.bam
+samtools index ./${orgref}-${refname}.mappedReads.bam >> $root/002_working_segments_vijay.log
 
 echo "***Marking Duplicates"
 java -Xmx2g -jar  ${picardPath} MarkDuplicates INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
 
 echo "***Index ${orgref}-${refname}.dup.bam"
-samtools index ${orgref}-${refname}.dup.bam
+samtools index ${orgref}-${refname}.dup.bam >> $root/002_working_segments_vijay.log
 
 ##############################
 echo $ref
 
 java -Xmx2g -jar ${GATKPath} -T ClipReads -R $ref -I ${orgref}-${refname}.dup.bam -o ${orgref}-${refname}.downsample.bam -filterNoBases -dcov 10
-samtools index ${orgref}-${refname}.downsample.bam
+samtools index ${orgref}-${refname}.downsample.bam >> $root/002_working_segments_vijay.log
 
 rm *UG.vcf
 
@@ -820,8 +750,8 @@ ref="${refname}.fasta"
 refname=`echo $ref | sed 's/\.fasta//'`
 echo "ref: $ref and refname: $refname"
 
-bwa index $ref
-samtools faidx $ref
+bwa index $ref >> $root/002_working_segments_vijay.log
+samtools faidx $ref >> $root/002_working_segments_vijay.log
 rm ${refname}.dict
 java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=$ref OUTPUT=${refname}.dict
 
@@ -830,7 +760,7 @@ if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
 else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
-    samtools faidx $ref
+    samtools faidx $ref >> $root/002_working_segments_vijay.log
     java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
     if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
@@ -846,21 +776,21 @@ fi
 
 samtools view -bh -F4 -T $ref ${orgref}-${refname}.sam > ${orgref}-${refname}.raw.bam
 echo "Sorting Bam"
-samtools sort ${orgref}-${refname}.raw.bam ${orgref}-${refname}.sorted
+samtools sort ${orgref}-${refname}.raw.bam ${orgref}-${refname}.sorted >> $root/002_working_segments_vijay.log
 echo "****Indexing Bam"
-samtools index ${orgref}-${refname}.sorted.bam
+samtools index ${orgref}-${refname}.sorted.bam >> $root/002_working_segments_vijay.log
 rm ${orgref}-${refname}.sam
 rm ${orgref}-${refname}.raw.bam
 samtools view -h -b -F4 ${orgref}-${refname}.sorted.bam > ./${orgref}-${refname}.mappedReads.bam
-samtools index ./${orgref}-${refname}.mappedReads.bam
+samtools index ./${orgref}-${refname}.mappedReads.bam >> $root/002_working_segments_vijay.log
 
 echo "***Marking Duplicates"
 java -Xmx2g -Xmx4g -jar  ${picardPath} MarkDuplicates INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
 
 echo "***Index ${orgref}-${refname}.dup.bam"
-samtools index ${orgref}-${refname}.dup.bam
+samtools index ${orgref}-${refname}.dup.bam >> $root/002_working_segments_vijay.log
 java -Xmx2g -jar ${GATKPath} -T ClipReads -R $ref -I ${orgref}-${refname}.dup.bam -o ${orgref}-${refname}.downsample.bam -filterNoBases -dcov 10
-samtools index ${orgref}-${refname}.downsample.bam
+samtools index ${orgref}-${refname}.downsample.bam >> $root/002_working_segments_vijay.log
 ########
 
 #bam prepared now onto variant calling
@@ -952,11 +882,11 @@ refheader=`grep ">" $writeFile`
 # Grab reads and reference and place them in variables
 ref=${writeFile}
 
-echo "Reference Input:  $ref"
+echo "Reference Input:  $ref" >> $root/002_working_segments_vijay.log
 refname=${ref%.fasta}
 
-bwa index $ref
-samtools faidx $ref
+bwa index $ref >> $root/002_working_segments_vijay.log
+samtools faidx $ref >> $root/002_working_segments_vijay.log
 java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
@@ -964,7 +894,7 @@ if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
 else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
-    samtools faidx $ref
+    samtools faidx $ref >> $root/002_working_segments_vijay.log
     java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
     if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
@@ -980,9 +910,9 @@ fi
 
 samtools view -bh -F4 -T $ref ${refname}.sam > ${refname}.raw.bam
 echo "Sorting Bam"
-samtools sort ${refname}.raw.bam ${refname}.sorted
+samtools sort ${refname}.raw.bam ${refname}.sorted >> $root/002_working_segments_vijay.log
 echo "****Indexing Bam"
-samtools index ${refname}.sorted.bam
+samtools index ${refname}.sorted.bam >> $root/002_working_segments_vijay.log
 rm ${refname}.sam
 rm ${refname}.raw.bam
 
@@ -1064,23 +994,56 @@ echo "Set up references"
 
 if [[ $flu == yes ]]; then
 
+    cp $targetref ./
+    mkdir fastas
+    cp $targetref ./fastas
+	cd ${root}
+	mkdir segment{1..8}
+	mv segment1*fasta ./segment1/
+        mv segment2*fasta ./segment2/
+	mv segment3*fasta ./segment3/
+	mv segment4*fasta ./segment4/
+	mv segment5*fasta ./segment5/
+	mv segment6*fasta ./segment6/
+	mv segment7*fasta ./segment7/
+	mv segment8*fasta ./segment8/
+
+	mv segment1 ./segment1_PB2/
+        mv segment2 ./segment2_PB1/
+        mv segment3 ./segment3_PA/
+        mv segment4 ./segment4_HA/
+        mv segment5 ./segment5_NP/
+        mv segment6 ./segment6_NA/
+        mv segment7 ./segment7_MP/
+        mv segment8 ./segment8_NS/
+
+echo "====== WORKING ON VARIOUS SEGMENTS =========== ....Vijay"
+echo " Check $root/002_working_segments_vijay.log to see progress "
+date > $root/002_working_segments_vijay.log
+echo "============================================" >> $root/002_working_segments_vijay.log
+	
+	for s in segment*; do
+		(cd $root
+
+
+#-------------------------------------FUNCTION------------------------------------------
 function findbest () {
 
 ref=`ls | grep .fasta`
-echo "Reference Input:  $ref"
+echo "Reference Input:  $ref" >> $root/002_working_segments_vijay.log
 refname=${ref%.fasta}
 
-bwa index $ref
-samtools faidx $ref
-java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
+bwa index $ref >> $root/002_working_segments_vijay.log
+samtools faidx $ref >> $root/002_working_segments_vijay.log
+java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict >> $root/002_working_segments_vijay.log
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
     echo "Index and dict are present, continue script"
 else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
-    samtools faidx $ref
-    java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
+    samtools faidx $ref >> $root/002_working_segments_vijay.log
+    java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict >> $root/002_working_segments_vijay.log
     if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
     fi
@@ -1095,9 +1058,9 @@ fi
 
 samtools view -bh -F4 -T $ref ${refname}.sam > ${refname}.raw.bam
 echo "Sorting Bam"
-samtools sort ${refname}.raw.bam ${refname}.sorted
+samtools sort ${refname}.raw.bam ${refname}.sorted >> $root/002_working_segments_vijay.log
 echo "****Indexing Bam"
-samtools index ${refname}.sorted.bam
+samtools index ${refname}.sorted.bam >> $root/002_working_segments_vijay.log
 
 #Number of nucleotides in reference with coverage
 echo "*** Bamtools is getting coverage..."
@@ -1122,35 +1085,11 @@ echo "perc: $perc"
 
 printf "%-20s %11.2f%% %'10dX\n" ${refname} $perc $meancov >> ${root}/${s}/${sampleName}.findbest
 }
+#-------------------------------FUNCTION ENDS------------------------------------------------------
 
-    cp $targetref ./
-    mkdir fastas
-    cp $targetref ./fastas
-	cd ${root}
-	mkdir segment{1..8}
-	mv segment1*fasta ./segment1/
-        mv segment2*fasta ./segment2/
-	mv segment3*fasta ./segment3/
-	mv segment4*fasta ./segment4/
-	mv segment5*fasta ./segment5/
-	mv segment6*fasta ./segment6/
-	mv segment7*fasta ./segment7/
-	mv segment8*fasta ./segment8/
-
-	mv segment1 ./segment1_PB2/
-        mv segment2 ./segment2_PB1/
-        mv segment3 ./segment3_PA/
-        mv segment4 ./segment4_HA/
-        mv segment5 ./segment5_NP/
-        mv segment6 ./segment6_NA/
-        mv segment7 ./segment7_MP/
-        mv segment8 ./segment8_NS/
-	
-	for s in segment*; do
-		(cd $root
 		cd $s
-		echo "s: $s"
-		pwd
+		echo "s: $s" >> $root/002_working_segments_vijay.log
+		pwd >> $root/002_working_segments_vijay.log
 		if [ "$bflag" ]; then
    		echo ""
     		echo " *** B FLAG ON, BUG FINDING MODE, SINGLE SAMPE PROCESSING *** "
@@ -1160,7 +1099,7 @@ printf "%-20s %11.2f%% %'10dX\n" ${refname} $perc $meancov >> ${root}/${s}/${sam
                         mkdir ${i%.fasta}
                         mv ${i} ${i%.fasta}
                         ln ${root}/*fastq* ${i%.fasta}
-                        echo "working on $sampleName $s $i"
+                        echo "working on $sampleName $s $i" >> $root/002_working_segments_vijay.log
                         cd ${i%.fasta}; findbest
                 done
 		else
@@ -1169,7 +1108,7 @@ printf "%-20s %11.2f%% %'10dX\n" ${refname} $perc $meancov >> ${root}/${s}/${sam
 			mkdir ${i%.fasta}
         		mv ${i} ${i%.fasta}
 			ln ${root}/*fastq* ${i%.fasta}
-        		echo "working on $sampleName $s $i"
+        		echo "working on $sampleName $s $i" >> $root/002_working_segments_vijay.log
        			cd ${i%.fasta}; findbest) &
 	        let count+=1
                 [[ $((count%55)) -eq 0 ]] && wait
@@ -1324,14 +1263,14 @@ echo "forward read: $forReads"
 echo "reverse read: $revReads"
 
 ref=`ls | grep .fasta`
-echo "Reference Input:  $ref"
+echo "Reference Input:  $ref" >> $root/002_working_segments_vijay.log
 refname=${ref%.fasta}
 orgref="igvalignment"
 
 #############################
 
-bwa index $ref
-samtools faidx $ref
+bwa index $ref >> $root/002_working_segments_vijay.log
+samtools faidx $ref >> $root/002_working_segments_vijay.log
 java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
@@ -1339,7 +1278,7 @@ echo "Index and dict are present, continue script"
 else
 sleep 5
 echo "Either index or dict for reference is missing, try making again"
-samtools faidx $ref
+samtools faidx $ref >> $root/002_working_segments_vijay.log
 java -Xmx2g -jar ${picardPath} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${n}-${refname}.dict
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
 read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
@@ -1357,21 +1296,21 @@ fi
 
 samtools view -bh -F4 -T $ref ${orgref}-${refname}.sam > ${orgref}-${refname}.raw.bam
 echo "Sorting Bam"
-samtools sort ${orgref}-${refname}.raw.bam ${orgref}-${refname}.sorted
+samtools sort ${orgref}-${refname}.raw.bam ${orgref}-${refname}.sorted >> $root/002_working_segments_vijay.log
 echo "****Indexing Bam"
-samtools index ${orgref}-${refname}.sorted.bam
+samtools index ${orgref}-${refname}.sorted.bam >> $root/002_working_segments_vijay.log
 rm ${orgref}-${refname}.sam
 rm ${orgref}-${refname}.raw.bam
 samtools view -h -b -F4 ${orgref}-${refname}.sorted.bam > ./${orgref}-${refname}.mappedReads.bam
-samtools index ./${orgref}-${refname}.mappedReads.bam
+samtools index ./${orgref}-${refname}.mappedReads.bam >> $root/002_working_segments_vijay.log
 
 echo "***Marking Duplicates"
 java -Xmx2g -jar  ${picardPath} MarkDuplicates INPUT=${orgref}-${refname}.mappedReads.bam OUTPUT=${orgref}-${refname}.dup.bam METRICS_FILE=${orgref}-${refname}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
 
 echo "***Index ${orgref}-${refname}.dup.bam"
-samtools index ${orgref}-${refname}.dup.bam
+samtools index ${orgref}-${refname}.dup.bam >> $root/002_working_segments_vijay.log
 java -Xmx2g -jar ${GATKPath} -T ClipReads -R $ref -I ${orgref}-${refname}.dup.bam -o ${orgref}-${refname}.downsample.bam -filterNoBases -dcov 10
-samtools index ${orgref}-${refname}.downsample.bam
+samtools index ${orgref}-${refname}.downsample.bam >> $root/002_working_segments_vijay.log
 
 # Make a quick and simple VCF to highlight possible problem areas of the consensus
 java -Xmx2g -jar ${GATKPath} -R $ref -T UnifiedGenotyper -glm BOTH -I ${orgref}-${refname}.downsample.bam -o ${orgref}-${refname}.UG.vcf -nct 8
