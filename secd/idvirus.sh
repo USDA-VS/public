@@ -57,7 +57,7 @@ pingyrdb=""
 # By default
 
 #######################################################################################
-#|||||||||||||||||||||||||||||| Environment Controls ||||||||||||||||||||||||||||||||||
+#|||||||||||||||||||||||||||||| EnvironmentControls ||||||||||||||||||||||||||||||||||
 #######################################################################################
 
 if [[ $1 == sivall ]]; then
@@ -220,9 +220,27 @@ elif [[ $1 == herpes ]]; then
     echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
+elif [[ $1 == rhabdo ]]; then
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
+    krakenDatabase="/home/shared/databases/kraken/std/"
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/rhabdoviruses/*fasta
+    #bioinfoVCF="/bioinfo11/MKillian/Analysis/results/rhabdoviruses"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
+    email_list="tod.p.stuber@usda.gov" # Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+
+elif [[ $1 == pentro ]]; then
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
+    krakenDatabase="/home/shared/databases/kraken/std/"
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/porcine_enterovirus/*fasta
+    #bioinfoVCF="/bioinfo11/MKillian/Analysis/results/porcine_enterovirus"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
+    email_list="tod.p.stuber@usda.gov" # Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+
 else
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: gen, testflu, allflu, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav, bvd, newcastle, prrsv, herpes"
+    echo "Incorrect argument!  Must use one of the following arguments: gen, testflu, allflu, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav, bvd, newcastle, prrsv, herpes, rhabdo, pentro (porcine_entrovirus)"
     echo ""
     echo "Set optional flags"
     echo -e '   flag -m will email just "M"e'
