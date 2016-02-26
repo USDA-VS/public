@@ -52,7 +52,7 @@ Software Requirements—
 - bamtools https://github.com/pezmaster31/bamtools
 - ABySS http://www.bcgsc.ca/platform/bioinfo/software/abyss ver 1.3.4 or greater
 - RStudio IDE and R libraries ggplot2 and gsalib
-- Clustal W http://www.clustal.org/clustal2/#Download ver 2.1 or greater
+- RAxML http://sco.h-its.org/exelixis/web/software/raxml/index.html
 
 If this is unfamiliar the link below is a great place to start:
 http://gatkforums.broadinstitute.org/discussion/2899/howto-install-all-software-packages-required-to-follow-the-gatk-best-practices
