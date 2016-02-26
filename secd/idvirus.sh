@@ -60,39 +60,9 @@ pingyrdb=""
 #|||||||||||||||||||||||||||||| EnvironmentControls ||||||||||||||||||||||||||||||||||
 #######################################################################################
 
-if [[ $1 == sivall ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
-    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/sivall/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
-
-elif [[ $1 == gen ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
-    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/gen/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
-
-
-elif [[ $1 == testflu ]]; then
+if [[ $1 == flu ]]; then
     flu=yes
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
-    targetref=/home/tstuber/virus_seeds/circovirus_picornavirus/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/ai/aiall/newfiles"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov" # Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
-
-elif [[ $1 == flu ]]; then
-    flu=yes
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    #krakenDatabase="/home/shared/databases/kraken/std/"
     krakenDatabase="/home/shared/databases/kraken/flu_jhu/fludb_20150820_with_hosts"
     pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/flu/*fasta
@@ -101,38 +71,9 @@ elif [[ $1 == flu ]]; then
     echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Boojala.Vijay.Reddy@aphis.usda.gov Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov" 
 
-elif [[ $1 == allflu ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
-    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/allflu/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
-
-elif [[ $1 == h5n2 ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
-    pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
-    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h5n2/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
-    echo "idvirus.sh rran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
-
-elif [[ $1 == h5n8 ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
-    pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
-    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h5n8/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/newfiles"
-    echo "idvirus.sh rran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
-
 elif [[ $1 == secd ]]; then
     genotypingcodes="NEED TO SET"
-    krakenDatabase="/home/shared/databases/kraken/stdPlusSECD"
+    krakenDatabase="/home/shared/databases/kraken/host-bac-vir"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/secd/*fasta
     bioinfoVCF="/bioinfo11/TStuber/Results/viruses/secd/newfiles"
     echo "idvirus.sh ran targeting $1"
@@ -141,7 +82,7 @@ elif [[ $1 == secd ]]; then
 
 elif [[ $1 == reo ]]; then
     genotypingcodes="NEED TO SET"
-    krakenDatabase="/home/shared/databases/kraken/std/"
+    krakenDatabase="/home/shared/databases/kraken/host-bac-vir"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/reo/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/reo/newfiles"
     echo "idvirus.sh ran targeting $1"
@@ -150,7 +91,7 @@ elif [[ $1 == reo ]]; then
 
 elif [[ $1 == vsv ]]; then
     genotypingcodes="NEED TO SET"
-    krakenDatabase="/home/shared/databases/kraken/std/"
+    krakenDatabase="/home/shared/databases/kraken/host-bac-vir"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/vsv/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/vsv/newfiles"
     echo "idvirus.sh ran targeting $1"
@@ -159,7 +100,7 @@ elif [[ $1 == vsv ]]; then
 
 elif [[ $1 == isav ]]; then
     genotypingcodes="NEED TO SET"
-    krakenDatabase="/home/shared/databases/kraken/std/"
+    krakenDatabase="/home/shared/databases/kraken/host-bac-vir"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/isav/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/isav/newfiles"
     echo "idvirus.sh ran targeting $1"
@@ -168,25 +109,16 @@ elif [[ $1 == isav ]]; then
 
 elif [[ $1 == bvd ]]; then
     genotypingcodes="NEED TO SET"
-    krakenDatabase="/home/shared/databases/kraken/std/"
+    krakenDatabase="/home/shared/databases/kraken/host-bac-vir"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/bvd/*fasta
     bioinfoVCF="/bioinfo11/KBrien/newfiles"
     echo "idvirus.sh ran targeting $1"
     echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov Kaitlin.E.Brien@aphis.usda.gov"
 
-elif [[ $1 == h11n9 ]]; then
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
-    targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/h11n9/*fasta
-    bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/h11n9/identification"
-    echo "idvirus.sh ran targeting $1"
-    echo "Script idvirus.sh ran targeting $1"
-    email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov" #mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
-
 elif [[ $1 == newcastle ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
+    krakenDatabase="/home/shared/databases/kraken/host-bac-vir"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/newcastle/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/newcastle"
     echo "idvirus.sh ran targeting $1"
@@ -195,7 +127,7 @@ elif [[ $1 == newcastle ]]; then
 
 elif [[ $1 == prrsv ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
+    krakenDatabase="/home/shared/databases/kraken/host-bac-vir"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/prrsv/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/prrsv"
     echo "idvirus.sh ran targeting $1"
@@ -204,7 +136,7 @@ elif [[ $1 == prrsv ]]; then
 
 elif [[ $1 == pox ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
+    krakenDatabase="/home/shared/databases/kraken/host-bac-vir"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/pox/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/pox"
     echo "idvirus.sh ran targeting $1"
@@ -213,7 +145,7 @@ elif [[ $1 == pox ]]; then
 
 elif [[ $1 == herpes ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
+    krakenDatabase="/home/shared/databases/kraken/host-bac-vir"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/herpes/*fasta
     bioinfoVCF="/bioinfo11/MKillian/Analysis/results/herpes"
     echo "idvirus.sh ran targeting $1"
@@ -222,7 +154,7 @@ elif [[ $1 == herpes ]]; then
 
 elif [[ $1 == rhabdo ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
+    krakenDatabase="/home/shared/databases/kraken/host-bac-vir"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/rhabdoviruses/*fasta
     #bioinfoVCF="/bioinfo11/MKillian/Analysis/results/rhabdoviruses"
     echo "idvirus.sh ran targeting $1"
@@ -231,7 +163,7 @@ elif [[ $1 == rhabdo ]]; then
 
 elif [[ $1 == pentro ]]; then
     genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
-    krakenDatabase="/home/shared/databases/kraken/std/"
+    krakenDatabase="/home/shared/databases/kraken/host-bac-vir"
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/porcine_enterovirus/*fasta
     #bioinfoVCF="/bioinfo11/MKillian/Analysis/results/porcine_enterovirus"
     echo "idvirus.sh ran targeting $1"
@@ -240,7 +172,7 @@ elif [[ $1 == pentro ]]; then
 
 else
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: gen, testflu, allflu, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav, bvd, newcastle, prrsv, herpes, rhabdo, pentro (porcine_entrovirus)"
+    echo "Incorrect argument!  Must use one of the following arguments: flu, secd, reo, vsv, isav, bvd, newcastle, prrsv, herpes, rhabdo, pentro (porcine_entrovirus)"
     echo ""
     echo "Set optional flags"
     echo -e '   flag -m will email just "M"e'
@@ -402,28 +334,34 @@ if [ "$kflag" ]; then
     echo "*** Kraken is finding reads"
     #Run Kraken
     if [[ $sampleType == "paired" ]]; then
-    kraken --db ${krakenDatabase} --threads ${NR_CPUS} --paired *fastq* > $sampleName-output.txt && kraken-report --db ${krakenDatabase} $sampleName-output.txt > $sampleName-kraken_report.txt
+        kraken --db ${krakenDatabase} --threads ${NR_CPUS} --paired *fastq* > $sampleName-output.txt && kraken-report --db ${krakenDatabase} $sampleName-output.txt > $sampleName-kraken_report.txt
     else
-    kraken --db ${krakenDatabase} --threads ${NR_CPUS}  $forReads > $sampleName-output.txt && kraken-report --db ${krakenDatabase} $sampleName-output.txt > $sampleName-kraken_report.txt
+        kraken --db ${krakenDatabase} --threads ${NR_CPUS}  $forReads > $sampleName-output.txt && kraken-report --db ${krakenDatabase} $sampleName-output.txt > $sampleName-kraken_report.txt
     fi
+    
     date
     echo "*** Krona transforming Kraken output to graph"
+    
+    echo "$1"
 
-    # Run Krona
-    #cut -f2,3 $sampleName-output.txt > $sampleName-kronaInput.txt;
-    #/usr/local/bin/ktImportTaxonomy $sampleName-kronaInput.txt;
-    #mv taxonomy.krona.html $sampleName-Krona_identification_graphic.html;
-    #mv taxonomy.krona.html.files $sampleName-taxonomy.krona.html.files
-
-echo "------> Building Krona Graph..."
-date
-
-    kraken2krona.sh -i $sampleName-output.txt -k ${krakenDatabase} -o $sampleName-jhu-output.txt -r $sampleName-jhu-Krona_id_graphic.html
+    if [[ $1 == flu ]]; then
+        echo "------> jhu Building Krona Graph..."
+        kraken2krona.sh -i $sampleName-output.txt -k ${krakenDatabase} -o $sampleName-jhu-output.txt -r $sampleName-jhu-Krona_id_graphic.html
+    else
+        # Run Krona
+        echo "------> ours Building Krona Graph..."
+        cut -f2,3 $sampleName-output.txt > $sampleName-kronaInput.txt;
+        /usr/local/bin/ktImportTaxonomy $sampleName-kronaInput.txt;
+        mv taxonomy.krona.html $sampleName-Krona_identification_graphic.html;
+        mv taxonomy.krona.html.files $sampleName-taxonomy.krona.html.files
+    fi
 
     # Set variables and paths
     output=`ls *-output.txt`
     report=`ls *kraken_report.txt`
-
+    ls -lh $output
+    ls -lh $report
+    
     printf "%s, %s file size, %s reads\n" ${forFile} ${forFileSize} ${forCount}
 
     if [[ $sampleType == "paired" ]]; then
@@ -1726,6 +1664,7 @@ echo "$sampleName"
 echo "$subtype"
 echo "$argUsed"
 
+pause
 if [ "$eflag" ]; then
 	# eflag is used when script is called from idemail.sh
 	# making summary file to send in email
