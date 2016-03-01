@@ -1664,7 +1664,6 @@ echo "$sampleName"
 echo "$subtype"
 echo "$argUsed"
 
-pause
 if [ "$eflag" ]; then
 	# eflag is used when script is called from idemail.sh
 	# making summary file to send in email
