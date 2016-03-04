@@ -1509,11 +1509,35 @@ EOL
     fi
 pwd
 
-rm *temp
+#rm *temp
 rm *information
 rm param.txt
 
 fi
+
+###########################
+echo "Making IRD for: $sampleName"
+
+# Create "here-document"
+cat >./ird_param.txt <<EOL
+
+>Seq1 Unique_Sample_Identifier:${sampleName}|Unique_Sequence_Identifier:${sampleName}.PB2
+>Seq2 Unique_Sample_Identifier:${sampleName}|Unique_Sequence_Identifier:${sampleName}.PB1
+>Seq3 Unique_Sample_Identifier:${sampleName}|Unique_Sequence_Identifier:${sampleName}.PA
+>Seq4 Unique_Sample_Identifier:${sampleName}|Unique_Sequence_Identifier:${sampleName}.HA
+>Seq5 Unique_Sample_Identifier:${sampleName}|Unique_Sequence_Identifier:${sampleName}.NP
+>Seq6 Unique_Sample_Identifier:${sampleName}|Unique_Sequence_Identifier:${sampleName}.NA
+>Seq7 Unique_Sample_Identifier:${sampleName}|Unique_Sequence_Identifier:${sampleName}.MP
+>Seq8 Unique_Sample_Identifier:${sampleName}|Unique_Sequence_Identifier:${sampleName}.NS
+
+EOL
+
+awk 'NR==FNR{a[$1]=$0;next} ($1 in a){ print a[$1]; next}1' ird_param.txt ${sampleName}.temp | sed 's/>Seq../>/' > ${root}/${sampleName}-IRD-submissionfile.fasta
+pwd
+
+rm *temp
+rm *information
+rm param.txt
 
 ###########################
 
@@ -1525,8 +1549,7 @@ echo "" >> $mytex
 
 echo "\begin{figure}[H]" >> $mytex
 echo "\begin{flushleft}" >> $mytex
-echo "\textbf{Coverage Graph}\par\medskip" >> $mytex
-echo "\end{flushleft}" >> $mytex
+echo "\textbf{Coverage Graph}\par\medskip" >> $mytex echo "\end{flushleft}" >> $mytex
 
 echo "\includegraphics[width=450pt]{graphic.pdf}" >> $mytex
 echo "" >> $mytex
