@@ -26,20 +26,12 @@ echo "**************************************************************************
 echo "**************************** START ${PWD##*/} ****************************"
 echo "**************************************************************************"
 
-CREATESEQUENCEDICTIONARY=`which CreateSequenceDictionary.jar`
-if [[ -z CREATESEQUENCEDICTIONARY ]]; then
+picard='/usr/local/bin/picard-tools-1.141/picard.jar'
+if [[ -z picard ]]; then
     echo "Picard jar files are not in PATH"
     echo "Add directory containing jars to PATH"
     exit 1
 fi
-
-SAMTOFASTQ=`which SamToFastq.jar`
-MARKDUPLICATES=`which MarkDuplicates.jar`
-QUALITYSCOREDISTRIBUTION=`which QualityScoreDistribution.jar`
-COLLECTIONMULTIPLEMETRICS=`which CollectMultipleMetrics.jar`
-COLLECTIONALIGNMENTSUMMARYMETRICS=`which CollectAlignmentSummaryMetrics.jar`
-COLLECTIONGCBIASMETRICS=`which CollectGcBiasMetrics.jar`
-COLLECTIONINSERTSIZEMETRICS=`which CollectInsertSizeMetrics.jar`
 
 BWA=`which bwa`
 if [[ -z $BWA ]]; then
@@ -150,17 +142,17 @@ echo "***Reference naming convention:  $r"
 echo "***Isolate naming convention:  $n"
 
 samtools faidx $ref
-java -Xmx4g -jar $CREATESEQUENCEDICTIONARY REFERENCE=${ref} OUTPUT=${r}.dict
+java -Xmx4g -jar ${picard} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${r}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${r}.dict ]; then
     echo "Index and dict are present, continue script"
-    else
+else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
     samtools faidx $ref
-    java -Xmx4g -jar $CREATESEQUENCEDICTIONARY REFERENCE=${ref} OUTPUT=${r}.dict
+    java -Xmx4g -jar ${picard} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${r}.dict
         if [ -s ${ref}.fai ] && [ -s ${r}.dict ]; then
-        read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
+            read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
         fi
 fi
 
@@ -293,23 +285,23 @@ java -jar $GATK -T DepthOfCoverage -R $ref -I $n.ready-mem.bam --omitDepthOutput
 
 #Quality Score Distribution
 echo "***Quality Score Distribution"
-java -Xmx4g -jar $QUALITYSCOREDISTRIBUTION REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam CHART_OUTPUT=$n.QualityScorceDistribution.pdf OUTPUT=$n.QualityScoreDistribution ASSUME_SORTED=true
+java -Xmx4g -jar ${picard} QualityScoreDistribution REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam CHART_OUTPUT=$n.QualityScorceDistribution.pdf OUTPUT=$n.QualityScoreDistribution ASSUME_SORTED=true
 
 #Mean Quality by Cycle
 echo "***Mean Quality by Cycle"
-java -Xmx4g -jar $COLLECTIONMULTIPLEMETRICS REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.Quality_by_cycle PROGRAM=MeanQualityByCycle ASSUME_SORTED=true
+java -Xmx4g -jar ${picard} CollectMultipleMetrics REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.Quality_by_cycle PROGRAM=MeanQualityByCycle ASSUME_SORTED=true
 
 #Collect Alignment Summary Metrics
 echo "***Collect Alignment Summary Metrics"
-java -Xmx4g -jar $COLLECTIONALIGNMENTSUMMARYMETRICS REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.AlignmentMetrics ASSUME_SORTED=true
+java -Xmx4g -jar ${picard} CollectAlignmentSummaryMetrics REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.AlignmentMetrics ASSUME_SORTED=true
 
 #Collect GC Bias Error
 echo "***Collect GC Bias Error"
-java -Xmx4g -jar $COLLECTIONGCBIASMETRICS REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.CollectGcBiasMetrics CHART_OUTPUT=$n.GC.PDF ASSUME_SORTED=true
+java -Xmx4g -jar ${picard} CollectGcBiasMetrics REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam OUTPUT=$n.CollectGcBiasMetrics CHART_OUTPUT=$n.GC.PDF ASSUME_SORTED=true
 
 #Collect Insert Size Metrics
 echo "***Collect Insert Size Metrics"
-java -Xmx4g -jar $COLLECTIONINSERTSIZEMETRICS REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam HISTOGRAM_FILE=$n.InsertSize.pdf OUTPUT=$n.CollectInsertSizeMetrics ASSUME_SORTED=true
+java -Xmx4g -jar ${picard} CollectInsertSizeMetrics REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam HISTOGRAM_FILE=$n.InsertSize.pdf OUTPUT=$n.CollectInsertSizeMetrics ASSUME_SORTED=true
 
 cat $n.DepthofCoverage.xls >> $n.Metrics_summary.xls
 cat $n.AlignmentMetrics >> $n.Metrics_summary.xls
