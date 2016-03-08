@@ -26,10 +26,10 @@ echo "**************************************************************************
 echo "**************************** START ${PWD##*/} ****************************"
 echo "**************************************************************************"
 
-picard='/usr/local/bin/picard-tools-1.141/picard.jar'
-if [[ -z picard ]]; then
+picard='Set into your PATH picard.jar and remove exit 1 below'
     echo "Picard jar files are not in PATH"
     echo "Add directory containing jars to PATH"
+    echo "see line $LINENO"
     exit 1
 fi
 
