@@ -87,14 +87,14 @@ pwd
 startingdir=`pwd`
 
 # Move zip files to their own directory
-mkdir ./Zips
-mv *.fastq* ./Zips
+mkdir ./zips
+mv *.fastq* ./zips
 mkdir ./BWAmem-GATK
 cd BWAmem-GATK/
 
 
 # Make alias links in BWA-GATK directory to zip files
-ls ../Zips/*.fastq* | while read file; do ln -s $file; done
+ls ../zips/*.fastq* | while read file; do ln -s $file; done
 
 #################################################################################
 
@@ -334,7 +334,7 @@ echo "***Getting stats for $n"
 bamtools stats -in $n.ready-mem.bam > $n.stats2.txt
 
 echo "fastq.gz file sizes:" >> $n.stats2.txt
-ls -lh ../Zips/ | awk '{print $5}' | egrep -v '^$' >> $n.stats2.txt
+ls -lh ../zips/ | awk '{print $5}' | egrep -v '^$' >> $n.stats2.txt
 
 echo "Unmapped fastq file sizes:" >> $n.stats2.txt
 ls -lh ../unmappedReads/*.fastq | awk '{print $5}' | egrep -v '^$' >> $n.stats2.txt
