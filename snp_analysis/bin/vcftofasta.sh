@@ -17,13 +17,19 @@ END
 echo ""
 echo "****************************** START ******************************"
 echo ""
+
+#for debug
 alias pause='read -p "$LINENO Enter"'
 
-echo "Start Time: `date`" > sectiontime
-starttime=`date +%s`
+#number of cpu minus 1
+NR_CPUS=$(($(nproc)-1)) # Computer cores to use when analyzing
+
+
+echo "Start Time: $(date)" > sectiontime
+starttime=$(date +%s)
 argUsed="$1"
-uniqdate=`date "+%Y-%m-%dat%Hh%Mm%Ss"`
-dircalled=`pwd`
+uniqdate=$(date "+%Y-%m-%dat%Hh%Mm%Ss")
+dircalled=$(pwd)
 echo "start time: $uniqdate"
 
 # Set flags
@@ -53,7 +59,10 @@ done
 shift $(($OPTIND - 1))
 
 ####################################################
-filterdir="/home/shared/${uniqdate}-FilterFiles"
+pipeline="$HOME/pipeline/public-master"
+dependents="$pipeline/snp_analysis/script_dependents"
+results="$pipeline/results"
+filterdir="$pipeline/results/${uniqdate}-FilterFiles"
 mkdir ${filterdir}
 FilterDirectory=${filterdir} #Files containing positions to filter
 ####################################################
@@ -68,7 +77,7 @@ function filterFileCreations () {
 filterFile="${filterdir}/filterFile.txt"
 
 # Number of columns in Excel worksheet
-columns=`head $filterFile | awk 'BEGIN{ FS="\t"; OFS="\t" }  END {print NF}'`
+columns=$(head $filterFile | awk 'BEGIN{ FS="\t"; OFS="\t" }  END {print NF}')
 
 # Location filter files are output to.
 output="${filterdir}"
@@ -81,36 +90,36 @@ echo "Extracting from Excel to text files..."
 count=1
 while [ $count -lt ${columns} ]; do
     #echo ${count}
-    filename=`awk -v x=$count 'BEGIN{FS=OFS="\t"}{print $x}' $filterFile | head -n1`
+    filename=$(awk -v x=$count 'BEGIN{FS=OFS="\t"}{print $x}' $filterFile | head -n 1)
     #echo "Filename: $filename"
     awk -v x=$count 'BEGIN{FS=OFS="\t"} FNR>1 {print $x}' $filterFile | grep -v "^$" > ${output}/${filename}.list
     let count=count+1
 done
 rm $filterFile
 for i in ${output}/*.list; do
-    (base=`basename "$i"`
-    readyfile=`echo $base | sed 's/\..*//'`
+    (base=$(basename "$i")
+    readyfile=$(echo $base | sed 's/\..*//')
 
     touch ${output}/${readyfile}.txt
 
-    mylist=`cat $i`
+    mylist=$(cat $i)
 
     for l in $mylist; do
-        pos1=`echo $l | sed 's/-/ /g' | awk '{print $1}'`
-        pos2=`echo $l | sed 's/-/ /g' | awk '{print $2}'`
-        #echo $pos2
+        pos1=$(echo $l | sed 's/-/ /g' | awk '{print $1}')
+        pos2=$(echo $l | sed 's/-/ /g' | awk '{print $2}')
+        #echo $pos2 #
             if [[ -z "$pos2" ]]
             then
             let pos2=pos1+1
                 while [ $pos1 -lt $pos2 ]; do
-                #echo $pos1
+                #echo $pos1 #
                 echo $pos1 >> ${output}/${readyfile}.txt
                 let pos1=pos1+1
                 done
             else
             let pos2=pos2+1
                 while [ $pos1 -lt $pos2 ]; do
-                #echo $pos1
+                #echo $pos1 #
                 echo $pos1 >> ${output}/${readyfile}.txt
                 let pos1=pos1+1
                 done
@@ -126,6 +135,10 @@ rm ${output}/*.list
 ####################################################
 function parseXLS () {
 # Create "here-document"
+#install python module without su rights
+# mkdir -p $HOME/local/lib/python2.7/site-packages
+# easy_install --install-dir=/home/CFIA-ACIA/duceppem/local/lib/python2.7/site-packages/ xlrd
+
 cat >./inputXLS.py <<EOL
 #!/usr/bin/env python
 
@@ -157,201 +170,201 @@ rm ./inputXLS.py
 
 if [[ $1 == ab1 ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    genotypingcodes="$dependents/genotyping_codes/bruc_tags.txt" #to change the name of vcf files
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/abortus1/script_dependents/Abortus1_Defining_SNPs.txt"
+    DefiningSNPs="$dependents/Brucella_abortus/Abortus1_Defining_SNPs.txt"
     #coverageFiles="/bioinfo11/TStuber/Results/brucella/Abortus1/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/abortus1/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/abortus1/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="$dependents/Brucella_abortus/FilterFiles" #Files containing positions to filter
+    #RemoveFromAnalysis="$dependents/Brucella_abortus/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/abortus1/vcfs"
+    #bioinfoVCF="$results/Brucella_abortus/vcfs"
     echo "vcftofasta.sh ran as Brucella abortus bv 1, 2 or 4"
     echo "Script vcftofasta.sh ran using Brucella abortus bv 1, 2 or 4 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov, Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca susan.nadin-davis@inspection.gc.ca"
 
 elif [[ $1 == mel ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    genotypingcodes="$dependents/genotyping_codes/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/melitensis/script_dependents/Mel_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
+    DefiningSNPs="$dependents/Brucella_melitensis/Mel_Defining_SNPs.txt"
+    #coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/melitensis/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/melitensis/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="$dependents/Brucella_melitensis/FilterFiles" #Files containing positions to filter
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/melitensis/script_dependents/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=200 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/melitensis/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/brucella/melitensis/vcfs"
     echo "vcftofasta.sh ran as B. melitensis"
     echo "Script vcftofasta.sh ran using B. melitensis variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca susan.nadin-davis@inspection.gc.ca"
 
 elif [[ $1 == suis1 ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    genotypingcodes="$dependents/genotyping_codes/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/suis1/script_dependents/Suis1_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
+    DefiningSNPs="$dependents/Brucella_suis_bv1/Suis1_Defining_SNPs.txt"
+    #coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/suis1/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/suis1/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="$dependents/Brucella_suis_bv1/FilterFiles" #Files containing positions to filter
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/suis1/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/suis1/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/brucella/suis1/vcfs"
     echo "vcftofasta.sh ran as B. suis bv1"
     echo "Script vcftofasta.sh ran using B. suis bv1 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca susan.nadin-davis@inspection.gc.ca"
 
 elif [[ $1 == suis2 ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    genotypingcodes="$dependents/genotyping_codes/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/suis2/script_dependents/suis2_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
+    DefiningSNPs="$dependents/Brucella_suis_bv2/suis2_Defining_SNPs.txt"
+    #coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/suis2/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/suis2/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="$dependents/Brucella_suis_bv2/FilterFiles" #Files containing positions to filter
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/suis2/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/suis2/vcfs/"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/brucella/suis2/vcfs/"
     echo "vcftofasta.sh ran as B. suis bv2"
     echo "Script vcftofasta.sh ran using B. suis bv2 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca susan.nadin-davis@inspection.gc.ca"
 
 elif [[ $1 == suis3 ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    genotypingcodes="$dependents/genotyping_codes/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/suis3/script_dependents/Suis3_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
+    DefiningSNPs="$dependents/Brucella_suis_bv3/Suis3_Defining_SNPs.txt"
+    #coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/suis3/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/suis3/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="$dependents/Brucella_suis_bv3/FilterFiles" #Files containing positions to filter
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/suis3/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/suis3/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/brucella/suis3/vcfs"
     echo "vcftofasta.sh ran as B. suis bv3"
     echo "Script vcftofasta.sh ran using B. suis bv3 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca susan.nadin-davis@inspection.gc.ca"
 
 elif [[ $1 == suis4 ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    genotypingcodes="$dependents/genotyping_codes/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/suis4/script_dependents/Suis4_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
+    DefiningSNPs="$dependents/Brucella_suis_bv4/Suis4_Defining_SNPs.txt"
+    #coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/suis4/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucela/suis4/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="$dependents/Brucella_suis_bv/FilterFiles" #Files containing positions to filter
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/_Brucela/suis4/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/suis4/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/brucella/suis4/vcfs"
     echo "vcftofasta.sh ran as B. suis bv4"
     echo "Script vcftofasta.sh ran using B. suis bv4 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca susan.nadin-davis@inspection.gc.ca"
 
 elif [[ $1 == canis ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    genotypingcodes="$dependents/genotyping_codes/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/canis/script_dependents/Canis_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
+    DefiningSNPs="$dependents/Brucella_canis/Canis_Defining_SNPs.txt"
+    #coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/canis/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/canis/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="$dependents/Brucella_canis/FilterFiles" #Files containing positions to filter
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/canis/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/canis/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/brucella/canis/vcfs"
     echo "vcftofasta.sh ran as B. canis"
     echo "Script vcftofasta.sh ran using B. canis variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca susan.nadin-davis@inspection.gc.ca"
 
 
 elif [[ $1 == ceti1 ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    genotypingcodes="$dependents/genotyping_codes/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/ceti1/script_dependents/Ceti1_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
+    DefiningSNPs="$dependents/Brucella_ceti-grp1/Ceti1_Defining_SNPs.txt"
+    #coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/ceti1/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/ceti1/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="$dependents/Brucella_ceti-grp1/FilterFiles" #Files containing positions to filter
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/ceti1/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/ceti1/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/brucella/ceti1/vcfs"
     echo "vcftofasta.sh ran as B ceti group 1"
     echo "Script vcftofasta.sh ran using B ceti group 1 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca susan.nadin-davis@inspection.gc.ca"
 
 
 elif [[ $1 == ceti2 ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    genotypingcodes="$dependents/genotyping_codes/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/ceti2/script_dependents/Ceti2_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
+    DefiningSNPs="$dependents/Brucella_ceti-grp2/Ceti2_Defining_SNPs.txt"
+    #coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/ceti2/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/ceti2/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="$dependents/Brucella_ceti-grp2/FilterFiles" #Files containing positions to filter
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/ceti2/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/ceti2/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/brucella/ceti2/vcfs"
     echo "vcftofasta.sh ran as B ceti group 2"
     echo "Script vcftofasta.sh ran using B ceti group 2 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca susan.nadin-davis@inspection.gc.ca"
 
 
 elif [[ $1 == ovis ]]; then
 
-    genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    genotypingcodes="$dependents/genotyping_codes/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/brucella/ovis/script_dependents/Ovis_Defining_SNPs.txt"
-    coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
+    DefiningSNPs="$dependents/Brucella_ovis/Ovis_Defining_SNPs.txt"
+    #coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    FilterDirectory="/bioinfo11/TStuber/Results/brucella/ovis/script_dependents/FilterFiles" #Files containing positions to filter
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/ovis/script_dependents/RemoveFromAnalysis.txt"
+    FilterDirectory="$dependents/Brucella_ovis/FilterFiles" #Files containing positions to filter
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/ovis/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=350 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/brucella/ovis/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/brucella/ovis/vcfs"
     echo "vcftofasta.sh ran as B. ovis"
     echo "Script vcftofasta.sh ran using B. ovis variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca susan.nadin-davis@inspection.gc.ca"
 
 elif [[ $1 == bovis ]]; then
-    genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
+    genotypingcodes="$dependents/genotyping_codes/tb_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/DefiningSNPsGroupDesignations.txt"
+    DefiningSNPs="$dependents/Mycobacterium_bovis/DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysis.txt"
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=200 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/comparisons"
+    #bioinfoVCF="$results/Mycobacterium_bovis/vcfs"
     echo "vcftofasta.sh ran as M. bovis"
     echo "Script vcftofasta.sh ran using M. bovis variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca olga.andrievskaia@inspection.gc.ca"
 
     if [ "$eflag" ]; then
         echo "Only the "elite" bovis isolates are being ran"
@@ -364,209 +377,191 @@ elif [[ $1 == bovis ]]; then
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/Filtered_Regions.xlsx
     # Excel tab label "New groupings"
 
-    excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/Filtered_Regions.xlsx"
-    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
+    excelinfile="$dependents/Mycobacterium_bovis/Filtered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed -e 's/\[//g' -e 's/\]//g' -e 's/ //g' -e 's/^u//g' -e 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
     filterFileCreations
 
 elif [[ $1 == tb1 ]]; then
-    genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
+    genotypingcodes="$dependents/genotyping_codes/tb_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb1/tb1DefiningSNPsGroupDesignations.txt"
+    DefiningSNPs="$dependents/TB1/tb1DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=200 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb1/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb1/vcfs"
     echo "vcftofasta.sh ran as ${1}"
     echo "Script vcftofasta.sh ran using ${1} variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca olga.andrievskaia@inspection.gc.ca"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
     # Excel tab label "New groupings"
-    excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb1/tb1Filtered_Regions.xlsx"
-    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  >${filterdir}/filterFile.txt
+    excelinfile="$dependents/TB1/tb1Filtered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed -e 's/\[//g' -e 's/\]//g' -e 's/ //g' -e 's/^u//g' -e 's/\.0//g' | tr -d "'"  >${filterdir}/filterFile.txt
     filterFileCreations
 
 elif [[ $1 == tb2 ]]; then
-    genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
+    genotypingcodes="$dependents/genotyping_codes/tb_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb2/tb2DefiningSNPsGroupDesignations.txt"
+    DefiningSNPs="$dependents/TB2/tb2DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=200 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb2/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb2/vcfs"
     echo "vcftofasta.sh ran as ${1}"
     echo "Script vcftofasta.sh ran using ${1} variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca olga.andrievskaia@inspection.gc.ca"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
     # Excel tab label "New groupings"
-    excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb2/tb2Filtered_Regions.xlsx"
-    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
+    excelinfile="$dependents/TB2/tb2Filtered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed -e 's/\[//g' -e 's/\]//g' -e 's/ //g' -e 's/^u//g' -e 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
     filterFileCreations
 
 elif [[ $1 == tb3 ]]; then
-    genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
+    genotypingcodes="$dependents/genotyping_codes/tb_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/tb3DefiningSNPsGroupDesignations.txt"
+    DefiningSNPs="$dependents/TB3/tb3DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=200 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/vcfs"
     echo "vcftofasta.sh ran as ${1}"
     echo "Script vcftofasta.sh ran using ${1} variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca olga.andrievskaia@inspection.gc.ca"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
     # Excel tab label "New groupings"
-    excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/tb3Filtered_Regions.xlsx"
-    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
+    excelinfile="$dependents/TB3/tb3Filtered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed -e 's/\[//g' -e 's/\]//g' -e 's/ //g' -e 's/^u//g' -e 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
     filterFileCreations
 
 elif [[ $1 == tb4a ]]; then
-    genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
+    genotypingcodes="$dependents/genotyping_codes/tb_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4a/tb4aDefiningSNPsGroupDesignations.txt"
+    DefiningSNPs="$dependents/TB4a/tb4aDefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=200 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4a/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4a/vcfs"
     echo "vcftofasta.sh ran as ${1}"
     echo "Script vcftofasta.sh ran using ${1} variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca olga.andrievskaia@inspection.gc.ca"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
     # Excel tab label "New groupings"
-    excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4a/tb4aFiltered_Regions.xlsx"
-    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
+    excelinfile="$dependents/TB4a/tb4aFiltered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed -e 's/\[//g' -e 's/\]//g' -e 's/ //g' -e 's/^u//g' -e 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
     filterFileCreations
 
 elif [[ $1 == tb4b ]]; then
-    genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
+    genotypingcodes="$dependents/genotyping_codes/tb_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/tb4bDefiningSNPsGroupDesignations.txt"
+    DefiningSNPs="$dependents/TB4b/tb4bDefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=200 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/vcfs"
     echo "vcftofasta.sh ran as ${1}"
     echo "Script vcftofasta.sh ran using ${1} variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca olga.andrievskaia@inspection.gc.ca"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
     # Excel tab label "New groupings"
-    excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/tb4bFiltered_Regions.xlsx"
-    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
+    excelinfile="$dependents/TB4b/tb4bFiltered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed -e 's/\[//g' -e 's/\]//g' -e 's/ //g' -e 's/^u//g' |-e 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
     filterFileCreations
 
 elif [[ $1 == tb5 ]]; then
-    genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
+    genotypingcodes="$dependents/genotyping_codes/tb_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb5/tb5DefiningSNPsGroupDesignations.txt"
+    DefiningSNPs="$dependents/TB5/tb5DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=200 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb5/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb5/vcfs"
     echo "vcftofasta.sh ran as ${1}"
     echo "Script vcftofasta.sh ran using ${1} variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca olga.andrievskaia@inspection.gc.ca"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
     # Excel tab label "New groupings"
-    excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb5/tb5Filtered_Regions.xlsx"
-    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
+    excelinfile="$dependents/TB5/tb5Filtered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed -e 's/\[//g' -e 's/\]//g' -e 's/ //g' -e 's/^u//g' -e 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
     filterFileCreations
 
 elif [[ $1 == tb6 ]]; then
-    genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
+    genotypingcodes="$dependents/genotyping_codes/tb_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb6/tb6DefiningSNPsGroupDesignations.txt"
+    DefiningSNPs="$dependents/TB6/tb6DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=200 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb6/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb6/vcfs"
     echo "vcftofasta.sh ran as ${1}"
     echo "Script vcftofasta.sh ran using ${1} variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca olga.andrievskaia@inspection.gc.ca"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
     # Excel tab label "New groupings"
-    excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb6/tb6Filtered_Regions.xlsx"
-    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
+    excelinfile="$dependents/TB6/tb6Filtered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed -e 's/\[//g' -e 's/\]//g' -e 's/ //g' -e 's/^u//g' -e 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
     filterFileCreations
 
 elif [[ $1 == para ]]; then
-    genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/mac/tags.txt"
+    genotypingcodes="$dependents/genotyping_codes/tb_tags.txt"
     # This file tells the script how to cluster VCFs
-    DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/DefiningSNPsGroupDesignations.txt"
+    DefiningSNPs="$dependents/paraTB/DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-    RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
+    #RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     lowEnd=1
     highEnd=200 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/vcfs"
+    #bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/vcfs"
     echo "vcftofasta.sh ran as M. paraTB"
     echo "Script vcftofasta.sh ran using para variables" >> section5
-    email_list="tod.p.stuber@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="marc-olivier.duceppe@inspection.gc.ca olga.andrievskaia@inspection.gc.ca"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
     # Excel tab label "New groupings"
 
-    excelinfile="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/vcfs/Filtered_Regions.xlsx"
-    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
+    excelinfile="$dependents/paraTB/Filtered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed -e 's/\[//g' -e 's/\]//g' -e 's/ //g' -e 's/^u//g' -e 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
     filterFileCreations
-
-elif [[ $1 == h5n2 ]]; then
-
-	genotypingcodes="/bioinfo11/MKillian/Analysis/results/snp-genotypingcodes.txt"
-	# This file tells the script how to cluster VCFs
-	DefiningSNPs="/bioinfo11/MKillian/Analysis/results/influenza/h5n2/snp_analysis/script2/Defining_SNPs_H5N2.txt"
-	FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
-	FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
-	FilterDirectory="/bioinfo11/MKillian/Analysis/results/influenza/h5n2/snp_analysis/script2/FilterFiles" #Files containing positions to filter
-	RemoveFromAnalysis="bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
-	QUAL=300 # Minimum quality for calling a SNP
-	lowEnd=1
-	highEnd=350 # QUAL range to change ALT to N
-	bioinfoVCF="/bioinfo11/MKillian/Analysis/results/influenza/h5n2/snp_analysis/script2/"
-	echo "vcftofasta.sh ran as H5N2"
-	echo "Script vcftofasta.sh ran using h5n2 variables" > section5
-	email_list="tod.p.stuber@usda.gov" #Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov
-	#for i in *vcf; do awk 'BEGIN{OFS="\t"}$1 ~ /seg1/ || $1 ~ /^#/ {print $0}' $i > ../h5n2_2015-10-03-seg1/${i%.vcf}-seg1.vcf; done
 
 else
 
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis, tb1, tb2, tb3, tb4a, tb4b, tb5, tb6, para, h5n2"
+    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis, tb1, tb2, tb3, tb4a, tb4b, tb5, tb6, para"
     echo ""
     echo "Set optional flags"
     echo "flag -c with look for positions to filter.  By default, with no -c, this will not be done."
@@ -584,34 +579,31 @@ fi
 # Set variables:
 
 # Sed searches put into variables
-tbNumberV='s/_.*//' #Remove all charaters at and beyond "_"
-tbNumberW='s/\..*//' #Remove all charaters at and beyond "."
-tbNumberOnly='s/.*\([0-9]\{2\}-[0-9,FM]\{4,6\}\).*/\1/' #Only tb Number, *laboratory specific*
-dropEXT='s/\(.*\)\..*/\1/' #Just drop the extention from the file
+tbNumberV="s/_.*//" #Remove all charaters at and beyond "_"
+tbNumberW="s/\..*//" #Remove all charaters at and beyond "."
+tbNumberOnly="s/.*\([0-9]\{2\}-[0-9,FM]\{4,6\}\).*/\1/" #Only tb Number, *laboratory specific*
+dropEXT="s/\(.*\)\..*/\1/" #Just drop the extention from the file
 
-NR_CPUS=50 # Computer cores to use when analyzing
-LIMIT_CPUS=10
+Ncov="1" # Coverage below this value will be changed to -
 
-Ncov=1 # Coverage below this value will be changed to -
-
-fulDir=$PWD # Current working directory, do not change.
+fulDir="$PWD" # Current working directory, do not change.
 
 # Remove selected files from comparison
 # Use file:  /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysis.txt
 
-function removeIsolates () {
+#function removeIsolates () {
 
-cat ${RemoveFromAnalysis} | tr '\r' '\n' | awk '{print $1}' > /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt
+#cat ${RemoveFromAnalysis} | tr '\r' '\n' | awk '{print $1}' > /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt
 
-removeList=`cat /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt`
+#removeList=$(cat /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt)
 
-for i in $removeList; do
-    rm *${i}* > /dev/null 2>&1
-done
+#for i in $removeList; do
+#    rm *${i}* > /dev/null 2>&1
+#done
 
-rm /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt
+#rm /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt
 
-}
+#}
 
 #################################################################################
 
@@ -635,26 +627,26 @@ for i in *; do
         	echo "$i has data" > /dev/null 2>&1
         	else
 		echo ""
-        	echo "$i is empty.  Fix and restart script"
+        	echo ""$i" is empty.  Fix and restart script"
         	echo ""
 		exit 1
 	fi
-    getbase=`basename "$i"`
-    number=`echo $getbase | sed $tbNumberV | sed $tbNumberW`
+    getbase=$(basename "$i")
+    number=$(echo $getbase | sed $tbNumberV | sed $tbNumberW)
     echo $number >> list) &
     let count+=1
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
     done
     wait
 
-duplist=`sort list | uniq -d`
+duplist=$(sort list | uniq -d)
 rm list
-dupNumberSize=`echo $duplist | wc | awk '{print $3}'`
+dupNumberSize=$(echo $duplist | wc | awk '{print $3}')
 if [ $dupNumberSize -gt 4 ]
 then
     echo "These are duplicated VCFs."
     echo "Must remove duplication, and restart script."
-    echo $duplist
+    echo "$duplist"
     exit 1 # Error status
 else
     echo "Good! No duplicate VCFs present"
@@ -669,7 +661,7 @@ fi
 
 function AConeCallPosition () {
 
-positionList=`awk ' { print $2 }' "${DefiningSNPs}" | awk ' NF > 0 '`
+positionList=$(awk ' { print $2 }' "${DefiningSNPs}" | awk ' NF > 0 ')
 
 echo "AConeCallPosition is running, started -->  `date`"
 #echo "*********************************************************************" >> section2
@@ -677,7 +669,8 @@ echo "AConeCallPosition is running, started -->  `date`"
 #echo "Defining SNPs that are called as AC=1" >> section2
 echo "" >> section2
 for i in *.vcf; do
-(for pos in $positionList; do awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ "^"x"$" ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }' $i; done | grep "AC=1;A" | awk 'BEGIN {FS=";"} {print $1, $2}' >> section2) &
+(for pos in $positionList; do awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ "^"x"$" ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }' $i; done \
+	| grep "AC=1;A" | awk 'BEGIN {FS=";"} {print $1, $2}' >> section2) &
     let count+=1
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
@@ -700,16 +693,16 @@ function filterFilespreparation () {
 echo "Waiting for filter file creation to complete"
 #filterFileCreations
 wait
-curdr=`pwd`
+curdr=$(pwd)
 
 cd "${FilterDirectory}"
 
 echo "Preparing Filter Files"
 for i in *.txt; do
-    (getbase=`basename "$i"`
-    number=`echo $getbase | sed 's/\(.*\)\..*/\1/'`
+    (getbase=$(basename "$i")
+    number=$(echo $getbase | sed 's/\(.*\)\..*/\1/')
     #echo $number
-    cat $i | sort | uniq > "$number".num
+    cat $i | sort | uniq > "$number.num"
     if [ $((chromCount)) -eq 1 ]; then
        echo "100000000" >> "$number.num"
        echo "100000000" >> "$number.num"
@@ -730,7 +723,7 @@ done
 wait
 sleep 2
 
-cd "${curdr}"
+cd "$curdr"
 echo "Finished preparing filter files"
 
 }
@@ -741,9 +734,10 @@ echo "Finished preparing filter files"
 # Change SNPs with low QUAL values to N, based on parameter set above in variable settings
 
 function changeLowCalls () {
-echo "Changeing low calls, started --> `date`"
+echo "Changeing low calls, started --> $(date)"
 for i in *.vcf; do
-(base=`basename $i .vcf`; awk -v x=$lowEnd -v y=$highEnd 'BEGIN {OFS="\t"} { if ($6 >= x && $6 <= y) print $1, $2, $3, $4, "N", $6, $7, $8; else print $0 }' $i > ${base}.txt; rm $i; mv ${base}.txt ${base}.vcf) &
+(base=`basename $i .vcf`; awk -v x=$lowEnd -v y=$highEnd 'BEGIN {OFS="\t"} { if ($6 >= x && $6 <= y) print $1, $2, $3, $4, "N", $6, $7, $8; else print $0 }' $i \
+	> ${base}.txt; rm $i; mv ${base}.txt ${base}.vcf) &
     let count+=1
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
@@ -756,17 +750,17 @@ sleep 2
 
 function findpositionstofilter () {
 
-echo "`date` --> Finding positions to filter"
+echo "$(date) --> Finding positions to filter"
 # positions have already been filtered via cutting specific positions.
 cp filtered_total_pos total_pos
 awk '{print $1}' total_pos > prepositionlist
-for n  in `cat prepositionlist`; do
-	(front=`echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
-	back=`echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+for n  in $(cat prepositionlist); do
+	(front=$(echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\1/')
+	back=$(echo "$n" | sed 's/\(.*\)-\([0-9]*\)/\2/')
 	#echo "front: $front"
 	#echo "back: $back"
 
-	positioncount=`awk -v f=$front -v b=$back ' $1 == f && $2 == b {count++} END {print count}' ./*vcf`
+	positioncount=$(awk -v f=$front -v b=$back ' $1 == f && $2 == b {count++} END {print count}' ./*vcf)
 	#echo "position count: $positioncount"
 	if [ $positioncount -gt 2 ]; then
 		#printf "%s\t%s\n" "$front" "$back"
@@ -779,20 +773,20 @@ for n  in `cat prepositionlist`; do
 done
 wait
 
-echo "`date` --> Filtering..."
-for p in `cat positionlist`; do
-	(front=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\1/'`
-	back=`echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+echo "$(date) --> Filtering..."
+for p in $(cat positionlist); do
+	(front=$(echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\1/')
+	back=$(echo "$p" | sed 's/\(.*\)-\([0-9]*\)/\2/')
 	#echo "front: $front"
 	#echo "back: $back"
 
-	maxqual=`awk -v f=$front -v b=$back 'BEGIN{max=0} $1 == f && $2 == b {if ($6>max) max=$6} END {print max}' ./*vcf | sed 's/\..*//'`
+	maxqual=$(awk -v f=$front -v b=$back 'BEGIN{max=0} $1 == f && $2 == b {if ($6>max) max=$6} END {print max}' ./*vcf | sed 's/\..*//')
 
-	avequal=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $6}' ./*vcf | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
+	avequal=$(awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $6}' ./*vcf | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//')
 
-	maxmap=`awk -v f=$front -v b=$back ' $1 == f && $2 == b {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//'`
+	maxmap=$(awk -v f=$front -v b=$back ' $1 == f && $2 == b {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk 'BEGIN{max=0}{if ($1>max) max=$1} END {print max}' | sed 's/\..*//')
 
-	avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
+	avemap=$(awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//')
 
 	#change maxmap from 52 to 56 2015-09-18
 	if [ $maxqual -lt 1300  ] || [ $avequal -lt 800 ] || [ $maxmap -lt 58  ] || [ $avemap -lt 57 ]; then
@@ -835,14 +829,14 @@ rm total_pos
 function fasta_table () {
 
 # Loop through the directories
-directories=`ls`
+directories=$(ls)
 echo "$directories"
-startingdirectory=`pwd`
+startingdirectory=$(pwd)
 
 for d in $directories; do
 
 cd ${startingdirectory}/$d/
-dir=`basename $PWD`
+dir=$(basename $PWD)
 echo "Directory:  $dir"
 
 mkdir starting_files
@@ -852,42 +846,42 @@ cp *.vcf ./starting_files
 		if [ $((chromCount)) -eq 1 ]; then
 			#Mark vcf allowing areas of the genome to be removed from the SNP analysis
 			for i in *.vcf; do
-				(m=`basename "$i"`; n=`echo $m | sed $dropEXT`
-				awk '$1 !~ /#/ && $10 !~ /\.\/\./ {print $2}' $i > $i.file
-				cat "${FilterDirectory}/$d.txt" $i.file >> $i.catFile
-				cat $i.catFile | sort | uniq -d > $i.txt
-				pos=`cat $i.txt | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+				(m=$(basename "$i"`; n=`echo $m | sed $dropEXT)
+				awk '$1 !~ /#/ && $10 !~ /\.\/\./ {print $2}' $i > ${i}.file
+				cat "${FilterDirectory}/$d.txt" ${i}.file >> ${i}.catFile
+				cat ${i}.catFile | sort | uniq -d > ${i}.txt
+				pos=$(cat ${i}.txt | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//')
 				if [ -z $pos ]; then
 					#echo "pos is zero... adding a value"
-					pos='^1000000000$'
+					pos=$(^1000000000$)
 				fi
 
-				awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filtered.vcf
+				awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > ${n}.filtered.vcf
 
-				rm $i.file
-				rm $i.catFile
-				rm $i.txt
-				grep -v "Not_Included" $n.filtered.vcf > $i)  &
+				rm ${i}.file
+				rm ${i}.catFile
+				rm ${i}.txt
+				grep -v "Not_Included" ${n}.filtered.vcf > $i)  &
 				let count+=1
 				[[ $((count%NR_CPUS)) -eq 0 ]] && wait
 			done
 			wait
 		else
 			#Mark vcf allowing areas of the genome to be removed from the SNP analysis
-			for i in *.vcf; do m=`basename "$i"`; n=`echo $m | sed $dropEXT` # n is name with all right of "_" and "." removed.
+			for i in *.vcf; do m=$(basename "$i"); n=$(echo $m | sed $dropEXT) # n is name with all right of "_" and "." removed.
 				grep '^#' $i > ${i}.header
 				grep -v '^#' $i > ${i}.body
 				#Mark vcf allowing areas of the genome to be removed from the SNP analysis
 				# Iterate through chrom number range
 				COUNTER=0
-				for c in `cat $dircalled/chroms`; do
+				for c in $(cat $dircalled/chroms); do
 					let COUNTER=COUNTER+1
 					#echo The counter is $COUNTER
 					#echo "********* In $d --> $n working on chromos $c **********"
-					awk -v c=$c 'BEGIN{OFS="\t"} $1 !~ /#/ && $10 !~ /\.\/\./ && $1 == c {print $2}' ${i}.body > $i.filepositions
-					awk -v c=$c ' $1 == c {print $2}' ${FilterDirectory}/${d}.txt > $i.positionstofilter
-					cat $i.positionstofilter $i.filepositions | sort -k1,1 | uniq -d > $i.foundpositions
-					pos=`cat $i.foundpositions | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+					awk -v c=$c 'BEGIN{OFS="\t"} $1 !~ /#/ && $10 !~ /\.\/\./ && $1 == c {print $2}' ${i}.body > ${i}.filepositions
+					awk -v c=$c ' $1 == c {print $2}' ${FilterDirectory}/${d}.txt > ${i}.positionstofilter
+					cat ${i}.positionstofilter ${i}.filepositions | sort -k1,1 | uniq -d > ${i}.foundpositions
+					pos=`cat ${i}.foundpositions | tr "\n" "W" | sed -e 's/W/\$\|\^/g' -e 's/\$\|\^$//' -e 's/$/\$/' -e 's/^/\^/' -e 's/|$$//'`
 					if [[ -n $pos ]]; then
 						echo "pos: $pos" > /dev/null 2>&1
 					else
@@ -895,16 +889,17 @@ cp *.vcf ./starting_files
 						pos="^1$"
 					fi
 
-					awk -v var1=$c -v var2=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' ${i}.body | grep "$c" > $n.filterchrom${COUNTER}.vcf
+					awk -v var1=$c -v var2=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' ${i}.body \
+					| grep "$c" > ${n}.filterchrom${COUNTER}.vcf
 				done
-				cat ${i}.header $n.filterchrom*.vcf > $n.filtered.vcf
-				grep -v "Not_Included" $n.filtered.vcf > $i
+				cat ${i}.header ${n}.filterchrom*.vcf > ${n}.filtered.vcf
+				grep -v "Not_Included" ${n}.filtered.vcf > $i
 				rm ${i}.header
 				rm ${i}.body
-				rm $i.filepositions
-				rm $i.positionstofilter
-				rm $n.filterchrom*.vcf
-				rm $i.foundpositions
+				rm ${i}.filepositions
+				rm ${i}.positionstofilter
+				rm ${n}.filterchrom*.vcf
+				rm ${i}.foundpositions
 
 			done
 		fi
@@ -938,12 +933,12 @@ fi
 awk '{print $1}' filtered_total_pos > total.list
 
     for i in *.vcf; do
-	(m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
+	(m=$(basename "$i"); n=$(echo $m | sed 's/\..*//')
 	# search for AC1 positions
 	awk ' $0 !~ /^#/ && $8 ~ /^AC=1/ && $6 > 0 {print $1 "-" $2}' $i > ${n}.list
 	# AC1 positions that are being found in this group
-	positionsfound=`cat ${n}.list total.list | sort -n | uniq -d`
-	countfind=`echo $positionsfound | wc -w`
+	positionsfound=$(cat ${n}.list total.list | sort -n | uniq -d)
+	countfind=$(echo $positionsfound | wc -w)
 	#echo "positonsfound: $positionsfound  countfind: $countfind"
 	rm ${n}.list
 	if [[ -z $positionsfound ]]; then
@@ -951,12 +946,12 @@ awk '{print $1}' filtered_total_pos > total.list
 	fi
 	
 	if [[ $countfind -gt 2  ]]; then
-	searchname=`echo $n | sed 's/_.*//'`
+	searchname=$(echo $n | sed 's/_.*//')
 
         	if [[  $argUsed == para ]]; then
-            	unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/data/${searchname}/bwamem-gatk/qualityvalues/*stats.txt`
+            	unmappedContigs=$(grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/data/${searchname}/bwamem-gatk/qualityvalues/*stats.txt)
         	elif [[  $argUsed == bovis ]]; then
-            	unmappedContigs=`grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script1/${searchname}/bwamem-gatk/qualityvalues/*stats.txt`
+            	unmappedContigs=$(grep -A 1 "Unmapped contig count" /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script1/${searchname}/bwamem-gatk/qualityvalues/*stats.txt)
         	else
             contigMessage="possibly set a new contig path at script line: $LINENO"
         	fi
@@ -974,8 +969,8 @@ awk '{print $1}' filtered_total_pos > total.list
 	tr -d "\n" < delete >> ${fulDir}/emailAC1counts.txt
         echo "" >> ${fulDir}/emailAC1counts.txt
 	
-	for p in `echo $positionsfound`; do
-            position=`echo $p | sed 's/chrom[0-9]*-//'`
+	for p in $(echo $positionsfound); do
+            position=$(echo $p | sed 's/chrom[0-9]*-//')
             awk -v p="$position" '$2 == p {print $0}' $i >> $d-AC1postions.txt
         done
 
@@ -988,7 +983,7 @@ rm total.list
 rm delete
 # Count the number of SNPs
 
-totalSNPs=`grep -c ".*" filtered_total_pos`
+totalSNPs=$(grep -c ".*" filtered_total_pos)
 echo "$d total SNPs: $totalSNPs" >> ../../section4
 
 echo "***Creating normalized vcf using AC2, QUAL > $QUAL"
@@ -996,41 +991,41 @@ echo "***Creating normalized vcf using AC2, QUAL > $QUAL"
 
 #########################################################################
 # Count the number of SNPs
-filteredSNPs=`wc -l filtered_total_pos`
+filteredSNPs=$(wc -l filtered_total_pos)
 echo "Total SNPs after filtering $filteredSNPs"
 
 
 for i in *.vcf; do
 	(n=${i%.vcf}
-	awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.allsnps_alt
+	awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > ${n}.allsnps_alt
 	#get SNPs of interest
-	fgrep -f filtered_total_pos $n.allsnps_alt > $n.targetsnps_alt
+	fgrep -f filtered_total_pos ${n}.allsnps_alt > ${n}.targetsnps_alt
 	#if SNP not found in sample default call to reference, normalize.
-	cat $n.targetsnps_alt filtered_total_alt | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1,1 > $n.filteredsnps_alt
+	cat ${n}.targetsnps_alt filtered_total_alt | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1,1 > ${n}.filteredsnps_alt
 
 	# If position has zero map quality change alt call to -
 	# get positions being used
-	awk '{print $1}' $n.filteredsnps_alt > $n.filteredsnps_pos
+	awk '{print $1}' ${n}.filteredsnps_alt > ${n}.filteredsnps_pos
 	# Get zero coverage positions.
 	awk ' $0 !~ /^#/ && $10 ~ /\.\/\./ {print $1 "-" $2}' ${i} > ${n}.zeropositions
 
 	# if duplicate then zero mapped position found for sample
-	cat $n.filteredsnps_pos ${n}.zeropositions | sort | uniq -d | awk '{print $1, "-"}' > ${n}.zerotomerge_alt #the - makes it and alt file
+	cat ${n}.filteredsnps_pos ${n}.zeropositions | sort | uniq -d | awk '{print $1, "-"}' > ${n}.zerotomerge_alt #the - makes it and alt file
 
 	#if zero positions found merge them to the SNPs found
 	if [ -s ${n}.zerotomerge_alt ]; then
 		# merge zero updates to SNP file
-		cat ${n}.zerotomerge_alt $n.filteredsnps_alt | awk '{ if (a[$1]++ == 0) print $0; }' | sort -nk1,1 > ${n}.zerofilteredsnps_alt
+		cat ${n}.zerotomerge_alt ${n}.filteredsnps_alt | awk '{ if (a[$1]++ == 0) print $0; }' | sort -nk1,1 > ${n}.zerofilteredsnps_alt
 		#echo "***Found zero postions: $n"
-		rm $n.filteredsnps_alt
+		rm ${n}.filteredsnps_alt
 	else
 		#echo "no zero positions found for $n"
-		mv $n.filteredsnps_alt ${n}.zerofilteredsnps_alt
+		mv ${n}.filteredsnps_alt ${n}.zerofilteredsnps_alt
 	fi
 
-	rm $n.allsnps_alt
-	rm $n.filteredsnps_pos
-	rm $n.targetsnps_alt
+	rm ${n}.allsnps_alt
+	rm ${n}.filteredsnps_pos
+	rm ${n}.targetsnps_alt
 	rm ${n}.zeropositions
 	rm ${n}.zerotomerge_alt)  &
 	let count+=1
@@ -1040,7 +1035,7 @@ wait
 sleep 5
 wait
 
-echo "`date` --> Finding parsimony informative positions"
+echo "$(date) --> Finding parsimony informative positions"
 # Capture only positions that have more than one SNP type called at a position
 cat *zerofilteredsnps_alt | sort -nk1,1 | uniq | awk '{print $1}' | uniq -d > parsimony_informative
 # This removes calls that are the same for all isolates being analyzed
@@ -1055,9 +1050,9 @@ awk '{print $2}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_call
 
 for i in *zerofilteredsnps_alt; do
 	#(
-	m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
+	m=$(basename "$i"); n=$(echo $m | sed 's/\..*//')
 
-	fgrep -f parsimony_filtered_total_pos $i | sort -k1,1n > $n.pretod
+	fgrep -f parsimony_filtered_total_pos $i | sort -k1,1n > ${n}.pretod
 
 	##############################################################
 	# Change AC1s to IUPAC
@@ -1075,12 +1070,12 @@ for i in *zerofilteredsnps_alt; do
 	if [ -s ${n}.actokeep ]; then
 		fgrep -f ${n}.actokeep ${n}.ac > ${n}.actomerge
 		# merge iupac updates to filledcut
-		cat ${n}.actomerge $n.pretod | awk '{ if (a[$1]++ == 0) print $0; }' | sort -nk1,1 > $n.tod
+		cat ${n}.actomerge ${n}.pretod | awk '{ if (a[$1]++ == 0) print $0; }' | sort -nk1,1 > ${n}.tod
 		rm ${n}.pretod
 		rm ${n}.actomerge
 	else
 		#echo "else done"
-		mv $n.pretod $n.tod
+		mv ${n}.pretod ${n}.tod
 	fi
 	rm ${n}.usedpostions
 	rm ${n}.ac
@@ -1088,9 +1083,9 @@ for i in *zerofilteredsnps_alt; do
 	rm ${n}.actokeep
 	##############################################################
 
-	awk '{print $2}' $n.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > $n.fas
+	awk '{print $2}' ${n}.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > ${n}.fas
 	# Add each isolate to the table
-	awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt 
+	awk '{print $2}' ${n}.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt 
 	#) &
 	#let count+=1
 	#[[ $((count%NR_CPUS)) -eq 0 ]] && wait
@@ -1104,7 +1099,7 @@ awk '{print $2}' parsimony_filtered_total_alt > root
 cat root | tr -cd "[:print:]" | sed "s/^/>root;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > root.fas
 echo "" >> root.fas
 
-totalSNPs=`grep -c ".*" parsimony_filtered_total_pos`
+totalSNPs=$(grep -c ".*" parsimony_filtered_total_pos)
 echo "Total informative SNPs: $totalSNPs"
 
 # Make a file containing all fasta files. Used awk instead of cat to insure newline between files
@@ -1124,24 +1119,27 @@ rm parsimony_filtered_total_pos
 rm parsimony_informative
 rm *zerofilteredsnps_alt
 
-cp /home/shared/Table_Template.xlsx ./${d}-Table_Template.xlsx
+cp $pipeline/Table_Template.xlsx ./${d}-Table_Template.xlsx
 done
 }
 #****************************************************************
 function alignTable () {
 
 # Beginning in fasta folder
-echo "`date` --> RAxML started $d"
+echo "$(date) --> RAxML started $d"
 
 awk '{print $0}' *.fas | sed '/root/{N;d;}' >> fastaGroup.txt
 awk '{print $0}' *.fas >> RAxMLfastaGroup.txt
 
-raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} -m GTRCAT -p 12345 &>/dev/null && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf; nw_reroot RAxML_bestTree.${d} root > tableinput.${d}; nw_reroot RAxML_bestTree.${d} root > rooted_RAxML_bestTree.${d}; mv rooted_RAxML_bestTree.${d} RAxML_bestTree.${d}
+raxmlHPC-SSE3 -T $NR_CPUS -s RAxMLfastaGroup.txt -n ${d} -m GTRCAT -p 12345 &>/dev/null && nw_reroot RAxML_bestTree.${d} root \
+| nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - \
+> ../${d}-tree.svg && rsvg-convert -f pdf ../${d}-tree.svg > ../${d}-tree.pdf; nw_reroot RAxML_bestTree.${d} root \
+> tableinput.${d}; nw_reroot RAxML_bestTree.${d} root > rooted_RAxML_bestTree.${d}; mv rooted_RAxML_bestTree.${d} RAxML_bestTree.${d}
 wait
 rm RAxML_parsimonyTree*
 for i in RAxML*Tree*; do mv $i ../${i}.tre; done
 
-tr ":" "\n" < tableinput.${d} | tr "," "\n" | sed 's/(//g' | sed 's/)//g' | grep -v "\.[0-9]*" | grep -v "root" > cleanedAlignment.txt
+tr ":" "\n" < tableinput.${d} | tr "," "\n" | sed -e 's/(//g' -e 's/)//g' | grep -v "\.[0-9]*" | grep -v "root" > cleanedAlignment.txt
 
 awk 'NR==FNR{o[FNR]=$1; next} {t[$1]=$0} END{for(x=1; x<=FNR; x++){y=o[x]; print t[y]}}' cleanedAlignment.txt ../$d.table.txt > joined.txt
 grep "reference" ../$d.table.txt > references.txt
@@ -1154,10 +1152,10 @@ rm references.txt
 cd ..
 
 #get the number of columns
-columnCount=`awk '$0 !~ /^$/ {print $0}' *sortedTable.txt | awk '{print NF-1; exit}'`
+columnCount=$(awk '$0 !~ /^$/ {print $0}' *sortedTable.txt | awk '{print NF-1; exit}')
 
 #number=`jot - 1 $columnCount`
-number=`seq $columnCount`
+number=$(seq $columnCount)
 #echo "Numbers in list: $number"
 
 #get the reference row
@@ -1172,7 +1170,7 @@ echo "countFirst" > firstOutput.txt
 #iterate numbers up to number of columns
 for n in $number; do
 	#use number to grab character in reference row i.e. C
-	letter=`awk -v x=$n '{print $x}' referenceRow`
+	letter=$(awk -v x=$n '{print $x}' referenceRow)
 	#echo "Number: $n"
 	#echo "Letter: $letter"
 	awk -v var1="$n" '{print $var1}' table > column
@@ -1251,7 +1249,7 @@ print str
 }
 }' orginizedTable10.txt > orginizedTable11.txt
 
-c=`basename $PWD`
+c=$(basename $PWD)
 
 #Convert spaces to tabs
 awk -v OFS="\t" '$1=$1' orginizedTable11.txt > $c.organizedTable.txt
@@ -1277,7 +1275,7 @@ echo "Adding map qualities..."
 awk ' NR == 1 {print $0}' $d.sortedTable.txt | tr "\t" "\n" | sed "1d" | awk '{print NR, $0}' > $d-positions
 
 echo "map-quality map-quality" > quality.txt
-echo "`date` --> Sorted table map quality gathering for $c"
+echo "$(date) --> Sorted table map quality gathering for $c"
 while read p; do
 	(rownumber=`echo $p | awk '{print $1}'`
 	front=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\1/'`
@@ -1285,7 +1283,8 @@ while read p; do
 	#echo "rownumber: $rownumber"
 	#echo "front: $front"
 	#echo "back: $back"
-	avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
+	avemap=$(awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' \
+	| awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//')
 	echo "$rownumber $avemap" >> quality.txt) &
 	CPU_NR=$(mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 15}'a | sed 's/\..*//')
 	let count+=1
@@ -1302,15 +1301,16 @@ mv $d-mapquality-sortedtable.txt $d.sortedTable.txt
 awk ' NR == 1 {print $0}' $c.organizedTable.txt | tr "\t" "\n" | sed "1d" | awk '{print NR, $0}' > $d-positions
 
 echo "map-quality map-quality" > quality.txt
-echo "`date` --> Organized table map quality gathering for $c"
+echo "$(date) --> Organized table map quality gathering for $c"
 while read p; do
-	(rownumber=`echo $p | awk '{print $1}'`
-	front=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\1/'`
-	back=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+	(rownumber=$(echo $p | awk '{print $1}')
+	front=$(echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\1/')
+	back=$(echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\2/')
 	#echo "rownumber: $rownumber"
 	#echo "front: $front"
 	#echo "back: $back"
-	avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
+	avemap=$(awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' \
+	| awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//')
 	echo "$rownumber $avemap" >> quality.txt) &
         CPU_NR=$(mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 15}'a | sed 's/\..*//')
 	let count+=1
@@ -1338,17 +1338,18 @@ rm -r ./starting_files
 #################################################################################
 
 # Clean the tag file that has been exported to Desktop
-chmod 777 ${genotypingcodes}  
-cat ${genotypingcodes} | tr '\r' '\n' | awk -F '\t' 'BEGIN{OFS="\t";} {gsub("\"","",$5);print;}' | sed 's/\"##/##/' | sed 's/MN_Wildlife_Deer_//' > preparedTags.txt
+#chmod 777 ${genotypingcodes}  
+#cat ${genotypingcodes} | tr '\r' '\n' | awk -F '\t' 'BEGIN{OFS="\t";} {gsub("\"","",$5);print;}' | sed 's/\"##/##/' | sed 's/MN_Wildlife_Deer_//' > preparedTags.txt
 
 #clean_tag.sh $genotypingcodes
 ####################
 # Clean the genotyping codes used for naming output
-sed 's/\*//g' < preparedTags.txt | sed 's/(/_/g' | sed 's/)/_/g' | sed 's/ /_/g' | sed 's/-_/_/g' | sed 's/\?//g' | sed 's/_-/_/g' | sed 's/,/_/g' | sed 's#/#_#g' | sed 's#\\#_#g' | sed 's/__/_/g' | sed 's/__/_/g' | sed 's/__/_/g' | sed 's/-$//g' | sed 's/_$//g' |awk 'BEGIN {OFS="\t"}{gsub("_$","",$1)}1' > outfile
-rm preparedTags.txt
+#sed 's/\*//g' < preparedTags.txt -e 's/(/_/g' -e 's/)/_/g' -e 's/ /_/g' -e 's/-_/_/g' -e 's/\?//g' -e 's/_-/_/g' -e 's/,/_/g' -e 's#/#_#g' \
+#| sed 's#\\#_#g' | sed 's/__/_/g' | sed 's/__/_/g' | sed 's/__/_/g' | sed 's/-$//g' | sed 's/_$//g' |awk 'BEGIN {OFS="\t"}{gsub("_$","",$1)}1' > outfile
+#rm preparedTags.txt
 
-cat ${genotypingcodes} | tr '\r' '\n' | grep "Yes" | sed 's/_.*//' >> elite
-echo "Only samples in this file will be ran when elite is used as the secound argument" >> elite
+#cat ${genotypingcodes} | tr '\r' '\n' | grep "Yes" | sed 's/_.*//' >> elite
+#echo "Only samples in this file will be ran when elite is used as the secound argument" >> elite
 
 ####################
 
@@ -1371,12 +1372,12 @@ mv *.* ./starting_files
 	if [ "$eflag" ]; then
         echo "Only analyzing elite files"
 
-        for i in `cat elite`; do
-        name=`ls starting_files | grep $i`
+        for i in $(cat elite); do
+        name=$(ls starting_files | grep $i)
         cp ./starting_files/$name ./
         done
 
-        for i in `find ./starting_files/ -mtime -2`; do
+        for i in $(find ./starting_files/ -mtime -15); do
         cp $i ./
         done
 
@@ -1395,8 +1396,8 @@ sed -i 's/^"##/##/' *vcf
 
 # Count the number of chromosomes used in the reference when VCFs were made.
 #singleFile=`ls *.vcf | head -1`
-echo "Counting the number of chromosomes in first 100 samples, started -->  `date`"
-chromCount=`awk ' $0 !~ /^#/ {print $1}' $(ls *vcf | head -100) | sort | uniq -d | awk 'END {print NR}'`
+echo "Counting the number of chromosomes in first 100 samples, started -->  $(date)"
+chromCount=$(awk ' $0 !~ /^#/ {print $1}' $(ls *vcf | head -100) | sort | uniq -d | awk 'END {print NR}')
 echo "The number of chromosomes/segments seen in VCF: $chromCount"
 awk ' $0 !~ /^#/ {print $1}' $(ls *vcf | head -100) | sort | uniq -d > chroms
 echo "These are the chromosomes/segments found:"
@@ -1406,7 +1407,7 @@ cat chroms
 
 # Remove selected isolates from comparison
 # This is optional, and should be turned on or off based on laboratories preference
-removeIsolates
+#removeIsolates
 
 ############################### Rename files ###############################
 
@@ -1416,17 +1417,17 @@ done
 for i in *.vcf; do
     echo "******************** Naming convention ********************"
     echo "Original File: $i"
-    base=`basename "$i"`
-    searchName=`echo $base | sed $tbNumberV | sed $tbNumberW | sed 's/V//'`
+    base=$(basename "$i")
+    searchName=$(echo $base | sed $tbNumberV | sed $tbNumberW | sed 's/V//')
     echo "searchName: $searchName"
     # Direct script to text file containing a list of the correct labels to use.
     # The file must be a txt file.
-    p=`grep "$searchName" "outfile"`
+    p=$(grep "$searchName" "outfile")
     echo "This is what was found in tag file: $p"
-    newName=`echo $p | awk '{print $1}' | tr -d "[:space:]"` # Captured the new name
-    n=`echo $base | sed $tbNumberV | sed $tbNumberW`
-    noExtention=`echo $base | sed $dropEXT`
-    VALtest=`echo $i | grep "VAL"`
+    newName=$(echo $p | awk '{print $1}' | tr -d "[:space:]") # Captured the new name
+    n=$(echo $base | sed $tbNumberV | sed $tbNumberW)
+    noExtention=$(echo $base | sed $dropEXT)
+    VALtest=$(echo $i | grep "VAL")
 #    echo "VALtest: $VALtest"
 #h=`echo ${i%-AZ}`; g=`echo ${h%-Broad}`; echo $g
     #Check if a name was found in the tag file.  If no name was found, keep original name, make note in log and cp file to unnamed folder.
@@ -1468,7 +1469,7 @@ echo "#############################"
 echo "Making Files Unix Compatiable"
 for v in *.vcf; do
     (dos2unix $v > /dev/null 2>&1 #Fixes files opened and saved in Excel
-    cat $v | tr '\r' '\n' | awk -F '\t' 'BEGIN{OFS="\t";} {gsub("\"","",$5);print;}' | sed 's/\"##/##/' | sed 's/\"AC=/AC=/' > $v.temp
+    cat $v | tr '\r' '\n' | awk -F '\t' 'BEGIN{OFS="\t";} {gsub("\"","",$5);print;}' | sed -e 's/\"##/##/' -e 's/\"AC=/AC=/' > $v.temp
     mv $v.temp $v) &
     let count+=1
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
@@ -1488,7 +1489,7 @@ wait
 
 ######################## Change AC1s to IUPAC ########################
 
-echo "Changing AC=1 to IUPAC, started -->  `date`"
+echo "Changing AC=1 to IUPAC, started -->  $(date)"
 
 for i in *vcf; do
 
@@ -1531,20 +1532,20 @@ wait
 echo "chromCount:  $chromCount"
 
 if [ $FilterAllVCFs == yes ]; then
-echo "`date` --> Marking all VCFs and removing filtering region"
+echo "$(date) --> Marking all VCFs and removing filtering region"
 	# Label filter field for positions to be filtered in all VCFs
         if [ $((chromCount)) -eq 1 ]; then
         for i in *.vcf; do
-        (m=`basename "$i"`; n=`echo $m | sed $dropEXT`
+        (m=$(basename "$i"); n=$(echo $m | sed $dropEXT)
         # Get usable positions in the VCF
-        awk '$1 !~ /#/ && $10 !~ /\.\/\./ {print $2}' $i > $i.file
+        awk '$1 !~ /#/ && $10 !~ /\.\/\./ {print $2}' $i > ${i}.file
         # Combine with positions that will be filtered
-        cat "${FilterDirectory}/FilterToAll.txt" $i.file >> $i.catFile
+        cat "${FilterDirectory}/FilterToAll.txt" ${i}.file >> ${i}.catFile
         
 	# Output any duplicate positions, aka decreasing positions to be marked and used by awk
-        cat $i.catFile | sort | uniq -d > $i.txt
+        cat ${i}.catFile | sort | uniq -d > ${i}.txt
         # preparing postions
-        pos=`cat $i.txt | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+        pos=`cat ${i}.txt | tr "\n" "W" | sed -e 's/W/\$\|\^/g' -e 's/\$\|\^$//' -e 's/$/\$/' -e 's/^/\^/' -e 's/|$$//'`
 	
 	# If no positions found to be filtered a filler is needed or all positions will get marked as "Not_Included"
 	if [ -z $pos ]; then
@@ -1552,12 +1553,12 @@ echo "`date` --> Marking all VCFs and removing filtering region"
 	fi
 
 	# Making a vcf with positions marked that should not be included based on filter file
-        awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filtered.vcf
+        awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' "$i" > ${n}.filtered.vcf
         # Clean up
 
-        rm $i.file; rm $i.catFile; rm $i.txt
+        rm ${i}.file; rm ${i}.catFile; rm ${i}.txt
 	# Removed positions and clobber origingal vcf
-	grep -v "Not_Included" $n.filtered.vcf > $i) &
+	grep -v "Not_Included" ${n}.filtered.vcf > $i) &
 	let count+=1
 	[[ $((count%NR_CPUS)) -eq 0 ]] && wait
 	done
@@ -1565,20 +1566,20 @@ echo "`date` --> Marking all VCFs and removing filtering region"
 
 	elif [ $((chromCount)) -gt 1 ]; then
 		#echo "multiple chromosomes"
-		for i in *.vcf; do m=`basename "$i"`; n=`echo $m | sed $dropEXT` # n is name with all right of "_" and "." removed.
+		for i in *.vcf; do m=$(basename "$i"); n=$(echo $m | sed $dropEXT) # n is name with all right of "_" and "." removed.
 		grep '^#' $i > ${i}.header
 		grep -v '^#' $i > ${i}.body
 		#Mark vcf allowing areas of the genome to be removed from the SNP analysis
 		# Iterate through chrom number range
 		COUNTER=0
-		for c in `cat chroms`; do
+		for c in $(cat chroms); do
 			let COUNTER=COUNTER+1
 			#echo The counter is $COUNTER
 			#echo "********* In all_vcfs $n working on chromos $c **********"
-			awk -v c=$c 'BEGIN{OFS="\t"} $1 !~ /#/ && $10 !~ /\.\/\./ && $1 == c {print $2}' ${i}.body > $i.filepositions
-			awk -v c=$c ' $1 == c {print $2}' ${FilterDirectory}/FilterToAll.txt > $i.positionstofilter
-			cat $i.positionstofilter $i.filepositions | sort -k1,1 | uniq -d > $i.foundpositions
-			pos=`cat $i.foundpositions | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/' | sed 's/|$$//'`
+			awk -v c=$c 'BEGIN{OFS="\t"} $1 !~ /#/ && $10 !~ /\.\/\./ && $1 == c {print $2}' ${i}.body > ${i}.filepositions
+			awk -v c=$c ' $1 == c {print $2}' ${FilterDirectory}/FilterToAll.txt > ${i}.positionstofilter
+			cat ${i}.positionstofilter ${i}.filepositions | sort -k1,1 | uniq -d > ${i}.foundpositions
+			pos=`cat ${i}.foundpositions | tr "\n" "W" | sed -e 's/W/\$\|\^/g' -e 's/\$\|\^$//' -e 's/$/\$/' -e 's/^/\^/' -e 's/|$$//'`
 			if [[ -n $pos ]]; then
 				echo "pos: $pos" > /dev/null 2>&1
 			else
@@ -1586,16 +1587,17 @@ echo "`date` --> Marking all VCFs and removing filtering region"
 				pos="^1$"
 				#echo $pos
 			fi
-			awk -v var1=$c -v var2=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' ${i}.body | grep "$c" > $n.filterchrom${COUNTER}.vcf
+			awk -v var1=$c -v var2=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ var1 && $2 ~ var2) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' ${i}.body \
+			| grep "$c" > ${n}.filterchrom${COUNTER}.vcf
 		done
-			cat ${i}.header $n.filterchrom*.vcf > $n.filtered.vcf
-			grep -v "Not_Included" $n.filtered.vcf > $i
+			cat ${i}.header ${n}.filterchrom*.vcf > ${n}.filtered.vcf
+			grep -v "Not_Included" ${n}.filtered.vcf > $i
 			rm ${i}.header
 			rm ${i}.body
-			rm $i.filepositions
-			rm $i.positionstofilter
-			rm $n.filterchrom*.vcf
-			rm $i.foundpositions
+			rm ${i}.filepositions
+			rm ${i}.positionstofilter
+			rm ${n}.filterchrom*.vcf
+			rm ${i}.foundpositions
 		done
 		else
 		echo "Check chromosome count numbers at line $LINENO.  Exiting script."
@@ -1641,13 +1643,13 @@ for i in *.vcf; do
 
 	awk 'NR==FNR{a[$0];next}$2 in a' quality-${i%.vcf} groupsnps | awk '{print $1}' > group-foundpositions-${i%.vcf}
 
-	echo "This is the Group Numbers: `cat group-foundpositions-${i%.vcf}`"
+	echo "This is the Group Numbers: $(cat group-foundpositions-${i%.vcf})"
 
 	# Typically a single group position is found, and the VCF will be placed into just one group.  It is posible that an isolate will need to go in more than one group because of were it falls on the tree.  In this case there may be 2 group, or more, group positions found.  The number of group positions found is captured in sizeGroup.
-	sizeGroup=`wc -l group-foundpositions-${i%.vcf} | awk '{print $1}'`
+	sizeGroup=$(wc -l group-foundpositions-${i%.vcf} | awk '{print $1}')
 
 	# Loop through the number of groups positions found
-	loops=`cat group-foundpositions-${i%.vcf}`
+	loops=$(cat group-foundpositions-${i%.vcf})
 
 	if [ $sizeGroup -lt 1 ]; then # There was not a position found that places VCF into group
 		echo "$i Grp not found" >> section3
@@ -1674,13 +1676,13 @@ for i in *.vcf; do
 
 	awk 'NR==FNR{a[$0];next}$2 in a' quality-${i%.vcf} subgroupsnps | awk '{print $1}' > subgroup-foundpositions-${i%.vcf}
 
-	echo "This is the Subgroup Numbers: `cat subgroup-foundpositions-${i%.vcf}`"
+	echo "This is the Subgroup Numbers: $(cat subgroup-foundpositions-${i%.vcf})"
 
 	# Typically a single group position is found, and the VCF will be placed into just one group.  It is posible that an isolate will need to go in more than one group because of were it falls on the tree.  In this case there may be 2 group, or more, group positions found.  The number of group positions found is captured in sizeGroup.
-	sizeGroup=`wc -l subgroup-foundpositions-${i%.vcf} | awk '{print $1}'`
+	sizeGroup=$(wc -l subgroup-foundpositions-${i%.vcf} | awk '{print $1}')
 
 	# Loop through the number of groups positions found
-	loops=`cat subgroup-foundpositions-${i%.vcf}`
+	loops=$(cat subgroup-foundpositions-${i%.vcf})
 
 	if [ $sizeGroup -lt 1 ]; then # There was not a position found that places VCF into group
 		echo "$i was not assigned a Subgroup"
@@ -1706,13 +1708,13 @@ for i in *.vcf; do
 
 	awk 'NR==FNR{a[$0];next}$2 in a' quality-${i%.vcf} cladesnps | awk '{print $1}' > clade-foundpositions-${i%.vcf}
 
-	echo "This is the Clade Numbers: `cat clade-foundpositions-${i%.vcf}`"
+	echo "This is the Clade Numbers: $(cat clade-foundpositions-${i%.vcf})"
 
 	# Typically a single group position is found, and the VCF will be placed into just one group.  It is posible that an isolate will need to go in more than one group because of were it falls on the tree.  In this case there may be 2 group, or more, group positions found.  The number of group positions found is captured in sizeGroup.
-	sizeGroup=`wc -l clade-foundpositions-${i%.vcf} | awk '{print $1}'`
+	sizeGroup=$(wc -l clade-foundpositions-${i%.vcf} | awk '{print $1}')
 
 	# Loop through the number of groups positions found
-	loops=`cat clade-foundpositions-${i%.vcf}`
+	loops=$(cat clade-foundpositions-${i%.vcf})
 
 	if [ $sizeGroup -lt 1 ]; then # There was not a position found that places VCF into group
 		echo "$i was not assigned a Clade"
@@ -1764,10 +1766,10 @@ cp *vcf starting_files
 # Make concatemer with the position and REF call.
 # Factor in possible multiple chromosomes
 # Get rid of duplicates in concatemer and list all the positions and REF calls
-echo "`date` --> Gathering SNP positions"
+echo "$(date) --> Gathering SNP positions"
 
 for i in *.vcf; do
-	awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' $i >> concatemer
+	awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $4}' "$i" >> concatemer
 done
 
 # Get rid of duplicates in concatemer and list all the positions and REF calls
@@ -1775,40 +1777,40 @@ sort -k1,1 < concatemer | uniq > filtered_total_alt
 awk '{print $1}' filtered_total_alt > filtered_total_pos
 
 # Count the number of SNPs
-totalSNPs=`wc -l  filtered_total_pos`
+totalSNPs=$(wc -l  filtered_total_pos)
 echo "Total filtered SNPs: $totalSNPs"
 
 for i in *.vcf; do
 	(n=${i%.vcf}
-	awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' $i > $n.allsnps_alt
+	awk -v Q="$QUAL" ' $0 !~ /^#/ && $6 > Q && $8 ~ /^AC=2;/ {print $1 "-" $2, $5}' "$i" > ${n}.allsnps_alt
 	#get SNPs of interest
-	fgrep -f filtered_total_pos $n.allsnps_alt > $n.targetsnps_alt
+	fgrep -f filtered_total_pos ${n}.allsnps_alt > ${n}.targetsnps_alt
 	#if SNP not found in sample default call to reference, normalize.
-	cat $n.targetsnps_alt filtered_total_alt | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1,1 > $n.filteredsnps_alt
+	cat ${n}.targetsnps_alt filtered_total_alt | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1,1 > ${n}.filteredsnps_alt
 
 	# If position has zero map quality change alt call to -
 	# get positions being used
-	awk '{print $1}' $n.filteredsnps_alt > $n.filteredsnps_pos
+	awk '{print $1}' ${n}.filteredsnps_alt > ${n}.filteredsnps_pos
 	# Get zero coverage positions.
 	awk ' $0 !~ /^#/ && $10 ~ /\.\/\./ {print $1 "-" $2}' ${i} > ${n}.zeropositions
 
 	# if duplicate then zero mapped position found for sample
-	cat $n.filteredsnps_pos ${n}.zeropositions | sort | uniq -d | awk '{print $1, "-"}' > ${n}.zerotomerge_alt #the - makes it and alt file
+	cat ${n}.filteredsnps_pos ${n}.zeropositions | sort | uniq -d | awk '{print $1, "-"}' > ${n}.zerotomerge_alt #the - makes it and alt file
 
 	#if zero positions found merge them to the SNPs found
 	if [ -s ${n}.zerotomerge_alt ]; then
 		# merge zero updates to SNP file
-		cat ${n}.zerotomerge_alt $n.filteredsnps_alt | awk '{ if (a[$1]++ == 0) print $0; }' | sort -nk1,1 > ${n}.zerofilteredsnps_alt
+		cat ${n}.zerotomerge_alt ${n}.filteredsnps_alt | awk '{ if (a[$1]++ == 0) print $0; }' | sort -nk1,1 > ${n}.zerofilteredsnps_alt
 		#echo "***Found zero postions: $n"
-		rm $n.filteredsnps_alt
+		rm ${n}.filteredsnps_alt
 	else
 		#echo "no zero positions found for $n"
-		mv $n.filteredsnps_alt ${n}.zerofilteredsnps_alt
+		mv ${n}.filteredsnps_alt ${n}.zerofilteredsnps_alt
 	fi
 
-	rm $n.allsnps_alt
-	rm $n.filteredsnps_pos
-	rm $n.targetsnps_alt
+	rm ${n}.allsnps_alt
+	rm ${n}.filteredsnps_pos
+	rm ${n}.targetsnps_alt
 	rm ${n}.zeropositions
 	rm ${n}.zerotomerge_alt)  &
 	let count+=1
@@ -1818,7 +1820,7 @@ wait
 sleep 5
 wait
 
-echo "`date` --> Finding parsimony informative positions"
+echo "$(date) --> Finding parsimony informative positions"
 # Capture only positions that have more than one SNP type called at a position
 cat *zerofilteredsnps_alt | sort -nk1,1 | uniq | awk '{print $1}' | uniq -d > parsimony_informative
 # This removes calls that are the same for all isolates being analyzed
@@ -1839,9 +1841,9 @@ awk '{print $2}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_call
 
 for i in *zerofilteredsnps_alt; do
 #	(
-m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
+m=$(basename "$i"); n=$(echo $m | sed 's/\..*//')
 
-	fgrep -f parsimony_filtered_total_pos $i | sort -k1,1n > $n.pretod
+	fgrep -f parsimony_filtered_total_pos $i | sort -k1,1n > ${n}.pretod
 
 	##############################################################
 	# Change AC1s to IUPAC
@@ -1859,12 +1861,12 @@ m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
 	if [ -s ${n}.actokeep ]; then
 		fgrep -f ${n}.actokeep ${n}.ac > ${n}.actomerge
 		# merge iupac updates to filledcut
-		cat ${n}.actomerge $n.pretod | awk '{ if (a[$1]++ == 0) print $0; }' | sort -nk1,1 > $n.tod
+		cat ${n}.actomerge ${n}.pretod | awk '{ if (a[$1]++ == 0) print $0; }' | sort -nk1,1 > ${n}.tod
 		rm ${n}.pretod
 		rm ${n}.actomerge
 	else
 		#echo "else done"
-		mv $n.pretod $n.tod
+		mv ${n}.pretod ${n}.tod
 	fi
 	rm ${n}.usedpostions
 	rm ${n}.ac
@@ -1872,9 +1874,9 @@ m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
 	rm ${n}.actokeep
 	##############################################################
 
-	awk '{print $2}' $n.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > $n.fas
+	awk '{print $2}' ${n}.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > ${n}.fas
 	# Add each isolate to the table
-	awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt #) &
+	awk '{print $2}' ${n}.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt #) &
 	#let count+=1
 	#[[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
@@ -1887,7 +1889,7 @@ awk '{print $2}' parsimony_filtered_total_alt > root
 cat root | tr -cd "[:print:]" | sed "s/^/>root;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > root.fas
 echo "" >> root.fas
 
-totalSNPs=`grep -c ".*" parsimony_filtered_total_pos`
+totalSNPs=$(grep -c ".*" parsimony_filtered_total_pos)
 echo "Total informative SNPs: $totalSNPs"
 
 #Clean-up
@@ -1939,7 +1941,7 @@ echo "At line $LINENO, sleeping 5 second"; sleep 5s
 cd ${fulDir}
 $PWD
 cp ${DefiningSNPs} ./
-cp /home/shared/Table_Template.xlsx ./
+cp $pipeline/Table_Template.xlsx ./
 cp "$0" "$PWD"
 
 #echo "***************************************************"
@@ -1947,11 +1949,11 @@ cp "$0" "$PWD"
 #echo "***************************************************"
 cd ${fulDir}/all_clades
 
-workingdir=`basename $PWD`
+workingdir=$(basename $PWD)
 
 if [ $workingdir == all_clades ]
 then
-directories=`ls`
+directories=$($ls)
 for d in $directories; do
     cd ${fulDir}/all_clades/${d}/fasta
     #echo "****************************************************"
@@ -1972,11 +1974,11 @@ wait
 #echo "***************************************************"
 cd ${fulDir}/all_groups
 
-workingdir=`basename $PWD`
+workingdir=$(basename $PWD)
 
 if [ $workingdir == all_groups ]
 then
-directories=`ls`
+directories=$(ls)
 for d in $directories; do
     cd ${fulDir}/all_groups/${d}/fasta
     #echo "****************************************************"
@@ -1994,12 +1996,12 @@ wait
 #echo "***************************************************"
 cd ${fulDir}/all_subgroups
 
-workingdir=`basename $PWD`
+workingdir=$(basename $PWD)
 
 if [ $workingdir == all_subgroups ]
 then
 
-directories=`ls`
+directories=$(ls)
 for d in $directories; do
     cd ${fulDir}/all_subgroups/$d/fasta
     #echo "****************************************************"
@@ -2013,15 +2015,14 @@ echo "*** $workingdir not found ***"
 fi
 wait
 pwd
-cd ${fulDir}
+cd "$fulDir"
 
 column section1 > csection1
 sort -nr < section4 > ssection4
 
-echo "End Time:  `date`" >> sectiontime
-endtime=`date +%s`
+echo "End Time:  $(date)" >> sectiontime
+endtime=$(date +%s)
 runtime=$((endtime-starttime))
-#totaltime=`date -u -d @${runtime} +"%T"`
 printf 'Runtime: %dh:%dm:%ds\n' $(($runtime/3600)) $(($runtime%3600/60)) $(($runtime%60)) >> sectiontime
 
 cat sectiontime >  log.txt
@@ -2097,15 +2098,15 @@ rm -r all_vcfs/starting_files
 zip -r starting_files.zip starting_files && rm -r starting_files
 #rm -r ${FilterDirectory}
 
-echo "Copy to ${bioinfoVCF}"
-cp -r $PWD ${bioinfoVCF}
-fileName=`basename $0`
+#echo "Copy to ${bioinfoVCF}"
+#cp -r $PWD ${bioinfoVCF}
+fileName=$(basename $0)
 
 if [ "$mflag" ]; then
-    email_list="Tod.P.Stuber@aphis.usda.gov"
-	echo "vcftofasta.sh completed" > mytempfile; cat mytempfile | mutt -s "vcftofasta.sh completed subject" -a email_log.html -- $email_list
+    email_list="marc-olivier.duceppe@inspection.gc.ca"
+	echo "vcftofasta.sh completed" > mytempfile; cat mytempfile | mail -s "vcftofasta.sh completed subject" -a email_log.html -- $email_list
 	else
-	echo "$fileName $@ completed, See attachment" > mytempfile; cat mytempfile | mutt -s "$fileName $@ completed" -a email_log.html -- $email_list
+	echo "$fileName $@ completed, See attachment" > mytempfile; cat mytempfile | mail -s "$fileName $@ completed" -a email_log.html -- $email_list
 fi
 rm mytempfile
 rm email_log.html
