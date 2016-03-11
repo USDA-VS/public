@@ -6,28 +6,28 @@
 #  Bovis files must NOT begin with a "B"
 
 
-date >> /scratch/report/coverageReport.txt
-echo "" > /scratch/report/dailyReport.txt
+date >> $HOME/pipeline/public-master/report/coverageReport.txt
+echo "" > $HOME/pipeline/public-master/report/dailyReport.txt
 
 # Reset spoligo and bruc mlst check file
-echo "" > /scratch/report/spoligoCheck.txt
-echo "" > /scratch/report/mlstCheck.txt
-echo "WG Spoligo Check" >> /scratch/report/spoligoCheck.txt
-echo "Brucella MLST Check" >> /scratch/report/mlstCheck.txt
+echo "" > $HOME/pipeline/public-master/report/spoligoCheck.txt
+echo "" > $HOME/pipeline/public-master/report/mlstCheck.txt
+echo "WG Spoligo Check" >> $HOME/pipeline/public-master/report/spoligoCheck.txt
+echo "Brucella MLST Check" >> $HOME/pipeline/public-master/report/mlstCheck.txt
 
 #Reset file
 dateFile=`date "+%Y%m%d"`
-printf "%s\t%s\n" "TB Number" "Octal Code" > "/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/newFiles/${dateFile}_FileMakerSpoligoImport.txt"
+#printf "%s\t%s\n" "TB Number" "Octal Code" > "/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/newFiles/${dateFile}_FileMakerSpoligoImport.txt"
 
-echo "Isolate Total_Bases AveDep %>Q15" | awk '{ printf("%-12s %-12s %-10s %-10s\n", $1, $2, $3, $4) }' >> /scratch/report/dailyReport.txt
-echo "" >> /scratch/report/dailyReport.txt
-echo ""  > /scratch/report/dailyStats.txt
+echo "Isolate Total_Bases AveDep %>Q15" | awk '{ printf("%-12s %-12s %-10s %-10s\n", $1, $2, $3, $4) }' >> $HOME/pipeline/public-master/report/dailyReport.txt
+echo "" >> $HOME/pipeline/public-master/report/dailyReport.txt
+echo ""  > $HOME/pipeline/public-master/report/dailyStats.txt
 
 currentdir=`pwd`
 
 for i in *.fastq.gz; do
 
-n=`echo $i | sed 's/_.*//' | sed 's/\..*//'`
+n=`echo $i | sed -e 's/_.*//' -e 's/\..*//'`
 echo "n is : $n"
 
 mkdir -p $n
