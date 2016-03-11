@@ -1549,7 +1549,8 @@ echo "" >> $mytex
 
 echo "\begin{figure}[H]" >> $mytex
 echo "\begin{flushleft}" >> $mytex
-echo "\textbf{Coverage Graph}\par\medskip" >> $mytex echo "\end{flushleft}" >> $mytex
+echo "\textbf{Coverage Graph}\par\medskip" >> $mytex 
+echo "\end{flushleft}" >> $mytex
 
 echo "\includegraphics[width=450pt]{graphic.pdf}" >> $mytex
 echo "" >> $mytex
