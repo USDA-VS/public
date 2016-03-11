@@ -34,7 +34,7 @@ mkdir -p $n
 mv $i $n/
 done
 
-for f in *; do
+for f in ./*/; do
 	echo "The cd is $currentdir"
 	cd $currentdir
 	echo "$f started"

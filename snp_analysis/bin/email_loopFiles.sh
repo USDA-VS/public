@@ -12,7 +12,7 @@ echo "" >> /scratch/report/dailyTime
 echo "End Time: `date`" >> /scratch/report/dailyTime
 endtime=`date +%s`
 runtime=$((endtime-starttime))
-echo "Run time: $runtime seconds" >> /scratch/report/dailyTime
+printf 'Runtime: %dh:%dm:%ds\n' $(($runtime/3600)) $(($runtime%3600/60)) $(($runtime%60)) >> /scratch/report/dailyTime
 
 echo "e-mailing files"
 

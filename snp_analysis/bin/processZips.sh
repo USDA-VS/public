@@ -262,7 +262,7 @@ elif [ $1 == TB3 ]; then
 cp /home/shared/mycobacterium/tbc/mtb-ancestor.fasta ./
 hqs="/home/shared/mycobacterium/tbc/15-5316-highqualitysnps.vcf"
 
-#bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/newFiles"
+bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/newFiles"
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 # Run spoligoSpacerFinder.sh

@@ -73,7 +73,7 @@ fi
 echo "End Time: `date`" >> /scratch/report/iddailyTime
 endtime=`date +%s`
 runtime=$((endtime-starttime))
-echo "Run time: $runtime seconds" >> /scratch/report/iddailyTime
+printf 'Runtime: %dh:%dm:%ds\n' $(($runtime/3600)) $(($runtime%3600/60)) $(($runtime%60)) >> /scratch/report/iddailyTime
 
 cat /scratch/report/iddailyTime > /scratch/report/tempfile
 echo "" >> /scratch/report/tempfile

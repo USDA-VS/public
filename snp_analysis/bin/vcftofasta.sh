@@ -1376,7 +1376,7 @@ mv *.* ./starting_files
         cp ./starting_files/$name ./
         done
 
-        for i in `find ./starting_files/ -mtime -15`; do
+        for i in `find ./starting_files/ -mtime -2`; do
         cp $i ./
         done
 
@@ -2022,7 +2022,7 @@ echo "End Time:  `date`" >> sectiontime
 endtime=`date +%s`
 runtime=$((endtime-starttime))
 #totaltime=`date -u -d @${runtime} +"%T"`
-echo "Run time: $runtime seconds" >> sectiontime
+printf 'Runtime: %dh:%dm:%ds\n' $(($runtime/3600)) $(($runtime%3600/60)) $(($runtime%60)) >> sectiontime
 
 cat sectiontime >  log.txt
 echo "" >> log.txt
