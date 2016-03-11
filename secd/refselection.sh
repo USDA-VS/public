@@ -13,7 +13,7 @@ refname=${ref%.fasta}
 
 bwa index $ref
 samtools faidx $ref
-java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+java -Xmx2g -jar ${picard} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
     echo "Index and dict are present, continue script"
@@ -21,7 +21,7 @@ else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
     samtools faidx $ref
-    java -Xmx2g -jar ${picardPath}/CreateSequenceDictionary.jar REFERENCE=${ref} OUTPUT=${refname}.dict
+    java -Xmx2g -jar ${picard} CreateSequenceDictionary REFERENCE=${ref} OUTPUT=${refname}.dict
     if [ -s ${ref}.fai ] && [ -s ${refname}.dict ]; then
         read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
     fi
