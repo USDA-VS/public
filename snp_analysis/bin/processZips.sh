@@ -2,9 +2,6 @@
 
 #  bovis_processzips.sh
 #  Working directory should contain paired-end fastq reads
-#  Sample must be labeled with TB/Bruc number.
-#  TB numbers must be labeled ##-####
-#  Bruc numbers must be labeled B##-####
 #  Reads must be included as _R1 and _R2
 #  See loopfiles.sh and email_loopfiles for multiple samples.
 
@@ -19,14 +16,18 @@
 #   Reference in fasta format, /Volumes/Data_HD/Mycobacterium/Go_To_File/NC_002945.fasta
 #################################################################################
 
+cpu="16"
+
 echo "**************************************************************************"
 echo "**************************** START ${PWD##*/} ****************************"
 echo "**************************************************************************"
 
+#debug stuff
+alias pause='read -p "$LINENO Enter"'
+
 picard='/usr/local/bin/picard-tools-1.141/picard.jar'
 gatk='/usr/local/bin/GenomeAnalysisTK/GenomeAnalysisTK.jar'
 igvtools='/usr/local/bin/IGVTools/igvtools.jar'
-
 BRUC_MLST=`which Bruc_MLST.sh`
 SPOLIGOSPACERFINDER=`which spoligoSpacerFinder.sh`
 
@@ -48,7 +49,6 @@ if [ $1 == ab1 ]; then
     cp /home/shared/brucella/abortus1/script_dependents/NC_00693c.fasta ./
     hqs="/home/shared/brucella/abortus1/script_dependents/NC_00693cHighestQualitySNPs.vcf"
     bioinfo="/bioinfo11/TStuber/Results/brucella/abortus1/newFiles"
-    sharedSAN="/home/shared/brucella/abortus1/newFiles"
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
@@ -63,7 +63,6 @@ elif [ $1 == mel ]; then
     cp /home/shared/brucella/melitensis/script_dependents/NC_00331c.fasta ./
     hqs="/home/shared/brucella/melitensis/script_dependents/B-REF-BM1-RESTRICTED-CDC-Rev1-highqualitysnps.vcf"
     bioinfo="/bioinfo11/TStuber/Results/brucella/melitensis/newFiles"
-    sharedSAN="/home/shared/brucella/melitensis/newFiles"
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
@@ -78,7 +77,6 @@ elif [ $1 == suis1 ]; then
     cp /home/shared/brucella/suis1/script_dependents/NC_01725c.fasta ./
     hqs="/home/shared/brucella/suis1/script_dependents/NC_01725cHighestQualitySNPs.vcf"
     bioinfo="/bioinfo11/TStuber/Results/brucella/suis1/newFiles"
-    sharedSAN="/home/shared/brucella/suis1/newFiles"
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
@@ -93,7 +91,6 @@ elif [ $1 == suis2 ]; then
     cp /home/shared/brucella/suis2/script_dependents/Bsuisbv2-94-11.fasta ./
     hqs="/home/shared/brucella/suis2/script_dependents/suis2HighestQualitySNPs.vcf"
     bioinfo="/bioinfo11/TStuber/Results/brucella/suis2/newFiles"
-    sharedSAN="/home/shared/brucella/suis2/newFiles"
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
@@ -108,7 +105,6 @@ elif [ $1 == suis3 ]; then
     cp /home/shared/brucella/suis3/script_dependents/B-REF-BS3-686.fasta ./
     hqs="/home/shared/brucella/suis3/script_dependents/B15-0007-highqualitysnps.vcf"
     bioinfo="/bioinfo11/TStuber/Results/brucella/suis3/newFiles"
-    sharedSAN="/home/shared/brucella/suis3/newFiles"
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
@@ -123,7 +119,6 @@ elif [ $1 == suis4 ]; then
     cp /home/shared/brucella/suis4/script_dependents/B-REF-BS4-40.fasta ./
     hqs="/home/shared/brucella/suis4/script_dependents/suis4HighestQualitySNPs.vcf"
     bioinfo="/bioinfo11/TStuber/Results/brucella/suis4/newFiles"
-    sharedSAN="/home/shared/brucella/suis4/newFiles"
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
@@ -138,7 +133,6 @@ elif [ $1 == canis ]; then
     cp /home/shared/brucella/canis/script_dependents/BcanisATCC23365.fasta ./
     hqs="/home/shared/brucella/canis/script_dependents/canisHighestQualitySNPs.vcf"
     bioinfo="/bioinfo11/TStuber/Results/brucella/canis/newFiles"
-    sharedSAN="/home/shared/brucella/canis/newFiles"
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
@@ -153,7 +147,6 @@ elif [ $1 == ceti1 ]; then
     cp /home/shared/brucella/ceti1/script_dependents/Bceti1Cudo.fasta ./
     hqs="/home/shared/brucella/ceti1/script_dependents/ceti1HighestQualitySNPs.vcf"
     bioinfo="/bioinfo11/TStuber/Results/brucella/ceti1/newFiles"
-    sharedSAN="/home/shared/brucella/ceti1/newFiles"
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
@@ -168,7 +161,6 @@ elif [ $1 == ceti2 ]; then
     cp /home/shared/brucella/ceti2/script_dependents/Bceti2-TE10759.fasta ./
     hqs="/home/shared/brucella/ceti2/script_dependents/ceti2HighestQualitySNPs.vcf"
     bioinfo="/bioinfo11/TStuber/Results/brucella/ceti2/newFiles"
-    sharedSAN="/home/shared/brucella/ceti2/newFiles"
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
@@ -183,7 +175,6 @@ elif [ $1 == ovis ]; then
     cp /home/shared/brucella/ovis/script_dependents/BovisATCC25840.fasta ./
     hqs="/home/shared/brucella/ovis/script_dependents/BovisATCC25840HighestQualitySNPs.vcf"
     bioinfo="/bioinfo11/TStuber/Results/brucella/ovis/newFiles"
-    sharedSAN="/home/shared/brucella/ovis/newFiles"
 
     # Run BrucMLST.sh
     echo "Starting Bruc_MLST.sh"
@@ -228,116 +219,105 @@ bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/ancestral/newfiles"
 ###################################################################
 # Lineage 1
 elif [ $1 == TB1 ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb1/NC_017528.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb1/HQ-NC_017528.vcf"
-bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb1/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+    cp /home/shared/mycobacterium/tbc/snppipeline/tb1/NC_017528.fasta ./
+    hqs="/home/shared/mycobacterium/tbc/snppipeline/tb1/HQ-NC_017528.vcf"
+    bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb1/newFiles"
 
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
+    # Run spoligoSpacerFinder.sh
+    echo "Starting spoligoSpacerFinder.sh"
+    ${SPOLIGOSPACERFINDER} &
+    echo "Moving forward from spoligoSpacerFinder.sh"
 
 ###################################################################
 # Lineage 2
 elif [ $1 == TB2 ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb2/NC_021251.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb2/HQ-NC021251.vcf"
-bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb2-H37/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+    cp /home/shared/mycobacterium/tbc/snppipeline/tb2/NC_021251.fasta ./
+    hqs="/home/shared/mycobacterium/tbc/snppipeline/tb2/HQ-NC021251.vcf"
+    bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb2-H37/newFiles"
 
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
+    # Run spoligoSpacerFinder.sh
+    echo "Starting spoligoSpacerFinder.sh"
+    ${SPOLIGOSPACERFINDER} &
+    echo "Moving forward from spoligoSpacerFinder.sh"
 
 ###################################################################
 
 # Lineage 3
 elif [ $1 == TB3 ]; then
-#cp /home/shared/mycobacterium/tbc/snppipeline/tb3/NC_021193.fasta ./
-#hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/HQ-13-7575.vcf"
-#cp /home/shared/mycobacterium/tbc/snppipeline/tb3/NC_021193it3-readreference.fasta ./
-#hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/13-7575-highqualitysnps.vcf"
-cp /home/shared/mycobacterium/tbc/mtb-ancestor.fasta ./
-hqs="/home/shared/mycobacterium/tbc/15-5316-highqualitysnps.vcf"
+    #cp /home/shared/mycobacterium/tbc/snppipeline/tb3/NC_021193.fasta ./
+    #hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/HQ-13-7575.vcf"
+    #cp /home/shared/mycobacterium/tbc/snppipeline/tb3/NC_021193it3-readreference.fasta ./
+    #hqs="/home/shared/mycobacterium/tbc/snppipeline/tb3/13-7575-highqualitysnps.vcf"
+    cp /home/shared/mycobacterium/tbc/mtb-ancestor.fasta ./
+    hqs="/home/shared/mycobacterium/tbc/15-5316-highqualitysnps.vcf"
 
-bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+    bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/newFiles"
 
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
+    # Run spoligoSpacerFinder.sh
+    echo "Starting spoligoSpacerFinder.sh"
+    ${SPOLIGOSPACERFINDER} &
+    echo "Moving forward from spoligoSpacerFinder.sh"
 
 ###################################################################
 # Lineage 4.1 and 4.2
 elif [ $1 == TB4a ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb4a/NC002755.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4a/HQ-NC002755.vcf"
-bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4a/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+    cp /home/shared/mycobacterium/tbc/snppipeline/tb4a/NC002755.fasta ./
+    hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4a/HQ-NC002755.vcf"
+    bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4a/newFiles"
 
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
+    # Run spoligoSpacerFinder.sh
+    echo "Starting spoligoSpacerFinder.sh"
+    ${SPOLIGOSPACERFINDER} &
+    echo "Moving forward from spoligoSpacerFinder.sh"
 
 ###################################################################
 # Lineage 4.9
 elif [ $1 == TB4b ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb4b/NC018143.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4b/HQ-NC018143.vcf"
-bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/newFiles"
+    cp /home/shared/mycobacterium/tbc/snppipeline/tb4b/NC018143.fasta ./
+    hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4b/HQ-NC018143.vcf"
+    bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/newFiles"
 
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
+    # Run spoligoSpacerFinder.sh
+    echo "Starting spoligoSpacerFinder.sh"
+    ${SPOLIGOSPACERFINDER} &
+    echo "Moving forward from spoligoSpacerFinder.sh"
 
 ###################################################################
 # Lineage 5
 elif [ $1 == TB5 ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb5/APKD01000001.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb5/HQ-16-2185-11.vcf"
-bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb5/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+    cp /home/shared/mycobacterium/tbc/snppipeline/tb5/APKD01000001.fasta ./
+    hqs="/home/shared/mycobacterium/tbc/snppipeline/tb5/HQ-16-2185-11.vcf"
+    bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb5/newFiles"
 
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
+    # Run spoligoSpacerFinder.sh
+    echo "Starting spoligoSpacerFinder.sh"
+    ${SPOLIGOSPACERFINDER} &
+    echo "Moving forward from spoligoSpacerFinder.sh"
 
 ###################################################################
 # Lineage 6
 elif [ $1 == TB6 ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tb6/NC_015758.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tb6/HQ-NC015758.vcf"
-bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb6/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+    cp /home/shared/mycobacterium/tbc/snppipeline/tb6/NC_015758.fasta ./
+    hqs="/home/shared/mycobacterium/tbc/snppipeline/tb6/HQ-NC015758.vcf"
+    bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb6/newFiles"
 
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
+    # Run spoligoSpacerFinder.sh
+    echo "Starting spoligoSpacerFinder.sh"
+    ${SPOLIGOSPACERFINDER} &
+    echo "Moving forward from spoligoSpacerFinder.sh"
 
 ###################################################################
 
 # Lineage Bov-Afri, AF2122
 elif [ $1 == TBBOV ]; then
-cp /home/shared/mycobacterium/tbc/snppipeline/tbbov/NC_002945.fasta ./
-hqs="/home/shared/mycobacterium/tbc/snppipeline/tbbov/HighestQualitySNPs.vcf"
-bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/newFiles"
-#sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+    cp /home/shared/mycobacterium/tbc/snppipeline/tbbov/NC_002945.fasta ./
+    hqs="/home/shared/mycobacterium/tbc/snppipeline/tbbov/HighestQualitySNPs.vcf"
+    bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/newFiles"
 
-# Run spoligoSpacerFinder.sh
-echo "Starting spoligoSpacerFinder.sh"
-${SPOLIGOSPACERFINDER} &
-echo "Moving forward from spoligoSpacerFinder.sh"
-
-###################################################################
-###################################################################
-###################################################################
+    # Run spoligoSpacerFinder.sh
+    echo "Starting spoligoSpacerFinder.sh"
+    ${SPOLIGOSPACERFINDER} &
+    echo "Moving forward from spoligoSpacerFinder.sh"
 
 ###################################################################
 
@@ -386,7 +366,7 @@ echo "Reverse Reads:  $revReads"
 
 #   retrieves reference name and name from sorted BAM file name
 r=`echo $ref | sed 's/\..*//'`
-n=`echo $revReads | sed 's/_.*//' | sed 's/\..*//'`
+n=`echo $revReads | sed 's/[._].*//'`
 
 echo "***Reference naming convention:  $r"
 echo "***Isolate naming convention:  $n"
@@ -413,51 +393,42 @@ bwa index $ref
 # -t sets the number of threads/cores
 # -r ST	 Specify the read group in a format like ‘@RG\tID:foo\tSM:bar’ Needed for GATK
 #adding -B 8 will require reads to have few mismatches to align to reference.  -B 1 will allow more mismatch per read.
-echo "***Making Sam file"
-bwa mem -M -t 16 -R @RG"\t"ID:"$n""\t"PL:ILLUMINA"\t"PU:"$n"_RG1_UNIT1"\t"LB:"$n"_LIB1"\t"SM:"$n" $ref $forReads $revReads > $n.sam
+echo "***Making BAM file"
+rg="@RG\tID:${n}\tPL:ILLUMINA\tPU:${n}_RG1_UNIT1\tLB:${n}_LIB1\tSM:${n}"
+bwa mem -M -r 1 -t "$cpu" -R "$rg" "$ref" "$forReads" "$revReads" | \
+sambamba view -t "$cpu" -f bam -h -S /dev/stdin | \
+sambamba sort -t "$cpu" -o ${n}.all.bam /dev/stdin # mapped and unmapped reads
 
-# -b	 Output in the BAM format.
-# -h	 Include the header in the output.
-#-F INT	 Skip alignments with bits present in INT [0]
-echo "***Making Bam file"
-samtools view -bh -F4 -T $ref $n.sam > $n.raw.bam
+#https://github.com/lomereiter/sambamba/wiki/%5Bsambamba-view%5D-Filter-expression-syntax
+#only mapped
+sambamba view -t "$cpu" -f bam -h -F "not (unmapped or mate_is_unmapped)" ${n}.all.bam | \
+sambamba sort -t "$cpu" -o ${n}.sorted.bam /dev/stdin
+#only unmapped
+sambamba view -t "$cpu" -f bam -h -F "unmapped or mate_is_unmapped" ${n}.all.bam | \
+sambamba sort -t "$cpu" -o ${n}.unmappedReads.bam /dev/stdin
 
-if [ $1 == secd ]; then
-        echo "secd, not assembling unmapped reads"
-else
-####### unmapped reads #######
-#Bam with mapped and unmapped reads
-samtools view -bh -T $ref $n.sam > $n.all.bam
-#Strip off the unmapped reads
-samtools view -h -f4 $n.all.bam > $n.unmappedReads.sam
 #Create fastqs of unmapped reads to assemble
-java -Xmx4g -jar ${picard} SamToFastq INPUT=$n.unmappedReads.sam FASTQ=${n}-unmapped_R1.fastq SECOND_END_FASTQ=${n}-unmapped_R2.fastq
-rm $n.all.bam
-rm $n.unmappedReads.sam
-abyss-pe name=${n}_abyss k=64 in="${n}-unmapped_R1.fastq ${n}-unmapped_R2.fastq"
+bedtools bamtofastq -i ${n}.unmappedReads.bam \
+-fq ${n}-unmapped_R1.fastq \
+-fq2 ${n}-unmapped_R2.fastq
 
+#compress fastq
+pigz ${n}-unmapped_R?.fastq
+
+#SPAdes
+# easy_install --install-dir=/home/CFIA-ACIA/duceppem/local/lib/python2.7/site-packages/ regex
+spades.py -t "$cpu" -k 63 --careful -1 ${n}-unmapped_R1.fastq.gz -2 ${n}-unmapped_R2.fastq.gz -o spades_output
+
+#file stuff
 mkdir ../unmappedReads
-mv ${n}-unmapped_R1.fastq ../unmappedReads
-mv ${n}-unmapped_R2.fastq ../unmappedReads
-mv ${n}_abyss-3.fa ../unmappedReads
-mv ${n}_abyss-8.fa ../unmappedReads
-mv ${n}_abyss-stats ../unmappedReads
-mv *coverage* ../unmappedReads
-rm *abyss*
+mv ${n}-unmapped_R?.fastq.gz ../unmappedReads
+mv spades_output/scaffolds.fasta ../unmappedReads
+mv spades_output/spades.log ../unmappedReads
 ######################
-fi
 
-echo "***Sorting Bam"
-samtools sort $n.raw.bam $n.sorted
-echo "***Indexing Bam"
-samtools index $n.sorted.bam
-# Remove duplicate molecules
-
-echo "***Marking Duplicates"
-java -Xmx4g -jar  ${picard} MarkDuplicates INPUT=$n.sorted.bam OUTPUT=$n.dup.bam METRICS_FILE=$n.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
-
-echo "***Index $n.dup.bam"
-samtools index $n.dup.bam
+echo "***Removing Duplicates and Indexing Bam"
+sambamba markdup -r -t "$cpu" ${n}.sorted.bam ${n}.dup.bam
+sambamba index -t "$cpu" ${n}.dup.bam
 
 # Creates file that is used in the next step
 # locally realign reads such that the number of mismatching bases is minimized across all the reads
