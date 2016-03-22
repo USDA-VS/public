@@ -519,6 +519,7 @@ cat ${n}.body ${n}.vcfFormated | awk 'BEGIN{OFS="\t"}{if ($4 == ".") print $1, $
 cat ${n}.header ${n}.SNPsMapzeroNoHeader.vcf > ${n}.unsortSNPsZeroCoverage.vcf
 java -Xmx4g -jar ${igvtools} sort ${n}.unsortSNPsZeroCoverage.vcf ${n}.SNPsZeroCoverage.vcf
 java -Xmx4g -jar ${igvtools} index ${n}.SNPsZeroCoverage.vcf
+fi
 
 # Emit all sites to VCF, not just the SNPs and indels.  This allows making a UnifiedGenotyper VCF similar to what was used before using the Haplotypecaller.
 java -Xmx4g -jar ${gatk} -R $ref -T UnifiedGenotyper -out_mode EMIT_ALL_SITES -I ${n}.ready-mem.bam -o ${n}.allsites.vcf -nt "$cpu"
@@ -528,7 +529,7 @@ awk ' $0 ~ /#/ || $8 !~ /^AN=2;/ {print $0}' ${n}.allsites.vcf > ${n}.ready-mem.
 java -Xmx4g -jar ${igvtools} index ${n}.ready-mem.vcf
 
 echo "***Deleting Files"
-#rm -rf spades_output/
+rm -rf spades_output/
 rm ${n}.unsortSNPsZeroCoverage.vcf
 rm ${n}.all.bam
 rm ${n}.dup.bam
@@ -680,8 +681,8 @@ ln qualityvalues/${n}.stats.txt ./stats-${n}.txt
 
 cp $0 ./
 
-echo "***Sending files to the Network"
-cp -r ${startingdir} ${bioinfo}
+#echo "***Sending files to the Network"
+#cp -r ${startingdir} ${bioinfo}
 
 #Make dailyStats.txt for each stats.txt made for each isolate.
 echo "" >> /scratch/report/dailyStats.txt
