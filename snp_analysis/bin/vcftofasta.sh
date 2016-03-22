@@ -1761,6 +1761,8 @@ mkdir all_clades
 mv ./Clade*/ ./all_clades/
 
 ##################### Start: All vcf folder #####################
+function all_vcfs () {
+
 cd ./all_vcfs/
 d="all_vcfs"
 
@@ -1909,8 +1911,10 @@ rm parsimony_filtered_total_alt
 rm parsimony_filtered_total_pos
 rm parsimony_informative
 rm *zerofilteredsnps_alt
+}
 
 if [ "$eflag" -o "$aflag" ]; then
+        all_vcfs
 	d="all_vcfs"
         cd ./fasta
         alignTable
