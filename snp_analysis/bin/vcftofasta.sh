@@ -1504,7 +1504,6 @@ wait
 # Change low QUAL SNPs to N, see set variables
 changeLowCalls
 wait
-pause
 
 ######################## Change AC1s to IUPAC ########################
 
