@@ -997,7 +997,11 @@ awk '{print $1}' filtered_total_pos > total.list
     done
     wait
 rm total.list
-rm delete
+
+if [ -e delete ]; then 
+    rm delete
+fi
+
 # Count the number of SNPs
 
 totalSNPs=`grep -c ".*" filtered_total_pos`
