@@ -688,7 +688,7 @@ echo "" >> section2
 #    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 #done
 
-ls *vcf | parallel --wait 'awk -v x=$lowEnd -v y=$highEnd '"'"'BEGIN {OFS="\t"} { if ($6 >= x && $6 <= y) print $1, $2, $3, $4, "N", $6, $7, $8; else print $0 }'"'"' {} > {.}.txt' && \
+ls *vcf | parallel 'awk -v x=$lowEnd -v y=$highEnd '"'"'BEGIN {OFS="\t"} { if ($6 >= x && $6 <= y) print $1, $2, $3, $4, "N", $6, $7, $8; else print $0 }'"'"' {} > {.}.txt' && \
 for f in *txt; do mv "$f" "${f%.txt}.vcf"; done
 
 wait
@@ -1328,7 +1328,7 @@ echo "`date` --> Organized table map quality gathering for $c"
 #	[[ $((count%CPU_NR)) -eq 0 ]] && wait
 #	done < $d-positions
 
-cat $d-positions | parallel 'export rownumber=$(echo {} | awk '{print $1}'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); echo "$rownumber $avemap" >> quality.txt'
+cat $d-positions | parallel 'export rownumber=$(echo {} | awk '"'"'{print $1}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); echo "$rownumber $avemap" >> quality.txt'
 
 wait
 sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
@@ -1496,7 +1496,6 @@ printf "%s\t%s\t%s\t%s\n" "TB Number" "Group" "Subgroup" "Clade" > FileMakerGrou
 AConeCallPosition
 wait
 
-pause
 # Change low QUAL SNPs to N, see set variables
 changeLowCalls
 wait
