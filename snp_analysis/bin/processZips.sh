@@ -477,12 +477,12 @@ if [ ! -e ${n}.preready-mem.bam ]; then
 	java -Xmx4g -jar ${gatk} -T PrintReads --fix_misencoded_quality_scores -R "$ref" -I ${n}.realignedBam.bam -BQSR ${n}.recal_data.grp -o ${n}.preready-mem.bam -nct "$cpu"
 fi
 
-java -jar ${gatk} -T ClipReads -R "$ref" -I ${n}.preready-mem.bam -o ${n}.ready-mem.bam -filterNoBases -dcov 10
+java -Xmx4g -jar ${gatk} -T ClipReads -R "$ref" -I ${n}.preready-mem.bam -o ${n}.ready-mem.bam -filterNoBases -dcov 10
 sambamba index -t "$cpu" ${n}.ready-mem.bam
 
 #Collect Depth of coverage info
 echo "***Collect Depth of Coverage"
-java -jar ${gatk} -T DepthOfCoverage -R "$ref" -I ${n}.preready-mem.bam -o ${n}.coverage -omitIntervals --omitLocusTable --omitPerSampleStats -nt "$cpu"
+java -Xmx4g -jar ${gatk} -T DepthOfCoverage -R "$ref" -I ${n}.preready-mem.bam -o ${n}.coverage -omitIntervals --omitLocusTable --omitPerSampleStats -nt "$cpu"
 
 #########################
 
