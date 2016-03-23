@@ -682,11 +682,15 @@ echo "AConeCallPosition is running, started -->  `date`"
 #echo "Possible Mixed Isolates" > section2
 #echo "Defining SNPs that are called as AC=1" >> section2
 echo "" >> section2
-for i in *.vcf; do
-(for pos in $positionList; do awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ "^"x"$" ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }' $i; done | grep "AC=1;A" | awk 'BEGIN {FS=";"} {print $1, $2}' >> section2) &
-    let count+=1
-    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
-done
+#for i in *.vcf; do
+#(for pos in $positionList; do awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ "^"x"$" ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }' $i; done | grep "AC=1;A" | awk 'BEGIN {FS=";"} {print $1, $2}' >> section2) &
+#    let count+=1
+#    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+#done
+
+ls *vcf | parallel --wait 'awk -v x=$lowEnd -v y=$highEnd '"'"'BEGIN {OFS="\t"} { if ($6 >= x && $6 <= y) print $1, $2, $3, $4, "N", $6, $7, $8; else print $0 }'"'"' {} > {.}.txt' && \
+for f in *txt; do mv "$f" "${f%.txt}.vcf"; done
+
 wait
 sleep 2
 
@@ -1489,6 +1493,7 @@ printf "%s\t%s\t%s\t%s\n" "TB Number" "Group" "Subgroup" "Clade" > FileMakerGrou
 AConeCallPosition
 wait
 
+pause
 # Change low QUAL SNPs to N, see set variables
 changeLowCalls
 wait
