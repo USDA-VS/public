@@ -682,14 +682,11 @@ echo "AConeCallPosition is running, started -->  `date`"
 #echo "Possible Mixed Isolates" > section2
 #echo "Defining SNPs that are called as AC=1" >> section2
 echo "" >> section2
-#for i in *.vcf; do
-#(for pos in $positionList; do awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ "^"x"$" ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }' $i; done | grep "AC=1;A" | awk 'BEGIN {FS=";"} {print $1, $2}' >> section2) &
-#    let count+=1
-#    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
-#done
-
-ls *vcf | parallel 'awk -v x=$lowEnd -v y=$highEnd '"'"'BEGIN {OFS="\t"} { if ($6 >= x && $6 <= y) print $1, $2, $3, $4, "N", $6, $7, $8; else print $0 }'"'"' {} > {.}.txt' && \
-for f in *txt; do mv "$f" "${f%.txt}.vcf"; done
+for i in *.vcf; do
+(for pos in $positionList; do awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ "^"x"$" ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }' $i; done | grep "AC=1;A" | awk 'BEGIN {FS=";"} {print $1, $2}' >> section2) &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+done
 
 wait
 sleep 2
@@ -752,11 +749,16 @@ echo "Finished preparing filter files"
 
 function changeLowCalls () {
 echo "Changeing low calls, started --> $(date)"
-for i in *.vcf; do
-(base=`basename $i .vcf`; awk -v x=$lowEnd -v y=$highEnd 'BEGIN {OFS="\t"} { if ($6 >= x && $6 <= y) print $1, $2, $3, $4, "N", $6, $7, $8; else print $0 }' $i > ${base}.txt; rm $i; mv ${base}.txt ${base}.vcf) &
-    let count+=1
-    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
-done
+
+#for i in *.vcf; do
+#(base=`basename $i .vcf`; awk -v x=$lowEnd -v y=$highEnd 'BEGIN {OFS="\t"} { if ($6 >= x && $6 <= y) print $1, $2, $3, $4, "N", $6, $7, $8; else print $0 }' $i > ${base}.txt; rm $i; mv ${base}.txt ${base}.vcf) &
+#    let count+=1
+#    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+#done
+
+ls *vcf | parallel 'awk -v x=$lowEnd -v y=$highEnd '"'"'BEGIN {OFS="\t"} { if ($6 >= x && $6 <= y) print $1, $2, $3, $4, "N", $6, $7, $8; else print $0 }'"'"' {} > {.}.txt' && \
+for f in *txt; do mv "$f" "${f%.txt}.vcf"; done
+
 wait
 sleep 2
 
@@ -1502,6 +1504,7 @@ wait
 # Change low QUAL SNPs to N, see set variables
 changeLowCalls
 wait
+pause
 
 ######################## Change AC1s to IUPAC ########################
 
