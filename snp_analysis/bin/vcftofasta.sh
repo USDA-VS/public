@@ -1289,19 +1289,22 @@ awk ' NR == 1 {print $0}' $d.sortedTable.txt | tr "\t" "\n" | sed "1d" | awk '{p
 
 echo "map-quality map-quality" > quality.txt
 echo "`date` --> Sorted table map quality gathering for $c"
-while read p; do
-	(rownumber=`echo $p | awk '{print $1}'`
-	front=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\1/'`
-	back=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\2/'`
-	#echo "rownumber: $rownumber"
-	#echo "front: $front"
-	#echo "back: $back"
-	avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
-	echo "$rownumber $avemap" >> quality.txt) &
-	CPU_NR=$(mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 15}'a | sed 's/\..*//')
-	let count+=1
-	[[ $((count%CPU_NR)) -eq 0 ]] && wait
-	done < $d-positions
+#while read p; do
+#	(rownumber=`echo $p | awk '{print $1}'`
+#	front=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\1/'`
+#	back=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\2/'`
+#	#echo "rownumber: $rownumber"
+#	#echo "front: $front"
+#	#echo "back: $back"
+#	avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
+#	echo "$rownumber $avemap" >> quality.txt) &
+#	CPU_NR=$(mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 15}'a | sed 's/\..*//')
+#	let count+=1
+#	[[ $((count%CPU_NR)) -eq 0 ]] && wait
+#	done < $d-positions
+
+cat $d-positions | parallel 'export rownumber=$(echo {} | awk '"'"'{print $1}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); echo "$rownumber $avemap" >> quality.txt'
+
 wait
 sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
 
