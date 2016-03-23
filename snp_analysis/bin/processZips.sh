@@ -432,7 +432,10 @@ mv spades_output/spades.log ../unmappedReads
 ######################
 
 echo "***Removing Duplicates and Indexing Bam"
-sambamba markdup -r -t "$cpu" ${n}.sorted.bam ${n}.dup.bam
+#sambamba markdup -r -t "$cpu" ${n}.sorted.bam ${n}.dup.bam
+echo "***Marking Duplicates"
+java -Xmx4g -jar  ${picard} MarkDuplicates INPUT=${n}.sorted.bam OUTPUT=${n}.dup.bam METRICS_FILE=${n}.FilteredReads.xls ASSUME_SORTED=true REMOVE_DUPLICATES=true
+
 sambamba index -t "$cpu" ${n}.dup.bam
 
 # Creates file that is used in the next step
@@ -571,20 +574,17 @@ java -Xmx4g -jar ${picard} CollectMultipleMetrics REFERENCE_SEQUENCE=$ref INPUT=
 #Collect Alignment Summary Metrics
 echo "***Collect Alignment Summary Metrics"
 java -Xmx4g -jar ${picard} CollectAlignmentSummaryMetrics REFERENCE_SEQUENCE=$ref INPUT=${n}.ready-mem.bam OUTPUT=${n}.AlignmentMetrics ASSUME_SORTED=true
-pause
 
 #Collect GC Bias Error
 echo "***Collect GC Bias Error"
 java -Xmx4g -jar ${picard} CollectGcBiasMetrics REFERENCE_SEQUENCE=$ref INPUT=${n}.ready-mem.bam OUTPUT=${n}.CollectGcBiasMetrics CHART_OUTPUT=${n}.GC.PDF SUMMARY_OUTPUT=${n}.GC.summary.txt ASSUME_SORTED=true
-pause
 
 #Collect Insert Size Metrics
 echo "***Collect Insert Size Metrics"
 java -Xmx4g -jar ${picard} CollectInsertSizeMetrics REFERENCE_SEQUENCE=$ref INPUT=${n}.ready-mem.bam HISTOGRAM_FILE=${n}.InsertSize.pdf OUTPUT=${n}.CollectInsertSizeMetrics ASSUME_SORTED=true
-pause
 
-cat ${n}.AlignmentMetrics > ${n}.Metrics_summary.txt
-cat ${n}.CollectInsertSizeMetrics >> ${n}.Metrics_summary.txt
+cat ${n}.AlignmentMetrics > ${n}.Metrics_summary.xls
+cat ${n}.CollectInsertSizeMetrics >> ${n}.Metrics_summary.xls
 
 echo "***Organizing files"
 
@@ -618,18 +618,16 @@ grep -c ">" ../unmappedReads/scaffolds.fasta >> ${n}.stats2.txt
 echo "" >> ${n}.stats2.txt
 
 #some stats
-sed -n 7,8p ${n}.Metrics_summary.txt | awk '{print $2}' >> ${n}.stats2.txt
-sed -n 7,8p ${n}.Metrics_summary.txt | awk '{print $3}' >> ${n}.stats2.txt
-sed -n 7,8p ${n}.Metrics_summary.txt | awk '{print $8}' >> ${n}.stats2.txt
-readcount=$(sed -n 8p ${n}.Metrics_summary.txt | awk '{print $3}')
+sed -n 7,8p ${n}.FilteredReads.xls | awk '{print $2}' >> ${n}.stats2.txt
+sed -n 7,8p ${n}.FilteredReads.xls | awk '{print $3}' >> ${n}.stats2.txt
+sed -n 7,8p ${n}.FilteredReads.xls | awk '{print $8}' >> ${n}.stats2.txt
+readcount=$(sed -n 8p ${n}.FilteredReads.xls | awk '{print $3}')
 echo "" >> ${n}.stats2.txt
 
-pause
 echo "***Bamtools running"
 aveCoverage=$(bamtools coverage -in ${n}.ready-mem.bam | awk '{sum+=$3} END { print sum/NR"X"}')
 echo "Average depth of coverage: $aveCoverage" >> ${n}.stats2.txt
 
-pause
 #genome coverage
 percGenomeMissing=$(awk -v x="$zeroposition" -v y="$refsize" 'BEGIN { print(x/y)*100}')
 percGenomeCoverage="$(echo "100 - $percGenomeMissing" | bc)"
@@ -639,7 +637,6 @@ echo "Percent of reference with coverage: ${percGenomeCoverage}%" >> ${n}.stats2
 cat ${n}.stats2.txt > ${n}.stats.txt
 echo "" >> ${n}.stats.txt
 
-pause
 rm ${n}.stats2.txt
 ###########################
 
@@ -647,14 +644,11 @@ rm ${n}.stats2.txt
 echo 'Mean_Insert_Size  Standard_Deviation:' >> ${n}.stats.txt
 awk 'BEGIN {OFS="\t"} { print $5,$6 }' ${n}.Quality_by_cycle.insert_size_metrics | awk 'FNR == 8 {print $0}' >> ${n}.stats.txt
 
-pause
 echo 'Mean_Read_Length:' >> ${n}.stats.txt
 awk 'BEGIN {OFS="\t"} { print $16 }' ${n}.AlignmentMetrics | awk 'FNR == 10 {print $0}' >> ${n}.stats.txt
 
-pause
 echo "" >> ${n}.stats.txt
 
-pause
 #  Add SNP call numbers to stats.txt file
 echo "SNP and zero coverage positions in ${n}.SNPsZeroCoverage.vcf:" >> ${n}.stats.txt
 egrep -v "#" ${n}.SNPsZeroCoverage.vcf | grep -c ".*" >> ${n}.stats.txt
@@ -672,7 +666,7 @@ echo -e "$n \t $readcount \t ${aveCoverage} \t ${percGenomeCoverage}% " >> /scra
 echo -e "$n \t $readcount \t ${aveCoverage} \t ${percGenomeCoverage}% " >> /scratch/report/dailyReport.txt
 
 mv ${n}.FilteredReads.xls qualityvalues/
-mv ${n}.Metrics_summary.txt qualityvalues/
+mv ${n}.Metrics_summary.xls qualityvalues/
 mv ${n}.stats.txt qualityvalues/
 rm ${n}.Quality_by_cycle.insert_size_metrics
 rm ${n}.AlignmentMetrics
