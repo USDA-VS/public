@@ -690,7 +690,6 @@ for i in *.vcf; do
 done
 
 echo "AConeCallPosition is running, end -->  `date`"
-pause
 wait
 sleep 2
 
