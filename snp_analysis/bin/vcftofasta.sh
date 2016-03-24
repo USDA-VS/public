@@ -683,20 +683,10 @@ echo "AConeCallPosition is running, started -->  `date`"
 #echo "Defining SNPs that are called as AC=1" >> section2
 echo "" >> section2
 
-echo "echo postionlist"
-echo $positionList
-
-pause
-echo "cat positionlist"
-cat $positionList
-
-pause
-
 for i in *.vcf; do
-#(for pos in $positionList; do awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ "^"x"$" ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }' $i; done | grep "AC=1;A" | awk 'BEGIN {FS=";"} {print $1, $2}' >> section2) &
-#    let count+=1
-#    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
-cat $positionList | parallel 'awk -v x=$pos '"'"'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ "^"x"$" ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }'"'"' {}; done | grep "AC=1;A" | awk '"'"'BEGIN {FS=";"} {print $1, $2}' >> section2'"'"' | parallel 'awk -v x=$pos '"'"'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ "^"x"$" ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }'"'"' {}; done | grep "AC=1;A" | awk '"'"'BEGIN {FS=";"} {print $1, $2}' >> section2'"'"'
+(for pos in $positionList; do awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ "^"x"$" ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }' $i; done | grep "AC=1;A" | awk 'BEGIN {FS=";"} {print $1, $2}' >> section2) &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
 
 echo "AConeCallPosition is running, end -->  `date`"
@@ -1425,7 +1415,10 @@ rm elite
 
 #Remove possible "## in vcf headers
 echo 'Removing possible "## in vcf headers'
-sed -i 's/^"##/##/' *vcf
+date
+ls *vcf | parallel 'sed  '"'"'s/^"##/##/'"'"' {} > {.}.temp' && \
+for f in *temp; do mv "$f" "${f%.temp}.vcf"; done
+date
 
 #################################################################################
 
