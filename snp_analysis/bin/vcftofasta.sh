@@ -1990,7 +1990,7 @@ for d in $directories; do
     #echo "****************************************************"
     #echo "************* Orginizing Table: $d *****************"
     #echo "****************************************************"
-	alignTable &
+	alignTable & 2> /dev/null
 
     pwd
 done
@@ -2015,7 +2015,7 @@ for d in $directories; do
     #echo "****************************************************"
     #echo "************* Orginizing Table: $d *****************"
     #echo "****************************************************"
-    alignTable &
+    alignTable & 2> /dev/null
 pwd
 done
 else
@@ -2038,7 +2038,7 @@ for d in $directories; do
     #echo "****************************************************"
     #echo "************* Orginizing Table: $d *****************"
     #echo "****************************************************"
-    alignTable &
+    alignTable & 2> /dev/null
 pwd
 done
 else
