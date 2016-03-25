@@ -21,7 +21,7 @@ shift $(($OPTIND - 1))
 
 if [ -z $1 ]; then 
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: gen, testflu, allflu, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav"
+    echo "Incorrect argument!  Must use one of the following arguments: flu, gen, testflu, allflu, sivall, h5n2, h5n8, h11n9, secd, reo, vsv, isav"
     echo ""
     echo "Set optional flags"
     echo -e '   flag -m will email just "M"e'
