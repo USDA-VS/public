@@ -258,9 +258,10 @@ cat << EOL > $mytex
 \today
 
 \vspace{5mm}
-\textbf{Identification Report:  ${sampleName}} 
-
-\textbf{XXXXXHNTYPEXXXXXXX}
+\textbf{ } \\\\
+\textbf{Identification Report:  ${sampleName}} \\\\ 
+\textbf{XXXXXSTRAINNAMEXXXXXXX} \\\\ 
+\textbf{XXXXXHNTYPEXXXXXXX} \\\\
 EOL
 
 #######################################################################################
@@ -1456,6 +1457,7 @@ cd ${root}/share_folder
 if [[ ${genotypingcodes} == "NEED TO SET" ]]; then
     echo "genotyping codes not given"
     cp ${root}/${sampleName}-reference_guided_assemblies/${sampleName}.consensus.reads.fasta ${root}/${sampleName}-submissionfile.fasta
+    sed -i "s/XXXXXSTRAINNAMEXXXXXXX//" $mytex	
 else
     echo "sampleName: $sampleName"
 
@@ -1471,7 +1473,8 @@ else
 
         #column 2: species
         species=`awk 'BEGIN{FS="\t"}{print $2}' ${sampleName}.information`
-        echo "species $species"
+        speciesspace=`awk 'BEGIN{FS="\t"}{print $2}' ${sampleName}.information | sed 's/_/ /g'`
+	echo "species $species"
 
         #column 3: state
         state=`awk 'BEGIN{FS="\t"}{print $3}' ${sampleName}.information`
@@ -1487,7 +1490,9 @@ else
         noyear=`echo $sample | sed -e "s/$syear-//"`
         echo "noyear $noyear"
 
-        # Create "here-document"
+	sed -i "s:XXXXXSTRAINNAMEXXXXXXX:A/${speciesspace}/${state}/${noyear}/${sampleyear}:" $mytex
+        
+	# Create "here-document"
 cat >./param.txt <<EOL
 
 >Seq1 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 1, polymerase PB2 (PB2) gene, complete cds.
