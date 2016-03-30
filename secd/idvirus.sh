@@ -260,8 +260,8 @@ cat << EOL > $mytex
 \vspace{5mm}
 \textbf{ } \\\\
 \textbf{Identification Report:  ${sampleName}} \\\\ 
-\textbf{XXXXXSTRAINNAMEXXXXXXX} \\\\ 
 \textbf{XXXXXHNTYPEXXXXXXX} \\\\
+\textbf{XXXXXSTRAINNAMEXXXXXXX} \\\\
 EOL
 
 #######################################################################################
@@ -1363,9 +1363,9 @@ blastn -query ${sampleName}.consensusnoN.reads.fasta -db /data/BLAST/db/nt -num_
 
 echo "" >> ${summaryfile}
 
-hsegment=`grep "segment4" ${sampleName}-consensus-max1-nt.txt | sed 's/.*\(H[0-9]\{1,2\}\).*/\1/'`
+hsegment=`grep "segment4" ${sampleName}-consensus-max1-nt.txt | sed 's/.*\(H[0-9]\{1,2\}\).*/\1/' | head -1`
 echo "hsegment: $hsegment"
-nsegment=`grep "segment6" ${sampleName}-consensus-max1-nt.txt | sed 's/.*\(N[0-9]\{1,2\}\).*/\1/'`
+nsegment=`grep "segment6" ${sampleName}-consensus-max1-nt.txt | sed 's/.*\(N[0-9]\{1,2\}\).*/\1/' | head -1`
 echo "nsegment: $nsegment"
 
 subtype=${hsegment}${nsegment}
@@ -1373,6 +1373,7 @@ subtype=${hsegment}${nsegment}
 # echo subtype to terminal
 i=0; while [ $i -lt 11 ]; do echo "*** Subtype: $subtype"; i=$[$i+1]; done
 
+echo "subtype: $subtype"
 if [[ -n $subtype ]]; then
         echo "Subtype: $subtype" >> ${summaryfile}
 	echo "Subtype: $subtype" >> $idscriptrunsummary
@@ -1462,11 +1463,8 @@ else
     echo "sampleName: $sampleName"
 
     grep "$sampleName" $genotypingcodes | head -1 > ${sampleName}.information
-    cat ${sampleName}.information
-
-    if [ -s ${sampleName}.information ]; then
+    if [[ -s ${sampleName}.information ]]; then
         echo "file exists and is greater than zero, continue"
-
         #column 1: sample
         sample=`awk 'BEGIN{FS="\t"}{print $1}' ${sampleName}.information`
         echo "sample $sample"
@@ -1491,7 +1489,7 @@ else
         echo "noyear $noyear"
 
 	sed -i "s:XXXXXSTRAINNAMEXXXXXXX:A/${speciesspace}/${state}/${noyear}/${sampleyear}:" $mytex
-        
+        	
 	# Create "here-document"
 cat >./param.txt <<EOL
 
@@ -1509,6 +1507,8 @@ EOL
         awk 'NR==FNR{a[$1]=$0;next} ($1 in a){ print a[$1]; next}1' param.txt ${sampleName}.temp > ${root}/${sampleName}-submissionfile.fasta
 
     else
+	sed -i "s/XXXXXSTRAINNAMEXXXXXXX//" $mytex
+	sed -i "s/XXXXXHNTYPEXXXXXXX/$argUsed/" $mytex
         echo "metadata not available"
         cp ${root}/${sampleName}-reference_guided_assemblies/${sampleName}.consensus.reads.fasta ${root}/${sampleName}-submissionfile.fasta
     fi
