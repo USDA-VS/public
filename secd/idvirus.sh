@@ -1368,13 +1368,24 @@ echo "hsegment: $hsegment"
 nsegment=`grep "segment6" ${sampleName}-consensus-max1-nt.txt | sed 's/.*\(N[0-9]\{1,2\}\).*/\1/' | head -1`
 echo "nsegment: $nsegment"
 
+#If matching segment is labeled "mixed" H and N subtypes are not found above and the entire line identification is found
+#therefore if characters in variable are > 3 variable is changed to "mixed"
+if [[ ${#hsegment} -gt 3 ]]; then
+        echo "hsegment is greater thatn 3, likely mixed.  Changing variable to mixed"
+        hsegment="H?"
+fi
+
+if [[ ${#nsegment} -gt 3 ]]; then 
+	echo "nsegment is greater thatn 3, likely mixed.  Changing variable to mixed"
+	nsegment="N?"
+fi
+
 subtype=${hsegment}${nsegment}
 
 # echo subtype to terminal
 i=0; while [ $i -lt 11 ]; do echo "*** Subtype: $subtype"; i=$[$i+1]; done
 
 echo "subtype: $subtype"
-pause
 
 if [[ -n $subtype ]]; then
         echo "Subtype: $subtype" >> ${summaryfile}
@@ -1382,14 +1393,11 @@ if [[ -n $subtype ]]; then
 	echo "Subtype: $subtype" >> /bioinfo11/TStuber/Results/viruses/idvirus_run_summary.txt
 
 	sed -i "s/XXXXXHNTYPEXXXXXXX/Subtype: $subtype/" $mytex
-pause
 
 else
 	sed -i "s/XXXXXHNTYPEXXXXXXX/$argUsed/" $mytex
-pause
 
 fi
-pause
 
 echo "--------------------------------------------------" >> ${summaryfile}
 echo "*** NT database ***" >> ${summaryfile}
