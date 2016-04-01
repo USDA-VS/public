@@ -1374,15 +1374,22 @@ subtype=${hsegment}${nsegment}
 i=0; while [ $i -lt 11 ]; do echo "*** Subtype: $subtype"; i=$[$i+1]; done
 
 echo "subtype: $subtype"
+pause
+
 if [[ -n $subtype ]]; then
         echo "Subtype: $subtype" >> ${summaryfile}
 	echo "Subtype: $subtype" >> $idscriptrunsummary
 	echo "Subtype: $subtype" >> /bioinfo11/TStuber/Results/viruses/idvirus_run_summary.txt
 
 	sed -i "s/XXXXXHNTYPEXXXXXXX/Subtype: $subtype/" $mytex
+pause
+
 else
 	sed -i "s/XXXXXHNTYPEXXXXXXX/$argUsed/" $mytex
+pause
+
 fi
+pause
 
 echo "--------------------------------------------------" >> ${summaryfile}
 echo "*** NT database ***" >> ${summaryfile}
@@ -1472,12 +1479,13 @@ else
         #column 2: species
         species=`awk 'BEGIN{FS="\t"}{print $2}' ${sampleName}.information`
         speciesspace=`awk 'BEGIN{FS="\t"}{print $2}' ${sampleName}.information | sed 's/_/ /g'`
-	echo "species $species"
+    	echo "species $species"
+        echo "speciesspace $speciesspace"
 
         #column 3: state
         state=`awk 'BEGIN{FS="\t"}{print $3}' ${sampleName}.information`
         echo "state $state"
-
+        statespace=`awk 'BEGIN{FS="\t"}{print $3}' ${sampleName}.information | sed 's/_/ /g'`
         syear=`echo "$sample" | sed 's/-.*//'`
         echo "syear $syear"
         sampleyear=`echo "20${syear}"`
@@ -1488,7 +1496,7 @@ else
         noyear=`echo $sample | sed -e "s/$syear-//"`
         echo "noyear $noyear"
 
-	sed -i "s:XXXXXSTRAINNAMEXXXXXXX:A/${speciesspace}/${state}/${noyear}/${sampleyear}:" $mytex
+	sed -i "s:XXXXXSTRAINNAMEXXXXXXX:A/${speciesspace}/${statespace}/${noyear}/${sampleyear}:" $mytex
         	
 	# Create "here-document"
 cat >./param.txt <<EOL
