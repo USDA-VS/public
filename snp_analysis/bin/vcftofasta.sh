@@ -217,10 +217,42 @@ rm ./inputXLS.py
 }
 #####################################################
 
+function getbrucname () {
+
+echo "using xlrd to get brucella genotyping codes from ALL_WGS.xlsx"
+date
+
+cat >./excelcolumnextract.py <<EOL
+#!/usr/bin/env python
+
+import os
+import xlrd
+from sys import argv
+
+script, input = argv
+
+wb = xlrd.open_workbook(input)
+
+sheet = wb.sheet_by_index(1)
+for row in sheet.col(32):
+        print row
+EOL
+
+chmod 755 ./excelcolumnextract.py
+
+./excelcolumnextract.py /bioinfo11/TStuber/Results/brucella/ALL_WGS.xlsx | sed 's/text:u//' | tr -d "'" | sed -e 's/[.*:()/\?]/_/g' -e 's/ /_/g' -e 's/_-/_/' -e 's/-_/_/' -e 's/__/_/g' -e 's/[_-]$//' > /bioinfo11/TStuber/Results/brucella/bruc_tags.txt
+
+rm ./excelcolumnextract.py
+
+}
+
+#####################################################
+
 # Environment controls:
 
 if [[ $1 == ab1 ]]; then
 
+    getbrucname    
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/abortus1/script_dependents/Abortus1_Defining_SNPs.txt"
@@ -239,6 +271,7 @@ if [[ $1 == ab1 ]]; then
 
 elif [[ $1 == mel ]]; then
 
+    getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/melitensis/script_dependents/Mel_Defining_SNPs.txt"
@@ -257,6 +290,7 @@ elif [[ $1 == mel ]]; then
 
 elif [[ $1 == suis1 ]]; then
 
+    getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/suis1/script_dependents/Suis1_Defining_SNPs.txt"
@@ -274,7 +308,8 @@ elif [[ $1 == suis1 ]]; then
     email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
 
 elif [[ $1 == suis2 ]]; then
-
+    
+    getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/suis2/script_dependents/suis2_Defining_SNPs.txt"
@@ -289,10 +324,12 @@ elif [[ $1 == suis2 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/brucella/suis2/vcfs/"
     echo "vcftofasta.sh ran as B. suis bv2"
     echo "Script vcftofasta.sh ran using B. suis bv2 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list=
+"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
 
 elif [[ $1 == suis3 ]]; then
 
+    getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/suis3/script_dependents/Suis3_Defining_SNPs.txt"
@@ -311,6 +348,7 @@ elif [[ $1 == suis3 ]]; then
 
 elif [[ $1 == suis4 ]]; then
 
+    getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/suis4/script_dependents/Suis4_Defining_SNPs.txt"
@@ -325,10 +363,12 @@ elif [[ $1 == suis4 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/brucella/suis4/vcfs"
     echo "vcftofasta.sh ran as B. suis bv4"
     echo "Script vcftofasta.sh ran using B. suis bv4 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list=
+"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
 
 elif [[ $1 == canis ]]; then
-
+    
+    getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/canis/script_dependents/Canis_Defining_SNPs.txt"
@@ -343,11 +383,13 @@ elif [[ $1 == canis ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/brucella/canis/vcfs"
     echo "vcftofasta.sh ran as B. canis"
     echo "Script vcftofasta.sh ran using B. canis variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list=
+"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
 
 
 elif [[ $1 == ceti1 ]]; then
-
+    
+    getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/ceti1/script_dependents/Ceti1_Defining_SNPs.txt"
@@ -362,11 +404,13 @@ elif [[ $1 == ceti1 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/brucella/ceti1/vcfs"
     echo "vcftofasta.sh ran as B ceti group 1"
     echo "Script vcftofasta.sh ran using B ceti group 1 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list=
+"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
 
 
 elif [[ $1 == ceti2 ]]; then
 
+    getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/ceti2/script_dependents/Ceti2_Defining_SNPs.txt"
@@ -381,11 +425,13 @@ elif [[ $1 == ceti2 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/brucella/ceti2/vcfs"
     echo "vcftofasta.sh ran as B ceti group 2"
     echo "Script vcftofasta.sh ran using B ceti group 2 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list=
+"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
 
 
 elif [[ $1 == ovis ]]; then
 
+    getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/ovis/script_dependents/Ovis_Defining_SNPs.txt"
@@ -400,7 +446,8 @@ elif [[ $1 == ovis ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/brucella/ovis/vcfs"
     echo "vcftofasta.sh ran as B. ovis"
     echo "Script vcftofasta.sh ran using B. ovis variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list=
+"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
 
 elif [[ $1 == bovis ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
@@ -1506,7 +1553,7 @@ for i in *.vcf; do
     echo "searchName: $searchName"
     # Direct script to text file containing a list of the correct labels to use.
     # The file must be a txt file.
-    p=`grep "$searchName" "outfile"`
+    p=`grep "$searchName" "outfile" | head -1`
     echo "This is what was found in tag file: $p"
     newName=`echo $p | awk '{print $1}' | tr -d "[:space:]"` # Captured the new name
     n=`echo $base | sed $tbNumberV | sed $tbNumberW`
@@ -1992,6 +2039,8 @@ rm parsimony_filtered_total_pos
 rm parsimony_informative
 rm *zerofilteredsnps_alt
 }
+
+pwd
 
 if [ "$eflag" -o "$aflag" ]; then
         all_vcfs
