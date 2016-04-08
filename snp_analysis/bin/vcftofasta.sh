@@ -267,7 +267,7 @@ if [[ $1 == ab1 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/brucella/abortus1/vcfs"
     echo "vcftofasta.sh ran as Brucella abortus bv 1, 2 or 4"
     echo "Script vcftofasta.sh ran using Brucella abortus bv 1, 2 or 4 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov, Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == mel ]]; then
 
@@ -286,7 +286,7 @@ elif [[ $1 == mel ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/brucella/melitensis/vcfs"
     echo "vcftofasta.sh ran as B. melitensis"
     echo "Script vcftofasta.sh ran using B. melitensis variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == suis1 ]]; then
 
@@ -305,7 +305,7 @@ elif [[ $1 == suis1 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/brucella/suis1/vcfs"
     echo "vcftofasta.sh ran as B. suis bv1"
     echo "Script vcftofasta.sh ran using B. suis bv1 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == suis2 ]]; then
     
@@ -325,7 +325,7 @@ elif [[ $1 == suis2 ]]; then
     echo "vcftofasta.sh ran as B. suis bv2"
     echo "Script vcftofasta.sh ran using B. suis bv2 variables" > section5
     email_list=
-"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == suis3 ]]; then
 
@@ -344,7 +344,7 @@ elif [[ $1 == suis3 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/brucella/suis3/vcfs"
     echo "vcftofasta.sh ran as B. suis bv3"
     echo "Script vcftofasta.sh ran using B. suis bv3 variables" > section5
-    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == suis4 ]]; then
 
@@ -364,7 +364,7 @@ elif [[ $1 == suis4 ]]; then
     echo "vcftofasta.sh ran as B. suis bv4"
     echo "Script vcftofasta.sh ran using B. suis bv4 variables" > section5
     email_list=
-"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == canis ]]; then
     
@@ -384,7 +384,7 @@ elif [[ $1 == canis ]]; then
     echo "vcftofasta.sh ran as B. canis"
     echo "Script vcftofasta.sh ran using B. canis variables" > section5
     email_list=
-"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 
 elif [[ $1 == ceti1 ]]; then
@@ -405,7 +405,7 @@ elif [[ $1 == ceti1 ]]; then
     echo "vcftofasta.sh ran as B ceti group 1"
     echo "Script vcftofasta.sh ran using B ceti group 1 variables" > section5
     email_list=
-"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 
 elif [[ $1 == ceti2 ]]; then
@@ -426,7 +426,7 @@ elif [[ $1 == ceti2 ]]; then
     echo "vcftofasta.sh ran as B ceti group 2"
     echo "Script vcftofasta.sh ran using B ceti group 2 variables" > section5
     email_list=
-"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 
 elif [[ $1 == ovis ]]; then
@@ -447,7 +447,7 @@ elif [[ $1 == ovis ]]; then
     echo "vcftofasta.sh ran as B. ovis"
     echo "Script vcftofasta.sh ran using B. ovis variables" > section5
     email_list=
-"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 elif [[ $1 == bovis ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
@@ -462,7 +462,7 @@ elif [[ $1 == bovis ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/comparisons"
     echo "vcftofasta.sh ran as M. bovis"
     echo "Script vcftofasta.sh ran using M. bovis variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
     if [ "$eflag" ]; then
         echo "Only the "elite" bovis isolates are being ran"
@@ -492,7 +492,7 @@ elif [[ $1 == tb1 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb1/vcfs"
     echo "vcftofasta.sh ran as ${1}"
     echo "Script vcftofasta.sh ran using ${1} variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
@@ -514,7 +514,7 @@ elif [[ $1 == tb2 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb2/vcfs"
     echo "vcftofasta.sh ran as ${1}"
     echo "Script vcftofasta.sh ran using ${1} variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
@@ -536,7 +536,7 @@ elif [[ $1 == tb3 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb3/vcfs"
     echo "vcftofasta.sh ran as ${1}"
     echo "Script vcftofasta.sh ran using ${1} variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
@@ -558,7 +558,7 @@ elif [[ $1 == tb4a ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4a/vcfs"
     echo "vcftofasta.sh ran as ${1}"
     echo "Script vcftofasta.sh ran using ${1} variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
@@ -580,7 +580,7 @@ elif [[ $1 == tb4b ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/vcfs"
     echo "vcftofasta.sh ran as ${1}"
     echo "Script vcftofasta.sh ran using ${1} variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
@@ -602,7 +602,7 @@ elif [[ $1 == tb5 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb5/vcfs"
     echo "vcftofasta.sh ran as ${1}"
     echo "Script vcftofasta.sh ran using ${1} variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
@@ -624,7 +624,7 @@ elif [[ $1 == tb6 ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb6/vcfs"
     echo "vcftofasta.sh ran as ${1}"
     echo "Script vcftofasta.sh ran using ${1} variables" >> section5
-    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
@@ -646,7 +646,7 @@ elif [[ $1 == para ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/vcfs"
     echo "vcftofasta.sh ran as M. paraTB"
     echo "Script vcftofasta.sh ran using para variables" >> section5
-    email_list="tod.p.stuber@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+    email_list="tod.p.stuber@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
     # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
     # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx

@@ -82,13 +82,13 @@ mv /scratch/report/tempfile /scratch/report/idemailsummary
 
 if [ "$mflag" ]; then
 	# just email me the summary
-	email_list="tod.p.stuber@usda.gov Boojala.Vijay.Reddy@aphis.usda.gov"
+	email_list="tod.p.stuber@usda.gov"
 	enscript /scratch/report/idemailsummary -B -j -r -f "Courier5" -o - | ps2pdf - /scratch/report/summary-report.pdf
         cat /scratch/report/idemailsummary | mutt -s "Samples analyzed" -a /scratch/report/summary-report.pdf -- $email_list
 	
 else
 	# email all the summary
-        email_list="tod.p.stuber@usda.gov Boojala.Vijay.Reddy@aphis.usda.gov Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+        email_list="tod.p.stuber@usda.gov Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 	enscript /scratch/report/idemailsummary -B -j -r -f "Courier5" -o - | ps2pdf - /scratch/report/summary-report.pdf
         cat /scratch/report/idemailsummary | mutt -s "Samples analyzed" -a /scratch/report/summary-report.pdf -- $email_list
 fi
