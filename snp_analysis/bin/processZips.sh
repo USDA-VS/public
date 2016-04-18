@@ -134,6 +134,20 @@ elif [ $1 == suis4 ]; then
 
     ###################################################################
 
+elif [ $1 == suis5 ]; then
+    cp /home/shared/brucella/suis5/script_dependents/NZ_CP00771c.fasta ./
+    hqs="/home/shared/brucella/suis5/script_dependents/B-513-highqualitysnps.vcf"
+    bioinfo="/bioinfo11/TStuber/Results/brucella/suis5/newFiles"
+
+    # Run BrucMLST.sh
+    echo "Starting Bruc_MLST.sh"
+    cd ../zips
+    ${BRUC_MLST} &
+    cd ../bwamem-gatk/
+    echo "Moving forward from Bruc_MLST.sh"
+
+    ###################################################################
+
 elif [ $1 == canis ]; then
     cp /home/shared/brucella/canis/script_dependents/BcanisATCC23365.fasta ./
     hqs="/home/shared/brucella/canis/script_dependents/canisHighestQualitySNPs.vcf"
@@ -296,6 +310,18 @@ ${SPOLIGOSPACERFINDER} &
 echo "Moving forward from spoligoSpacerFinder.sh"
 
 ###################################################################
+# Used to find SNPs in Mungi isolate
+elif [ $1 == mungi ]; then
+cp /home/shared/mycobacterium/tbc/snppipeline/tb4b/NC000962.fasta ./
+hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4b/15-3162-highqualitysnps.vcf"
+#bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/newFiles"
+
+# Run spoligoSpacerFinder.sh
+#echo "Starting spoligoSpacerFinder.sh"
+#${SPOLIGOSPACERFINDER} &
+#echo "Moving forward from spoligoSpacerFinder.sh"
+
+###################################################################
 # Lineage 5
 elif [ $1 == TB5 ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb5/APKD01000001.fasta ./
@@ -370,7 +396,7 @@ elif [ $1 == secd ]; then
    #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 else
-    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para, h5n2 secd, taylorella, anc"
+    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, suis5, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para, h5n2 secd, taylorella, anc"
     exit 1
 fi
 

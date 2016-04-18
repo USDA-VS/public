@@ -479,6 +479,27 @@ elif [[ $1 == bovis ]]; then
     parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  > ${filterdir}/filterFile.txt
     filterFileCreations
 
+elif [[ $1 == mungi ]]; then
+    genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
+    # This file tells the script how to cluster VCFs
+    DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/mungi/mungiDefiningSNPsGroupDesignations.txt"
+    FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
+    FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
+    QUAL=150 # Minimum quality for calling a SNP
+    export lowEnd=1
+    export highEnd=200 # QUAL range to change ALT to N
+    bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/mungi/script2/comparisons"
+    echo "vcftofasta.sh ran as ${1}"
+    echo "Script vcftofasta.sh ran using ${1} variables" >> section5
+    email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+
+    # For tb inputXLS.py creates text files with positions to be filetered, and places them in FilterDirectory
+    # Excel file that is being used is at: /bioinfo11/TStuber/Results/mycobacterium/vcfs/Filtered_Regions.xlsx
+    # Excel tab label "New groupings"
+    excelinfile="/bioinfo11/TStuber/Results/mycobacterium/tbc/mungi/mungiFiltered_Regions.xlsx"
+    parseXLS | sed 's/ u//g' | tr "," "\t" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' | tr -d "'"  >${filterdir}/filterFile.txt
+    filterFileCreations
+
 elif [[ $1 == tb1 ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
     # This file tells the script how to cluster VCFs
