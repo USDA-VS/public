@@ -1501,22 +1501,22 @@ else
 
         sed 's/>.*seg.*1_.*/>Seq1/' ${sampleName}.consensus.reads.fasta | sed 's/>.*seg.*2_.*/>Seq2/' | sed 's/>.*seg.*3_.*/>Seq3/' | sed 's/>.*seg.*4_.*/>Seq4/' | sed 's/>.*seg.*5_.*/>Seq5/' | sed 's/>.*seg.*6_.*/>Seq6/' | sed 's/>.*seg.*7_.*/>Seq7/' | sed 's/>.*seg.*8_.*/>Seq8/' > ${sampleName}.temp
 
-        noyear=`echo $sample | sed -e "s/$syear-//"`
-        echo "noyear $noyear"
+#noyear=`echo $sample | sed -e "s/$syear-//"`
+#echo "noyear $noyear"
 
-	sed -i "s:XXXXXSTRAINNAMEXXXXXXX:A/${speciesspace}/${statespace}/${noyear}/${sampleyear}:" $mytex
+	sed -i "s:XXXXXSTRAINNAMEXXXXXXX:A/${speciesspace}/${statespace}/${sample}/${sampleyear}:" $mytex
         	
 	# Create "here-document"
 cat >./param.txt <<EOL
 
->Seq1 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 1, polymerase PB2 (PB2) gene, complete cds.
->Seq2 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 2, polymerase PB1 (PB1) gene, complete cds.
->Seq3 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 3, polymerase PA (PA) gene, complete cds.
->Seq4 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 4, hemagglutinin (HA) gene, complete cds.
->Seq5 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 5, nucleoprotein (NP) gene, complete cds.
->Seq6 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 6, neuraminidase (NA) gene, complete cds.
->Seq7 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 7, matrix protein 2 (M2) and matrix protein 1 (M1) genes, complete cds.
->Seq8 [organism=Influenza A virus](A/${species}/${state}/${noyear}/${sampleyear}(${subtype})) segment 8, non-structural protein NS1 and non-structural protein NS2 (NS) gene, complete cds.
+>Seq1 [organism=Influenza A virus](A/${species}/${state}/${sample}/${sampleyear}(${subtype})) segment 1, polymerase PB2 (PB2) gene, complete cds.
+>Seq2 [organism=Influenza A virus](A/${species}/${state}/${sample}/${sampleyear}(${subtype})) segment 2, polymerase PB1 (PB1) gene, complete cds.
+>Seq3 [organism=Influenza A virus](A/${species}/${state}/${sample}/${sampleyear}(${subtype})) segment 3, polymerase PA (PA) gene, complete cds.
+>Seq4 [organism=Influenza A virus](A/${species}/${state}/${sample}/${sampleyear}(${subtype})) segment 4, hemagglutinin (HA) gene, complete cds.
+>Seq5 [organism=Influenza A virus](A/${species}/${state}/${sample}/${sampleyear}(${subtype})) segment 5, nucleoprotein (NP) gene, complete cds.
+>Seq6 [organism=Influenza A virus](A/${species}/${state}/${sample}/${sampleyear}(${subtype})) segment 6, neuraminidase (NA) gene, complete cds.
+>Seq7 [organism=Influenza A virus](A/${species}/${state}/${sample}/${sampleyear}(${subtype})) segment 7, matrix protein 2 (M2) and matrix protein 1 (M1) genes, complete cds.
+>Seq8 [organism=Influenza A virus](A/${species}/${state}/${sample}/${sampleyear}(${subtype})) segment 8, non-structural protein NS1 and non-structural protein NS2 (NS) gene, complete cds.
 
 EOL
 
