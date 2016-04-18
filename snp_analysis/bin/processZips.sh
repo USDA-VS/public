@@ -353,6 +353,7 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 elif [ $1 == TBBOV ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tbbov/NC_002945.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tbbov/HighestQualitySNPs.vcf"
+gff_file="/home/shared/mycobacterium/tbc/snppipeline/tbbov/NC_002945.gff"
 bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/newFiles"
 #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
@@ -577,6 +578,34 @@ java -Xmx4g -jar ${gatk} -R $ref -T UnifiedGenotyper -out_mode EMIT_ALL_SITES -I
 # This removes all positions same as the reference.  These positions are found by removing rows were column (field) 8 begins with AN=2.  This decreases the size of the VCF considerably.  The final VCF contains all SNP, indel or zero mapped/coverage positions
 awk ' $0 ~ /#/ || $8 !~ /^AN=2;/ {print $0}' ${n}.allsites.vcf > $n.ready-mem.vcf
 java -Xmx4g -jar ${igvtools} index $n.ready-mem.vcf
+
+if [ $gff_file ]; then
+    echo "Annotating $n.SNPsZeroCoverage.vcf"
+    awk '$3 == "gene" {print $0}' $gff_file | awk '{print $4, $5, $9}' > list.genes
+
+    while read l; do
+    echo $l | awk '{for(i=$1;i<=$2;i++) print i, $3}'
+    done < list.genes | sed -e 's/\([0-9]*\).*;\(Name=.*\);gbkey.*\(gene_biotype=.*\);\(locus_tag=.*\)/\1   \2;\3;\4/' > expand.gene
+
+    #Split header lines from position calls
+    grep "#" $n.SNPsZeroCoverage.vcf > header
+    grep -v "#" $n.SNPsZeroCoverage.vcf > body
+
+    #http://unix.stackexchange.com/questions/113898/how-to-merge-two-files-based-on-the-matching-of-two-columns
+
+    awk 'BEGIN{OFS="\t"}NR==FNR {h[$1] = $2; next} {print $1,$2,h[$2],$4,$5,$6,$7,$8,$9,$10}' expand.gene body | awk 'BEGIN { FS = OFS = "\t" } { for(i=1; i<=NF; i++) if($i ~ /^ *$/) $i = "." }; 1' > body2
+
+    cat header body2 > ${n}.SNPsZeroCoverage-annotated.vcf
+
+    rm body
+    rm body2
+    rm header
+    rm expand.gene
+    rm list.genes
+
+else
+    echo "gff file not given"
+fi
 
 echo "***Deleting Files"
 rm $n.unsortSNPsZeroCoverage.vcf
