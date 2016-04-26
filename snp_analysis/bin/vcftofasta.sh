@@ -510,7 +510,7 @@ elif [[ $1 == tb1 ]]; then
     QUAL=150 # Minimum quality for calling a SNP
     export lowEnd=1
     export highEnd=200 # QUAL range to change ALT to N
-    bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb1/vcfs"
+    bioinfoVCF="/bioinfo11/TStuber/Results/mycobacterium/tbc/mungi/script2/comparisons"
     echo "vcftofasta.sh ran as ${1}"
     echo "Script vcftofasta.sh ran using ${1} variables" >> section5
     email_list="tod.p.stuber@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
@@ -733,15 +733,18 @@ fulDir=$PWD # Current working directory, do not change.
 
 function removeIsolates () {
 
-cat ${RemoveFromAnalysis} | tr '\r' '\n' | awk '{print $1}' > /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt
+if [[ ${RemoveFromAnalysis} ]]; then
+    echo "Unwanted isolates removed"
+    cat ${RemoveFromAnalysis} | tr '\r' '\n' | awk '{print $1}' > /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt
 
-removeList=`cat /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt`
+    removeList=`cat /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt`
 
-for i in $removeList; do
-    rm *${i}* > /dev/null 2>&1
-done
+    for i in $removeList; do
+        rm *${i}* > /dev/null 2>&1
+    done
 
-rm /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt
+    rm /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysisUnixReady.txt
+fi
 
 }
 
@@ -1563,6 +1566,7 @@ removeIsolates
 
 ############################### Rename files ###############################
 
+echo "Files are being renamed"
 for i in *.txt; do
     mv $i ${i%.txt}.vcf
 done
@@ -1629,8 +1633,6 @@ done
 wait
 
 ########################################################################
-
-printf "%s\t%s\t%s\t%s\n" "TB Number" "Group" "Subgroup" "Clade" > FileMakerGroupImport.txt
 
 AConeCallPosition
 wait

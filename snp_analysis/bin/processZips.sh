@@ -314,7 +314,7 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 elif [ $1 == mungi ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb4b/NC000962.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4b/15-3162-highqualitysnps.vcf"
-#bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/newFiles"
+bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/mungi/newFiles"
 
 # Run spoligoSpacerFinder.sh
 #echo "Starting spoligoSpacerFinder.sh"
@@ -374,6 +374,12 @@ elif [ $1 == para ]; then
    bioinfo="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/newFiles"
    #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
+elif [ $1 == past ]; then
+   cp /home/shared/pasteurella/NC_002663.fasta ./
+   hqs="/home/shared/pasteurella/P00-9670-highqualitysnps.vcf"
+   #bioinfo="/bioinfo11/TStuber/Results/gen-bact/Pasteurella/newFiles"
+   #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+
 
 elif [ $1 == h5n2 ]; then
    cp /home/shared/virus/ai/h5n2/TY-BC-FAV10-2014.fasta ./
@@ -397,7 +403,7 @@ elif [ $1 == secd ]; then
    #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 else
-    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, suis5, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para, h5n2 secd, taylorella, anc"
+    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, suis5, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para, past, h5n2 secd, taylorella, anc"
     exit 1
 fi
 
