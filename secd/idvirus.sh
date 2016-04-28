@@ -634,7 +634,7 @@ fi
 echo "mapCount: $mapCount"
 
 #Length of reference
-countNTs=`grep -v ">" $ref | wc | awk '{print $3}'`
+countNTs=`grep -v ">" $ref | tr -d "\n" | wc | awk '{print $3}'`
 
 #Number of nucleotides in reference with coverage
 echo "*** Bamtools is getting coverage..."

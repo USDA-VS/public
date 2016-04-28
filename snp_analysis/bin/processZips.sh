@@ -375,8 +375,8 @@ elif [ $1 == para ]; then
    #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 elif [ $1 == past ]; then
-   cp /home/shared/pasteurella/NC_002663.fasta ./
-   hqs="/home/shared/pasteurella/P00-9670-highqualitysnps.vcf"
+   cp /home/shared/pasteurella/NZ_CP004392.fasta ./
+   hqs="/home/shared/pasteurella/BTYP-P1059-1-pasteurella-highqualitysnps.vcf"
    #bioinfo="/bioinfo11/TStuber/Results/gen-bact/Pasteurella/newFiles"
    #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
