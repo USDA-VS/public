@@ -56,13 +56,50 @@ pingyrdb=""
 
 # By default
 
+#####################################################
+
+function getfluname () {
+
+echo "using xlrd to get flu genotyping codes from MiSeq_Samples.xlsx"
+date
+
+cat >./excelcolumnextract.py <<EOL
+#!/usr/bin/env python
+
+import xlrd
+from sys import argv
+
+script, input = argv
+
+wb = xlrd.open_workbook(input)
+
+sh = wb.sheet_by_index(0)
+for rownum in range(sh.nrows):
+    row = sh.row_values(rownum)
+    # use the join/map/str to output comma delimited list only
+    print ', '.join(map(str, row))
+
+EOL
+
+chmod 755 ./excelcolumnextract.py
+
+./excelcolumnextract.py /bioinfo11/MKillian/MiSeq\ samples/MiSeq_Samples.xlsx | sed 's/, /,/g' | awk 'BEGIN{FS=","; OFS="\t"} {print $2, $4, $5}' | sed -e 's/[.*:()/\?]/_/g' -e 's/ /_/g' -e 's/_-/_/' -e 's/-_/_/' -e 's/__/_/g' -e 's/[_-]$//' > /scratch/report/flu_genotyping_codes.txt 
+
+rm ./excelcolumnextract.py
+
+}
+
+#####################################################
+
+
 #######################################################################################
 #|||||||||||||||||||||||||||||| EnvironmentControls ||||||||||||||||||||||||||||||||||
 #######################################################################################
 
 if [[ $1 == flu ]]; then
+    getfluname
     flu=yes
-    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
+    genotypingcodes="/scratch/report/flu_genotyping_codes.txt"
     krakenDatabase="/home/shared/databases/kraken/flu_jhu/fludb_20150820_with_hosts"
     pingyrdb=yes #(yes or no) Do you want to BLAST pintail gyrfalcon database
     targetref=/bioinfo11/MKillian/Analysis/script_dependents/ai/flu/*fasta
