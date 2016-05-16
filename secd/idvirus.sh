@@ -77,7 +77,7 @@ sh = wb.sheet_by_index(0)
 for rownum in range(sh.nrows):
     row = sh.row_values(rownum)
     # use the join/map/str to output comma delimited list only
-    print ', '.join(map(str, row))
+    print (', '.join(map(str, row)))
 
 EOL
 
@@ -478,7 +478,7 @@ fi
 
 samtools view -bh -F4 -T $ref ${refname}.sam > ${refname}.raw.bam
 echo "Sorting Bam"
-samtools sort ${refname}.raw.bam ${refname}.sorted
+samtools sort ${refname}.raw.bam -o ${refname}.sorted.bam
 echo "****Indexing Bam"
 samtools index ${refname}.sorted.bam
 rm ${refname}.sam
@@ -759,7 +759,7 @@ fi
 
 samtools view -bh -F4 -T $ref ${orgref}-${refname}.sam > ${orgref}-${refname}.raw.bam
 echo "Sorting Bam"
-samtools sort ${orgref}-${refname}.raw.bam ${orgref}-${refname}.sorted
+samtools sort ${orgref}-${refname}.raw.bam -o ${orgref}-${refname}.sorted.bam
 echo "****Indexing Bam"
 samtools index ${orgref}-${refname}.sorted.bam
 rm ${orgref}-${refname}.sam
@@ -840,7 +840,7 @@ fi
 
 samtools view -bh -F4 -T $ref ${orgref}-${refname}.sam > ${orgref}-${refname}.raw.bam
 echo "Sorting Bam"
-samtools sort ${orgref}-${refname}.raw.bam ${orgref}-${refname}.sorted
+samtools sort ${orgref}-${refname}.raw.bam -o ${orgref}-${refname}.sorted.bam
 echo "****Indexing Bam"
 samtools index ${orgref}-${refname}.sorted.bam
 rm ${orgref}-${refname}.sam
@@ -974,7 +974,7 @@ fi
 
 samtools view -bh -F4 -T $ref ${refname}.sam > ${refname}.raw.bam
 echo "Sorting Bam"
-samtools sort ${refname}.raw.bam ${refname}.sorted
+samtools sort ${refname}.raw.bam -o ${refname}.sorted.bam
 echo "****Indexing Bam"
 samtools index ${refname}.sorted.bam
 rm ${refname}.sam
@@ -1089,7 +1089,7 @@ fi
 
 samtools view -bh -F4 -T $ref ${refname}.sam > ${refname}.raw.bam
 echo "Sorting Bam"
-samtools sort ${refname}.raw.bam ${refname}.sorted
+samtools sort ${refname}.raw.bam -o ${refname}.sorted.bam
 echo "****Indexing Bam"
 samtools index ${refname}.sorted.bam
 
@@ -1351,7 +1351,7 @@ fi
 
 samtools view -bh -F4 -T $ref ${orgref}-${refname}.sam > ${orgref}-${refname}.raw.bam
 echo "Sorting Bam"
-samtools sort ${orgref}-${refname}.raw.bam ${orgref}-${refname}.sorted
+samtools sort ${orgref}-${refname}.raw.bam -o ${orgref}-${refname}.sorted.bam
 echo "****Indexing Bam"
 samtools index ${orgref}-${refname}.sorted.bam
 rm ${orgref}-${refname}.sam
