@@ -204,7 +204,7 @@ wb.sheet_names()
 #sh = wb.sheet_by_index(1)
 sh = wb.sheet_by_name(u'New groupings')
 for rownum in range(sh.nrows):
-    print sh.row_values(rownum)
+    print (sh.row_values(rownum))
 
 EOL
 
@@ -235,7 +235,7 @@ wb = xlrd.open_workbook(input)
 
 sheet = wb.sheet_by_index(1)
 for row in sheet.col(32):
-        print row
+        print (row)
 EOL
 
 chmod 755 ./excelcolumnextract.py
@@ -1304,7 +1304,13 @@ echo "`date` --> RAxML started $d"
 awk '{print $0}' *.fas | sed '/root/{N;d;}' >> fastaGroup.txt
 awk '{print $0}' *.fas >> RAxMLfastaGroup.txt
 
-raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} -m GTRCAT -p 12345 &> /dev/null && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf; nw_reroot RAxML_bestTree.${d} root > tableinput.${d}; nw_reroot RAxML_bestTree.${d} root > rooted_RAxML_bestTree.${d}; mv rooted_RAxML_bestTree.${d} RAxML_bestTree.${d} &> /dev/null
+#raxmlHPC-SSE3 -f a -s RAxMLfastaGroup.txt -p 12345 -x 12345 -# 100 -m GTRCAT -n ${d}
+
+#exit 1
+
+#raxmlHPC-SSE3 -f b -t ref -z tree -m GTRCAT -s alg -n ${d}
+
+raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} ­b 123476 -m GTRCAT -p 12345 &> /dev/null && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf; nw_reroot RAxML_bestTree.${d} root > tableinput.${d}; nw_reroot RAxML_bestTree.${d} root > rooted_RAxML_bestTree.${d}; mv rooted_RAxML_bestTree.${d} RAxML_bestTree.${d} &> /dev/null
 wait
 
 rm RAxML_parsimonyTree*

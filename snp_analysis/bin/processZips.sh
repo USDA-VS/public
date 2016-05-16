@@ -481,7 +481,7 @@ rm *abyss*
 fi
 
 echo "***Sorting Bam"
-samtools sort $n.raw.bam $n.sorted
+samtools sort $n.raw.bam -o $n.sorted.bam
 echo "***Indexing Bam"
 samtools index $n.sorted.bam
 # Remove duplicate molecules
