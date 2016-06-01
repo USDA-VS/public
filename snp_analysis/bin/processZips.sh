@@ -315,6 +315,7 @@ elif [ $1 == mungi ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb4b/NC000962.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4b/15-3162-highqualitysnps.vcf"
 bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/mungi/newFiles"
+gff_file="/home/shared/mycobacterium/tbc/snppipeline/tb4b/NC_000962.gff"
 
 # Run spoligoSpacerFinder.sh
 #echo "Starting spoligoSpacerFinder.sh"

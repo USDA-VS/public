@@ -207,9 +207,18 @@ elif [[ $1 == pentro ]]; then
     echo "Script idvirus.sh ran targeting $1"
     email_list="tod.p.stuber@usda.gov" # Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
+elif [[ $1 == tescho ]]; then
+    genotypingcodes="/bioinfo11/MKillian/Analysis/results/genotypingcodes.txt"
+    krakenDatabase="/home/shared/databases/kraken/host-bac-vir"
+    targetref=/bioinfo11/MKillian/Analysis/script_dependents/teschovirus/*fasta
+    #bioinfoVCF="/bioinfo11/MKillian/Analysis/results/porcine_enterovirus"
+    echo "idvirus.sh ran targeting $1"
+    echo "Script idvirus.sh ran targeting $1"
+    email_list="tod.p.stuber@usda.gov" # Mary.L.Killian@aphis.usda.gov mia.kim.torchetti@aphis.usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+
 else
     echo ""
-    echo "Incorrect argument!  Must use one of the following arguments: flu, secd, reo, vsv, isav, bvd, newcastle, prrsv, herpes, rhabdo, pentro (porcine_entrovirus)"
+    echo "Incorrect argument!  Must use one of the following arguments: flu, secd, reo, vsv, isav, bvd, newcastle, prrsv, herpes, rhabdo, tescho, pentro (porcine_entrovirus)"
     echo ""
     echo "Set optional flags"
     echo -e '   flag -m will email just "M"e'
