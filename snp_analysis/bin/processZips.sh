@@ -74,6 +74,20 @@ elif [ $1 == mel ]; then
 
     ###################################################################
 
+elif [ $1 == suisall ]; then
+    cp /home/shared/brucella/suis5/script_dependents/NZ_CP00771c.fasta ./
+    hqs="/home/shared/brucella/suis5/script_dependents/B-513-highqualitysnps.vcf"
+    #bioinfo="/bioinfo11/TStuber/Results/brucella/suisall/newFiles"
+
+    # Run BrucMLST.sh
+    echo "Starting Bruc_MLST.sh"
+    cd ../zips
+    ${BRUC_MLST} &
+    cd ../bwamem-gatk/
+    echo "Moving forward from Bruc_MLST.sh"
+
+    ###################################################################
+
 elif [ $1 == suis1 ]; then
     cp /home/shared/brucella/suis1/script_dependents/NC_01725c.fasta ./
     hqs="/home/shared/brucella/suis1/script_dependents/NC_01725cHighestQualitySNPs.vcf"
@@ -404,7 +418,7 @@ elif [ $1 == secd ]; then
    #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 else
-    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, suis5, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para, past, h5n2 secd, taylorella, anc"
+    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suisall, suis1, suis2, suis3, suis4, suis5, canis, ceti1, ceti2, ovis, TB1, TB2, TB3, TB4a, TB4b, TB5, TB6, TBBOV, para, past, h5n2 secd, taylorella, anc"
     exit 1
 fi
 
