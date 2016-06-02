@@ -1317,139 +1317,102 @@ rm RAxML_parsimonyTree*
 for i in RAxML*Tree*; do mv $i ../${i}.tre; done
 
 tr ":" "\n" < tableinput.${d} | tr "," "\n" | sed 's/(//g' | sed 's/)//g' | grep -v "\.[0-9]*" | grep -v "root" > cleanedAlignment.txt
+# Place headers onto aligned file
+{ echo "reference_call"; cat cleanedAlignment.txt; } > cleanedAlignment.txt.temp; mv cleanedAlignment.txt{.temp,}
+{ echo "reference_pos"; cat cleanedAlignment.txt; } > cleanedAlignment.txt.temp; mv cleanedAlignment.txt{.temp,}
 
-awk 'NR==FNR{o[FNR]=$1; next} {t[$1]=$0} END{for(x=1; x<=FNR; x++){y=o[x]; print t[y]}}' cleanedAlignment.txt ../$d.table.txt > joined.txt
-grep "reference" ../$d.table.txt > references.txt
-cat references.txt joined.txt >> joined2.txt
-mv joined2.txt ../$d.sortedTable.txt
+cp ../${d}.table.txt ./
 
-rm joined.txt
-rm references.txt
+function table_sort_and_organize () {
 
-cd ..
+# Create "here-document" to prevent a dependent file.
+cat >./$d.table.py <<EOL
+#!/usr/bin/env python
 
-#get the number of columns
-columnCount=`awk '$0 !~ /^$/ {print $0}' *sortedTable.txt | awk '{print NF-1; exit}'`
+import pandas as pd
 
-#number=`jot - 1 $columnCount`
-number=`seq $columnCount`
-#echo "Numbers in list: $number"
+# There must be a top row header name to match for join to work, "reference_pos"
+mytable = pd.read_csv("${d}.table.txt", delimiter="\t")
 
-#get the reference row
-cat *sortedTable.txt | sed -n 2p | awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' > referenceRow
-cat referenceRow > out2.txt
-cat *sortedTable.txt | awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' > table
-#remove first column from *sortedTable.txt
+# mylist must be ordered with 2 top columns "reference_pos" and "reference_call"
+mylist = pd.read_csv("cleanedAlignment.txt")
 
-echo "countDif" > countOutput.txt
-echo "countFirst" > firstOutput.txt
+# axis drops the entire column if column is empty
+mytable.dropna(axis='columns', how='all', inplace='True')
 
-#iterate numbers up to number of columns
-for n in $number; do
-	#use number to grab character in reference row i.e. C
-	letter=`awk -v x=$n '{print $x}' referenceRow`
-	#echo "Number: $n"
-	#echo "Letter: $letter"
-	awk -v var1="$n" '{print $var1}' table > column
-	grep "$letter" column | wc -l >> countOutput.txt
-	sed '1,2d' column > column2
-	cat column2 | awk -v var2=${letter} ' $0 !~ var2 {print NR; exit}' >> firstOutput.txt
-done
+# mytable orders to mylist (alignment file)
+# This sorts the rows vertically in the best position provided by RAxML
+mytable = mylist.merge(mytable, how="outer")
 
-#/var2/ {print NR; exit}' column
-#Clear table2.txt
-echo "" > table2.txt
-#Add a \n to the end of file
+mytable.to_csv("$d.sorted_table.txt", sep="\t", index=False)
 
-cat *sortedTable.txt >> table2.txt
-#sed '$a\' *sortedTable.txt >> table2.txt
+col_num = mytable.shape[1]
+#print ("There are %s columns in table." % col_num)
 
-#Prepare count line
-cat countOutput.txt | sed 's/ //g' | tr "\n" "\t" > readyline.txt
-#Create readytable.txt with count line.
-cat table2.txt readyline.txt > orginizedTable2.txt
-grep -v "^$" orginizedTable2.txt > orginizedTable3.txt
+row_num = mytable.shape[0]
+#print ("There are %s rows in table." % row_num)
 
-#Prepare firstOut line
-cat firstOutput.txt | sed 's/ //g' | tr "\n" "\t" > readyFirstOut.txt
-cat orginizedTable3.txt readyFirstOut.txt > orginizedTable4.txt
+# Counting the number of SNPs/position and group
+# Iterate through each column of table
+# If sample call is equal to reference call (cell [0,x]), count finding
+# Place sum in new row for each column
+count=0
+# Get a column number
+for each_column in range(1,col_num):
+    # Iterate each cell in column
+    for each_cell in mytable.ix[0:,each_column]:
+        if each_cell == mytable.ix[0,each_column]:
+            count += 1
+    mytable.ix[row_num + 1,each_column] = count
+    #mytable.ix[1, 1]="myvalue"
+    count=0
 
-rm referenceRow
-rm out2.txt
-rm table
-rm countOutput.txt
-rm table2.txt
-rm readyline.txt
-rm orginizedTable2.txt
+# Iterate through each column of table
+# Count distance SNP accures from reference call
+count=0
+# Get a column number
+for each_column in range(1,col_num):
+    # Iterate each cell in column
+    for each_cell in mytable.ix[0:,each_column]:
+        if each_cell == mytable.ix[0,each_column]:
+            count += 1
+        else:
+            mytable.ix[row_num + 2,each_column] = count
+            count=0
+            break
 
-awk '{a[NR]=$0} END {print a[NR]; for (i=1;i<NR;i++) print a[i]}' orginizedTable4.txt > orginizedTable5.txt
-awk '{a[NR]=$0} END {print a[NR]; for (i=1;i<NR;i++) print a[i]}' orginizedTable5.txt > orginizedTable6.txt
+mytrans = mytable.transpose()
+col_num = mytrans.shape[1]
+mytable = mytrans.sort_values([col_num, col_num - 1], ascending=[True, True]).transpose()
 
-#Transpose
-awk '{
-for (i=1; i<=NF; i++)  {
-a[NR,i] = $i
+# Put the last column to the front
+cols = mytable.columns.tolist()
+cols = cols[-1:] + cols[:-1]
+mytable = mytable[cols]
+
+# Remove the last row with number counts
+mytable = mytable[:-2]
+
+mytable.to_csv("$d.organized_table.txt", sep="\t", index=False)
+
+EOL
+
+chmod 755 ./$d.table.py
+
+./$d.table.py $file
+
+rm ./$d.table.py
+
 }
-}
-NF>p { p = NF }
-END {
-for(j=1; j<=p; j++) {
-str=a[1,j]
-for(i=2; i<=NR; i++){
-str=str" "a[i,j];
-}
-print str
-}
-}' orginizedTable6.txt > orginizedTable7.txt
-
-#Orgainize file based on 1st 2 columns
-sort -n -k1 orginizedTable7.txt | sort -n -k2 > orginizedTable8.txt
-
-#Convert spaces to tabs
-awk -v OFS="\t" '$1=$1' orginizedTable8.txt > orginizedTable9.txt
-awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' orginizedTable9.txt | awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' > orginizedTable10.txt
-
-#Transpose back
-awk '{
-for (i=1; i<=NF; i++)  {
-a[NR,i] = $i
-}
-}
-NF>p { p = NF }
-END {
-for(j=1; j<=p; j++) {
-str=a[1,j]
-for(i=2; i<=NR; i++){
-str=str" "a[i,j];
-}
-print str
-}
-}' orginizedTable10.txt > orginizedTable11.txt
-
-c=`basename $PWD`
-
-#Convert spaces to tabs
-awk -v OFS="\t" '$1=$1' orginizedTable11.txt > $c.organizedTable.txt
-
-rm orginizedTable3.txt
-rm orginizedTable4.txt
-rm orginizedTable5.txt
-rm orginizedTable6.txt
-rm orginizedTable7.txt
-rm orginizedTable8.txt
-rm orginizedTable9.txt
-rm orginizedTable10.txt
-rm orginizedTable11.txt
-rm column
-rm column2
-rm readyFirstOut.txt
-rm firstOutput.txt
-echo "Adding map qualities..."
+pwd
+pause
+table_sort_and_organize
+pause
 
 # Add map qualities to sorted table
 
 # Get just the position.  The chromosome must be removed
-awk ' NR == 1 {print $0}' $d.sortedTable.txt | tr "\t" "\n" | sed "1d" | awk '{print NR, $0}' > $d-positions
+awk ' NR == 1 {print $0}' $d.sorted_table.txt | tr "\t" "\n" | sed "1d" | awk '{print NR, $0}' > $d-positions
 
 echo "map-quality map-quality" > quality.txt
 echo "`date` --> Sorted table map quality gathering for $c"
@@ -1472,12 +1435,12 @@ cat $d-positions | parallel 'export rownumber=$(echo {} | awk '"'"'{print $1}'"'
 wait
 sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
 
-cat $d.sortedTable.txt qualitytransposed.txt | grep -v '^$' > $d-mapquality-sortedtable.txt
-mv $d-mapquality-sortedtable.txt $d.sortedTable.txt
+cat $d.sorted_table.txt qualitytransposed.txt | grep -v '^$' > $d-mapquality-sorted_table.txt
+mv $d-mapquality-sorted_table.txt $d.sorted_table.txt
 
 # Add map qualities to organized table
 
-awk ' NR == 1 {print $0}' $c.organizedTable.txt | tr "\t" "\n" | sed "1d" | awk '{print NR, $0}' > $d-positions
+awk ' NR == 1 {print $0}' $d.organized_table.txt | tr "\t" "\n" | sed "1d" | awk '{print NR, $0}' > $d-positions
 
 echo "map-quality map-quality" > quality.txt
 echo "`date` --> Organized table map quality gathering for $c"
@@ -1500,8 +1463,8 @@ cat $d-positions | parallel 'export rownumber=$(echo {} | awk '"'"'{print $1}'"'
 wait
 sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
 
-cat $c.organizedTable.txt qualitytransposed.txt | grep -v '^$' > $d-mapquality-orgainizedtable.txt
-mv $d-mapquality-orgainizedtable.txt $c.organizedTable.txt
+cat $d.organized_table.txt qualitytransposed.txt | grep -v '^$' > $d-mapquality-orgainizedtable.txt
+mv $d-mapquality-orgainizedtable.txt $d.organized_table.txt
 
 rm quality.txt
 rm qualitytransposed.txt
