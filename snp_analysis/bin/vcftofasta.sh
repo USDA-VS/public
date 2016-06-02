@@ -1404,10 +1404,10 @@ chmod 755 ./$d.table.py
 rm ./$d.table.py
 
 }
-pwd
-pause
+
 table_sort_and_organize
-pause
+
+mv ${d}.organized_table.txt ${d}.sorted_table.txt ${d}.table.txt ../
 
 # Add map qualities to sorted table
 
