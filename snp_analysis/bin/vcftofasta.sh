@@ -77,6 +77,7 @@ echo "****************************** START ******************************"
 echo ""
 
 #for debug
+
 alias pause='read -p "$LINENO Enter"'
 
 echo "Start Time: $(date)" > sectiontime
@@ -1342,7 +1343,7 @@ mytable.dropna(axis='columns', how='all', inplace='True')
 
 # mytable orders to mylist (alignment file)
 # This sorts the rows vertically in the best position provided by RAxML
-mytable = mylist.merge(mytable, how="outer")
+mytable = mylist.merge(mytable, on='reference_pos', how="outer")
 
 mytable.to_csv("$d.sorted_table.txt", sep="\t", index=False)
 
@@ -1399,8 +1400,9 @@ EOL
 
 chmod 755 ./$d.table.py
 
-./$d.table.py $file
+./$d.table.py
 
+pwd
 rm ./$d.table.py
 
 }
@@ -1408,68 +1410,72 @@ rm ./$d.table.py
 table_sort_and_organize
 
 mv ${d}.organized_table.txt ${d}.sorted_table.txt ${d}.table.txt ../
+cd ..
 
 # Add map qualities to sorted table
 
 # Get just the position.  The chromosome must be removed
 awk ' NR == 1 {print $0}' $d.sorted_table.txt | tr "\t" "\n" | sed "1d" | awk '{print NR, $0}' > $d-positions
 
-echo "map-quality map-quality" > quality.txt
+printf "reference_pos\tmap-quality\n" > $d.quality.txt
 echo "`date` --> Sorted table map quality gathering for $c"
-#while read p; do
-#	(rownumber=`echo $p | awk '{print $1}'`
-#	front=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\1/'`
-#	back=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\2/'`
-#	#echo "rownumber: $rownumber"
-#	#echo "front: $front"
-#	#echo "back: $back"
-#	avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
-#	echo "$rownumber $avemap" >> quality.txt) &
-#	CPU_NR=$(mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 15}'a | sed 's/\..*//')
-#	let count+=1
-#	[[ $((count%CPU_NR)) -eq 0 ]] && wait
-#	done < $d-positions
 
-cat $d-positions | parallel 'export rownumber=$(echo {} | awk '"'"'{print $1}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); echo "$rownumber $avemap" >> quality.txt' &> /dev/null
+cat $d-positions | parallel 'export positionnumber=$(echo {} | awk '"'"'{print $2}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); printf "$positionnumber\t$avemap\n" >> $d.quality.txt' &> /dev/null
 
-wait
-sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
+function add_mapping_values_sorted () {
 
-cat $d.sorted_table.txt qualitytransposed.txt | grep -v '^$' > $d-mapquality-sorted_table.txt
-mv $d-mapquality-sorted_table.txt $d.sorted_table.txt
+# Create "here-document" to prevent a dependent file.
+cat >./$d.mapvalues.py <<EOL
+#!/usr/bin/env python
+
+import pandas as pd
+import numpy as np
+from sys import argv
+
+# infile arg used to make compatible for both sorted and organized tables
+script, infile = argv
+
+quality = pd.read_csv('$d.quality.txt', sep='\t')
+mytable = pd.read_csv(infile, sep='\t')
+
+# set index to "reference_pos" so generic index does not transpose
+mytable = mytable.set_index('reference_pos')
+mytable = mytable.transpose()
+
+# write to csv to import back with generic index again
+# seems like a hack that can be done better
+mytable.to_csv("$d.transposed_table.txt", sep="\t", index_label='reference_pos')
+
+# can't merge on index but this newly imported transpose is formated correctly
+mytable = pd.read_csv('$d.transposed_table.txt', sep='\t')
+mytable = mytable.merge(quality, on='reference_pos', how='inner')
+
+# set index to "reference_pos" so generic index does not transpose 
+mytable = mytable.set_index('reference_pos')
+mytable = mytable.transpose()
+# since "reference_pos" was set as index it needs to be explicitly written into csv
+mytable.to_csv("$d.finished_table.txt", sep="\t", index_label='reference_pos')
+
+EOL
+
+chmod 755 ./$d.mapvalues.py
+
+}
+
+add_mapping_values_sorted
+./$d.mapvalues.py $d.sorted_table.txt
+mv $d.finished_table.txt $d.sorted_table.txt
 
 # Add map qualities to organized table
+echo "`date` --> Organized table map quality gathering for $d"
+./$d.mapvalues.py $d.organized_table.txt
+mv $d.finished_table.txt $d.organized_table.txt
 
-awk ' NR == 1 {print $0}' $d.organized_table.txt | tr "\t" "\n" | sed "1d" | awk '{print NR, $0}' > $d-positions
-
-echo "map-quality map-quality" > quality.txt
-echo "`date` --> Organized table map quality gathering for $c"
-#while read p; do
-#	(rownumber=`echo $p | awk '{print $1}'`
-#	front=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\1/'`
-#	back=`echo "$p" | awk '{print $2}' | sed 's/\(.*\)-\([0-9]*\)/\2/'`
-#	#echo "rownumber: $rownumber"
-#	#echo "front: $front"
-#	#echo "back: $back"
-#	avemap=`awk -v f=$front -v b=$back '$6 != "." && $1 == f && $2 == b {print $8}' ./starting_files/*vcf | sed 's/.*MQ=\(.....\).*/\1/' | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' | sed 's/\..*//'`
-#	echo "$rownumber $avemap" >> quality.txt) &
-#        CPU_NR=$(mpstat | grep -A 5 "%idle" | tail -n 1 | awk -F " " '{print  64 * (0.01 * $12) - 15}'a | sed 's/\..*//')
-#	let count+=1
-#	[[ $((count%CPU_NR)) -eq 0 ]] && wait
-#	done < $d-positions
-
-cat $d-positions | parallel 'export rownumber=$(echo {} | awk '"'"'{print $1}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); echo "$rownumber $avemap" >> quality.txt' &> /dev/null
-
-wait
-sort -nk1,1 < quality.txt | awk '{print $2}' | tr "\n" "\t" > qualitytransposed.txt
-
-cat $d.organized_table.txt qualitytransposed.txt | grep -v '^$' > $d-mapquality-orgainizedtable.txt
-mv $d-mapquality-orgainizedtable.txt $d.organized_table.txt
-
-rm quality.txt
-rm qualitytransposed.txt
+rm $d.quality.txt
+rm $d.transposed_table.txt
 rm $d-positions
 rm -r ./starting_files
+rm ./$d.mapvalues.py
 
 }
 
