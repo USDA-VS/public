@@ -317,6 +317,7 @@ elif [ $1 == TB4b ]; then
 cp /home/shared/mycobacterium/tbc/snppipeline/tb4b/NC018143.fasta ./
 hqs="/home/shared/mycobacterium/tbc/snppipeline/tb4b/HQ-NC018143.vcf"
 bioinfo="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/newFiles"
+gff_file="/home/shared/mycobacterium/tbc/snppipeline/tb4b/NC_018143.gff"
 
 # Run spoligoSpacerFinder.sh
 echo "Starting spoligoSpacerFinder.sh"
