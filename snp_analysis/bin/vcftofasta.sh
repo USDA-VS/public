@@ -2,8 +2,8 @@
 
 # hide standard error
 # comment out when troubleshooting
-echo "stderr redirected to /dev/null"
-exec 2> /dev/null
+#echo "stderr redirected to /dev/null"
+#exec 2> /dev/null
 
 : <<'END'
 This script is the second script in a two script workflow.  Script 2 genotypes Mycobacterium tuberculosis complex and Brucella species from SNP data contained in VCFs.  It operates on VCFs generated with the same reference output from script 1.  VCFs are collected into a single working directory.  Comparisons are output as SNP tables and alignment FASTA files to view as trees in your program of choice.
@@ -1477,18 +1477,6 @@ rm $d.transposed_table.txt
 rm $d-positions
 rm -r ./starting_files
 rm ./$d.mapvalues.py
-
-if [[ -z $gff_file ]]; then
-        printf "\n\n\t There is not a gff file to annotate tables \n\n"
-        sleep 20
-    else
-
-    awk '$3 == "gene" {print $0}' $gff_file | awk '{print $4, $5, $9}' > list.genes
-
-    while read l; do
-    echo $l | awk '{for(i=$1;i<=$2;i++) print i, $3}'
-    done < list.genes | sed -e 's/\([0-9]*\).*;\(Name=.*\);gbkey.*\(gene_biotype=.*\);\(locus_tag=.*\)/\1   \2;\3;\4/' > expand.gene
-fi
 
 }
 
