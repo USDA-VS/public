@@ -2,8 +2,8 @@
 
 # hide standard error
 # comment out when troubleshooting
-#echo "stderr redirected to /dev/null"
-#exec 2> /dev/null
+echo "stderr redirected to /dev/null"
+exec 2> /dev/null
 
 : <<'END'
 This script is the second script in a two script workflow.  Script 2 genotypes Mycobacterium tuberculosis complex and Brucella species from SNP data contained in VCFs.  It operates on VCFs generated with the same reference output from script 1.  VCFs are collected into a single working directory.  Comparisons are output as SNP tables and alignment FASTA files to view as trees in your program of choice.
@@ -452,7 +452,7 @@ elif [[ $1 == ovis ]]; then
 
 elif [[ $1 == bovis ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
-    gff_file="/home/shared/mycobacterium/tbc/snppipeline/tbbov/NC_002945.gff"
+    gbk_file="/home/shared/mycobacterium/tbc/snppipeline/tbbov/NC_002945.gbk"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
@@ -483,6 +483,7 @@ elif [[ $1 == bovis ]]; then
 
 elif [[ $1 == mungi ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
+    gbk_file="/home/shared/mycobacterium/tbc/snppipeline/tbbov/NC_000962.gbk"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/mungi/mungiDefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
@@ -592,6 +593,7 @@ elif [[ $1 == tb4a ]]; then
 
 elif [[ $1 == tb4b ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
+    gbk_file="/home/shared/mycobacterium/tbc/snppipeline/tbbov/NC_018143.gbk"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/tb4bDefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
@@ -1294,7 +1296,13 @@ rm parsimony_filtered_total_pos
 rm parsimony_informative
 rm *zerofilteredsnps_alt
 
-cp /home/shared/Table_Template.xlsx ./${d}-Table_Template.xlsx
+if [[ -z $gbk_file ]]; then
+    cp /home/shared/Table_Template.xlsx ./${d}-Table_Template.xlsx
+else
+    # Copy template for annotated tables
+    cp /home/shared/aTable_Template.xlsx ./${d}-Table_Template.xlsx
+fi
+
 done
 }
 #****************************************************************
@@ -1403,7 +1411,6 @@ chmod 755 ./$d.table.py
 
 ./$d.table.py
 
-pwd
 rm ./$d.table.py
 
 }
@@ -1415,13 +1422,13 @@ cd ..
 
 # Add map qualities to sorted table
 
-# Get just the position.  The chromosome must be removed
-awk ' NR == 1 {print $0}' $d.sorted_table.txt | tr "\t" "\n" | sed "1d" | awk '{print NR, $0}' > $d-positions
+#n Get just the position.  The chromosome must be removed
+awk ' NR == 1 {print $0}' $d.sorted_table.txt | tr "\t" "\n" | sed "1d" | awk '{print NR, $0}' > $d.positions
 
 printf "reference_pos\tmap-quality\n" > $d.quality.txt
 echo "`date` --> Sorted table map quality gathering for $c"
 
-cat $d-positions | parallel 'export positionnumber=$(echo {} | awk '"'"'{print $2}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); printf "$positionnumber\t$avemap\n" >> $d.quality.txt' &> /dev/null
+cat $d.positions | parallel 'export positionnumber=$(echo {} | awk '"'"'{print $2}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); printf "$positionnumber\t$avemap\n" >> $d.quality.txt' &> /dev/null
 
 function add_mapping_values_sorted () {
 
@@ -1434,9 +1441,9 @@ import numpy as np
 from sys import argv
 
 # infile arg used to make compatible for both sorted and organized tables
-script, infile = argv
+script, infile, inquality = argv
 
-quality = pd.read_csv('$d.quality.txt', sep='\t')
+quality = pd.read_csv(inquality, sep='\t')
 mytable = pd.read_csv(infile, sep='\t')
 
 # set index to "reference_pos" so generic index does not transpose
@@ -1464,19 +1471,85 @@ chmod 755 ./$d.mapvalues.py
 }
 
 add_mapping_values_sorted
-./$d.mapvalues.py $d.sorted_table.txt
+./$d.mapvalues.py $d.sorted_table.txt $d.quality.txt
 mv $d.finished_table.txt $d.sorted_table.txt
 
 # Add map qualities to organized table
 echo "`date` --> Organized table map quality gathering for $d"
-./$d.mapvalues.py $d.organized_table.txt
+./$d.mapvalues.py $d.organized_table.txt $d.quality.txt
 mv $d.finished_table.txt $d.organized_table.txt
 
 rm $d.quality.txt
 rm $d.transposed_table.txt
-rm $d-positions
 rm -r ./starting_files
-rm ./$d.mapvalues.py
+
+function annotate_table () {
+
+# Create "here-document" to prevent a dependent file.
+cat >./$d.annotate.py <<EOL
+#!/usr/bin/env python
+
+from Bio import SeqFeature
+from Bio import SeqIO
+from sys import argv
+
+# infile arg used to make compatible for both sorted and organized tables
+script, myposition = argv
+myposition = int(myposition)
+
+# Biopython tutorial
+# 4.3.2.4  Location testing
+
+record = SeqIO.read("${gbk_file}", "genbank")
+for feature in record.features:
+    if myposition in feature:
+        if "CDS" in feature.type:
+            product = feature.qualifiers['product']
+            for p in product:
+                myout = p
+        else:
+            myout = "No annotated product"
+print (myout)
+
+EOL
+
+chmod 755 ./$d.annotate.py
+}
+
+if [[ -z $gbk_file ]]; then
+        printf "\n\n\t There is not a gbk file to annotate tables \n\n"
+        sleep 20
+    else
+    printf "\nAnnotating...\n\n"
+    date
+    annotate_table
+    printf "reference_pos\tannotation\n" > $d.annotation_in
+    awk '{print $2}' $d.positions > $d.header_positions 
+    for l in `cat $d.header_positions`; do
+        (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
+        position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
+        annotation=`./$d.annotate.py $position`
+        printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> $d.annotation_in)  &
+        let count+=1
+        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+    done
+fi
+
+# Add annoations to tables
+./$d.mapvalues.py $d.sorted_table.txt $d.annotation_in 
+# Rename output tables back to original names
+mv $d.finished_table.txt $d.sorted_table.txt
+
+./$d.mapvalues.py $d.organized_table.txt $d.annotation_in
+# Rename output tables back to original names
+mv $d.finished_table.txt $d.organized_table.txt
+
+rm $d.positions
+rm $d.mapvalues.py
+rm $d.header_positions
+rm $d.annotate.py
+rm $d.annotation_in
+rm $d.transposed_table.txt
 
 }
 
@@ -2098,7 +2171,14 @@ echo "At line $LINENO, sleeping 5 second"; sleep 5s
 cd ${fulDir}
 $PWD
 cp ${DefiningSNPs} ./
-cp /home/shared/Table_Template.xlsx ./
+
+if [[ -z $gbk_file ]]; then
+    cp /home/shared/Table_Template.xlsx ./
+else
+    # Copy template for annotated tables
+    cp /home/shared/aTable_Template.xlsx ./Table_Template.xlsx
+fi
+
 cp "$0" "$PWD"
 
 #echo "***************************************************"
