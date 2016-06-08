@@ -2,8 +2,8 @@
 
 # hide standard error
 # comment out when troubleshooting
-echo "stderr redirected to /dev/null"
-exec 2> /dev/null
+#echo "stderr redirected to /dev/null"
+#exec 2> /dev/null
 
 : <<'END'
 This script is the second script in a two script workflow.  Script 2 genotypes Mycobacterium tuberculosis complex and Brucella species from SNP data contained in VCFs.  It operates on VCFs generated with the same reference output from script 1.  VCFs are collected into a single working directory.  Comparisons are output as SNP tables and alignment FASTA files to view as trees in your program of choice.
@@ -483,7 +483,7 @@ elif [[ $1 == bovis ]]; then
 
 elif [[ $1 == mungi ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
-    gbk_file="/home/shared/mycobacterium/tbc/snppipeline/tbbov/NC_000962.gbk"
+    gbk_file="/home/shared/mycobacterium/tbc/snppipeline/mungi/NC_000962.gbk"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/mungi/mungiDefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
@@ -593,7 +593,7 @@ elif [[ $1 == tb4a ]]; then
 
 elif [[ $1 == tb4b ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/Untitled.tab"
-    gbk_file="/home/shared/mycobacterium/tbc/snppipeline/tbbov/NC_018143.gbk"
+    gbk_file="/home/shared/mycobacterium/tbc/snppipeline/tb4b/NC_018143.gbk"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/tbc/tb4b/tb4bDefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
@@ -1534,6 +1534,7 @@ if [[ -z $gbk_file ]]; then
         [[ $((count%NR_CPUS)) -eq 0 ]] && wait
     done
 fi
+pause
 
 # Add annoations to tables
 ./$d.mapvalues.py $d.sorted_table.txt $d.annotation_in 
@@ -1548,7 +1549,7 @@ rm $d.positions
 rm $d.mapvalues.py
 rm $d.header_positions
 rm $d.annotate.py
-rm $d.annotation_in
+#rm $d.annotation_in
 rm $d.transposed_table.txt
 
 }
