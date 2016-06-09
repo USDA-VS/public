@@ -1425,10 +1425,10 @@ cd ..
 #n Get just the position.  The chromosome must be removed
 awk ' NR == 1 {print $0}' $d.sorted_table.txt | tr "\t" "\n" | sed "1d" | awk '{print NR, $0}' > $d.positions
 
-printf "reference_pos\tmap-quality\n" > $d.quality.txt
-echo "`date` --> Sorted table map quality gathering for $c"
+printf "reference_pos\tmap-quality\n" > quality.txt
+echo "`date` --> Sorted table map quality gathering for $d"
 
-cat $d.positions | parallel 'export positionnumber=$(echo {} | awk '"'"'{print $2}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); printf "$positionnumber\t$avemap\n" >> $d.quality.txt' &> /dev/null
+cat $d.positions | parallel 'export positionnumber=$(echo {} | awk '"'"'{print $2}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); printf "$positionnumber\t$avemap\n" >> quality.txt' &> /dev/null
 
 function add_mapping_values_sorted () {
 
@@ -1471,15 +1471,15 @@ chmod 755 ./$d.mapvalues.py
 }
 
 add_mapping_values_sorted
-./$d.mapvalues.py $d.sorted_table.txt $d.quality.txt
+./$d.mapvalues.py $d.sorted_table.txt quality.txt
 mv $d.finished_table.txt $d.sorted_table.txt
 
 # Add map qualities to organized table
 echo "`date` --> Organized table map quality gathering for $d"
-./$d.mapvalues.py $d.organized_table.txt $d.quality.txt
+./$d.mapvalues.py $d.organized_table.txt quality.txt
 mv $d.finished_table.txt $d.organized_table.txt
 
-rm $d.quality.txt
+rm quality.txt
 rm $d.transposed_table.txt
 rm -r ./starting_files
 
@@ -1531,10 +1531,9 @@ if [[ -z $gbk_file ]]; then
         annotation=`./$d.annotate.py $position`
         printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> $d.annotation_in
     done
-fi
 
 # Add annoations to tables
-./$d.mapvalues.py $d.sorted_table.txt $d.annotation_in 
+./$d.mapvalues.py $d.sorted_table.txt $d.annotation_in
 # Rename output tables back to original names
 mv $d.finished_table.txt $d.sorted_table.txt
 
@@ -1548,6 +1547,8 @@ rm $d.header_positions
 rm $d.annotate.py
 #rm $d.annotation_in
 rm $d.transposed_table.txt
+
+fi
 
 }
 
@@ -2331,7 +2332,8 @@ rm sectiontime
 rm ssection4
 rm csection1
 rm -r all_vcfs/starting_files
-zip -r starting_files.zip starting_files && rm -r starting_files
+printf "\n\tZipping starting files\n"
+zip -rq starting_files.zip starting_files && rm -r starting_files
 #rm -r ${FilterDirectory}
 
 echo "Copy to ${bioinfoVCF}"
