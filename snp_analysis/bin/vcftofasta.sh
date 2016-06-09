@@ -1494,21 +1494,34 @@ from Bio import SeqIO
 from sys import argv
 
 # infile arg used to make compatible for both sorted and organized tables
-script, myposition = argv
-myposition = int(myposition)
+script, my_snp = argv
+my_snp = int(my_snp)
 
 # Biopython tutorial
 # 4.3.2.4  Location testing
 
 record = SeqIO.read("${gbk_file}", "genbank")
 for feature in record.features:
-    if myposition in feature:
+    if my_snp in feature:
+        myproduct = "none list"
+        mylocus = "none list"
+        mygene = "none list"
         if "CDS" in feature.type:
             product = feature.qualifiers['product']
+            locus_tag = feature.qualifiers['locus_tag']
             for p in product:
-                myout = p
+                myproduct = p
+            for l in locus_tag:
+                mylocus = l
+            if "gene" in feature.qualifiers:
+                gene = feature.qualifiers['gene']
+                for g in gene:
+                    mygene = g
+            myout = "product: " + myproduct + ", gene: " + mygene + ", locus_tag: " + mylocus
+                
         else:
             myout = "No annotated product"
+
 print (myout)
 
 EOL
@@ -1518,7 +1531,6 @@ chmod 755 ./$d.annotate.py
 
 if [[ -z $gbk_file ]]; then
         printf "\n\n\t There is not a gbk file to annotate tables \n\n"
-        sleep 20
     else
     printf "\nAnnotating...\n\n"
     date
