@@ -1526,15 +1526,12 @@ if [[ -z $gbk_file ]]; then
     printf "reference_pos\tannotation\n" > $d.annotation_in
     awk '{print $2}' $d.positions > $d.header_positions 
     for l in `cat $d.header_positions`; do
-        (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
+        chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
         position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
         annotation=`./$d.annotate.py $position`
-        printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> $d.annotation_in)  &
-        let count+=1
-        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+        printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> $d.annotation_in
     done
 fi
-pause
 
 # Add annoations to tables
 ./$d.mapvalues.py $d.sorted_table.txt $d.annotation_in 
