@@ -249,6 +249,54 @@ rm ./excelcolumnextract.py
 
 #####################################################
 
+function annotate_table () {
+
+# Create "here-document" to prevent a dependent file.
+cat >./annotate.py <<EOL
+#!/usr/bin/env python
+
+from Bio import SeqFeature
+from Bio import SeqIO
+from sys import argv
+
+# infile arg used to make compatible for both sorted and organized tables
+script, my_snp = argv
+my_snp = int(my_snp)
+
+# Biopython tutorial
+# 4.3.2.4  Location testing
+
+record = SeqIO.read("${gbk_file}", "genbank")
+for feature in record.features:
+    if my_snp in feature:
+        myproduct = "none list"
+        mylocus = "none list"
+        mygene = "none list"
+        if "CDS" in feature.type:
+            product = feature.qualifiers['product']
+            locus_tag = feature.qualifiers['locus_tag']
+            for p in product:
+                myproduct = p
+            for l in locus_tag:
+                mylocus = l
+            if "gene" in feature.qualifiers:
+                gene = feature.qualifiers['gene']
+                for g in gene:
+                    mygene = g
+            myout = "product: " + myproduct + ", gene: " + mygene + ", locus_tag: " + mylocus
+                
+        else:
+            myout = "No annotated product"
+    
+print (myout)
+    
+EOL
+
+chmod 755 ./annotate.py
+}
+    
+#####################################################
+
 # Environment controls:
 
 if [[ $1 == ab1 ]]; then
@@ -1223,11 +1271,12 @@ awk '{print $1}' parsimony_filtered_total_alt > parsimony_filtered_total_pos
 
 # Create table and fasta
 awk '{print $1}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt
+awk '{print $1}' parsimony_filtered_total_alt | sed 's/$//' >> ${dircalled}/each_vcf-poslist.txt
 awk '{print $2}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt
 
 for i in *zerofilteredsnps_alt; do
-	#(
-	m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
+    # Turned on 6/10/2016	
+    (m=`basename "$i"`; n=`echo $m | sed 's/\..*//'`
 
 	fgrep -f parsimony_filtered_total_pos $i | sort -k1,1n > $n.pretod
 
@@ -1262,14 +1311,13 @@ for i in *zerofilteredsnps_alt; do
 
 	awk '{print $2}' $n.tod | tr -d [:space:] | sed "s/^/>$n;/" | tr ";" "\n" | sed 's/[A-Z],[A-Z]/N/g' > $n.fas
 	# Add each isolate to the table
-	awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt 
-	#) &
-	#let count+=1
-	#[[ $((count%NR_CPUS)) -eq 0 ]] && wait
+	awk '{print $2}' $n.tod | awk -v number="$n" 'BEGIN{print number}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt) &
+	let count+=1
+	[[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
 
 wait
-sleep 5
+sleep 2
 
 #Create root sequence
 awk '{print $2}' parsimony_filtered_total_alt > root
@@ -1483,129 +1531,69 @@ rm quality.txt
 rm $d.transposed_table.txt
 rm -r ./starting_files
 
-function annotate_table () {
-
-# Create "here-document" to prevent a dependent file.
-cat >./$d.annotate.py <<EOL
-#!/usr/bin/env python
-
-from Bio import SeqFeature
-from Bio import SeqIO
-from sys import argv
-
-# infile arg used to make compatible for both sorted and organized tables
-script, my_snp = argv
-my_snp = int(my_snp)
-
-# Biopython tutorial
-# 4.3.2.4  Location testing
-
-record = SeqIO.read("${gbk_file}", "genbank")
-for feature in record.features:
-    if my_snp in feature:
-        myproduct = "none list"
-        mylocus = "none list"
-        mygene = "none list"
-        if "CDS" in feature.type:
-            product = feature.qualifiers['product']
-            locus_tag = feature.qualifiers['locus_tag']
-            for p in product:
-                myproduct = p
-            for l in locus_tag:
-                mylocus = l
-            if "gene" in feature.qualifiers:
-                gene = feature.qualifiers['gene']
-                for g in gene:
-                    mygene = g
-            myout = "product: " + myproduct + ", gene: " + mygene + ", locus_tag: " + mylocus
-                
-        else:
-            myout = "No annotated product"
-
-print (myout)
-
-EOL
-
-chmod 755 ./$d.annotate.py
-}
-
 if [ $doing_allvcf == doing_allvcf ]; then
-    # Run with all cpus if doing a single "all_vcf" 
+    # Done doing its job, reset
+    doing_allvcf="dadada"
+
+    # Find annotation for each position to merge to tables 
     if [[ -z $gbk_file ]]; then
            printf "\n\n\t There is not a gbk file to annotate tables \n\n"
     else
-        printf "\nAnnotating...\n\n"
+        # sort and keep uniq
+        sort < ${dircalled}/all_vcf-poslist.txt | uniq > ${dircalled}/all_vcf-poslist.temp; mv ${dircalled}/all_vcf-poslist.temp ${dircalled}/all_vcf-poslist.txt
+    
+        printf "\nGetting annotation...\n\n"
         date
         annotate_table
-        printf "reference_pos\tannotation\n" > $d.annotation_in
-        awk '{print $2}' $d.positions > $d.header_positions 
-        for l in `cat $d.header_positions`; do
+        printf "reference_pos\tannotation\n" > ${dircalled}/all_vcf.annotation_in
+        for l in `cat ${dircalled}/all_vcf-poslist.txt`; do
             (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
             position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
-            annotation=`./$d.annotate.py $position`
-            printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> $d.annotation_in) &
+            annotation=`./annotate.py $position`
+            printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/all_vcf.annotation_in) &
         let count+=1
         [[ $((count%NR_CPUS)) -eq 0 ]] && wait
         done
     fi
     wait
     sleep 2
-# Add annoations to tables
-./$d.mapvalues.py $d.sorted_table.txt $d.annotation_in
-# Rename output tables back to original names
-mv $d.finished_table.txt $d.sorted_table.txt
+    # Add annoations to tables
+    ./$d.mapvalues.py $d.sorted_table.txt ${dircalled}/all_vcf.annotation_in
+    # Rename output tables back to original names
+    mv $d.finished_table.txt $d.sorted_table.txt
 
-./$d.mapvalues.py $d.organized_table.txt $d.annotation_in
-# Rename output tables back to original names
-mv $d.finished_table.txt $d.organized_table.txt
+    ./$d.mapvalues.py $d.organized_table.txt ${dircalled}/all_vcf.annotation_in
+    # Rename output tables back to original names
+    mv $d.finished_table.txt $d.organized_table.txt
 
-rm $d.positions
-rm $d.mapvalues.py
-rm $d.header_positions
-rm $d.annotate.py
-#rm $d.annotation_in
-rm $d.transposed_table.txt
-
+    rm $d.positions
+    rm $d.mapvalues.py
+    rm $d.transposed_table.txt
 else
     # When multiple tables are being done decrease cpus being used
     if [[ -z $gbk_file ]]; then
            printf "\n\n\t There is not a gbk file to annotate tables \n\n"
     else
-        NR_CPUS=1
-        printf "\nAnnotating...\n\n"
-        date
-        annotate_table
-        printf "reference_pos\tannotation\n" > $d.annotation_in
-        awk '{print $2}' $d.positions > $d.header_positions
-        for l in `cat $d.header_positions`; do
-            (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
-            position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
-            annotation=`./$d.annotate.py $position`
-            printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> $d.annotation_in) &
-        let count+=1
-        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
-        done
+        # Position with annotation made at line: 2247
+        # All positions in single file, "${dircalled}/each_annotation_in"
+        # Inner merge of this file to all tables
+        # Add annoations to tables
+        ./$d.mapvalues.py $d.sorted_table.txt ${dircalled}/each_annotation_in
+        # Rename output tables back to original names
+        mv $d.finished_table.txt $d.sorted_table.txt
+
+        ./$d.mapvalues.py $d.organized_table.txt ${dircalled}/each_annotation_in
+        # Rename output tables back to original names
+        mv $d.finished_table.txt $d.organized_table.txt
+
+        rm $d.positions
+        rm $d.mapvalues.py
+        rm $d.header_positions
+        rm $d.transposed_table.txt
     fi
     wait
     sleep 2
-# Add annoations to tables
-./$d.mapvalues.py $d.sorted_table.txt $d.annotation_in
-# Rename output tables back to original names
-mv $d.finished_table.txt $d.sorted_table.txt
-
-./$d.mapvalues.py $d.organized_table.txt $d.annotation_in
-# Rename output tables back to original names
-mv $d.finished_table.txt $d.organized_table.txt
-
-rm $d.positions
-rm $d.mapvalues.py
-rm $d.header_positions
-rm $d.annotate.py
-#rm $d.annotation_in
-rm $d.transposed_table.txt
-
 fi
-
 }
 
 #################################################################################
@@ -2108,7 +2096,6 @@ cat *zerofilteredsnps_alt | sort -nk1,1 | uniq | awk '{print $1}' | uniq -d > pa
 # If many SNPs fgrep may not do much and be slow
 fgrep -f parsimony_informative filtered_total_alt | sort -k1,1n > parsimony_filtered_total_alt
 awk '{print $1}' parsimony_filtered_total_alt > parsimony_filtered_total_pos
-
 ######################## FILTER FILE CREATOR ###########################
 if [ "$cflag" ]; then
 	d="all_vcfs"
@@ -2118,6 +2105,7 @@ fi
 
 # Create table and fasta
 awk '{print $1}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt
+awk '{print $1}' parsimony_filtered_total_alt | sed 's/$//' >> ${dircalled}/all_vcf-poslist.txt
 awk '{print $2}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt
 
 for i in *zerofilteredsnps_alt; do
@@ -2188,8 +2176,6 @@ rm parsimony_informative
 rm *zerofilteredsnps_alt
 }
 
-pwd
-
 if [ "$eflag" -o "$aflag" ]; then
     doing_allvcf="doing_allvcf"    
     all_vcfs
@@ -2234,6 +2220,31 @@ else
     # Copy template for annotated tables
     cp /home/shared/aTable_Template.xlsx ./Table_Template.xlsx
 fi
+
+#####################################################
+# Get a single annotation file for all positions in all tables
+if [[ -z $gbk_file ]]; then
+    printf "\n\n\t There is not a gbk file to annotate tables \n\n"
+else
+    # sort and keep uniq
+    sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/each_vcf-poslist.temp; mv ${dircalled}/each_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
+
+    printf "\nAnnotating...\n\n"
+    date
+    annotate_table
+    printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
+    for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
+        (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
+        position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
+        annotation=`./annotate.py $position`
+        printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+    done
+fi
+wait
+sleep 2
+#####################################################
 
 cp "$0" "$PWD"
 
@@ -2380,6 +2391,12 @@ awk 'BEGIN{print "<Body>"} {print "<p style=\"line-height: 40%;\">" $0 "</p>"} E
 echo "</Body>" >> email_log.html
 echo "</html>" >> email_log.html
 
+rm ${dircalled}/all_vcf-poslist.txt
+rm ${dircalled}/all_vcf.annotation_in
+rm ${dircalled}/annotate.py
+rm ${dircalled}/chroms
+rm ${dircalled}/each_annotation_in
+rm ${dircalled}/each_vcf-poslist.txt
 rm section1
 rm section2
 rm section3
