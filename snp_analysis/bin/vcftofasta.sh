@@ -1529,21 +1529,65 @@ EOL
 chmod 755 ./$d.annotate.py
 }
 
-if [[ -z $gbk_file ]]; then
-        printf "\n\n\t There is not a gbk file to annotate tables \n\n"
+if [ $doing_allvcf == doing_allvcf ]; then
+    # Run with all cpus if doing a single "all_vcf" 
+    if [[ -z $gbk_file ]]; then
+           printf "\n\n\t There is not a gbk file to annotate tables \n\n"
     else
-    printf "\nAnnotating...\n\n"
-    date
-    annotate_table
-    printf "reference_pos\tannotation\n" > $d.annotation_in
-    awk '{print $2}' $d.positions > $d.header_positions 
-    for l in `cat $d.header_positions`; do
-        chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
-        position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
-        annotation=`./$d.annotate.py $position`
-        printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> $d.annotation_in
-    done
+        printf "\nAnnotating...\n\n"
+        date
+        annotate_table
+        printf "reference_pos\tannotation\n" > $d.annotation_in
+        awk '{print $2}' $d.positions > $d.header_positions 
+        for l in `cat $d.header_positions`; do
+            (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
+            position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
+            annotation=`./$d.annotate.py $position`
+            printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> $d.annotation_in) &
+        let count+=1
+        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+        done
+    fi
+    wait
+    sleep 2
+# Add annoations to tables
+./$d.mapvalues.py $d.sorted_table.txt $d.annotation_in
+# Rename output tables back to original names
+mv $d.finished_table.txt $d.sorted_table.txt
 
+./$d.mapvalues.py $d.organized_table.txt $d.annotation_in
+# Rename output tables back to original names
+mv $d.finished_table.txt $d.organized_table.txt
+
+rm $d.positions
+rm $d.mapvalues.py
+rm $d.header_positions
+rm $d.annotate.py
+#rm $d.annotation_in
+rm $d.transposed_table.txt
+
+else
+    # When multiple tables are being done decrease cpus being used
+    if [[ -z $gbk_file ]]; then
+           printf "\n\n\t There is not a gbk file to annotate tables \n\n"
+    else
+        NR_CPUS=1
+        printf "\nAnnotating...\n\n"
+        date
+        annotate_table
+        printf "reference_pos\tannotation\n" > $d.annotation_in
+        awk '{print $2}' $d.positions > $d.header_positions
+        for l in `cat $d.header_positions`; do
+            (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
+            position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
+            annotation=`./$d.annotate.py $position`
+            printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> $d.annotation_in) &
+        let count+=1
+        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+        done
+    fi
+    wait
+    sleep 2
 # Add annoations to tables
 ./$d.mapvalues.py $d.sorted_table.txt $d.annotation_in
 # Rename output tables back to original names
@@ -2147,10 +2191,11 @@ rm *zerofilteredsnps_alt
 pwd
 
 if [ "$eflag" -o "$aflag" ]; then
-        all_vcfs
+    doing_allvcf="doing_allvcf"    
+    all_vcfs
 	d="all_vcfs"
-        cd ./fasta
-        alignTable
+    cd ./fasta
+    alignTable
 else
 	echo "Tree not ran for all_vcfs"
 fi
