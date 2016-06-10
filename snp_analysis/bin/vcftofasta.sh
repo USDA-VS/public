@@ -753,6 +753,17 @@ Ncov=1 # Coverage below this value will be changed to -
 
 fulDir=$PWD # Current working directory, do not change.
 
+# Copy gbk locally to ssd to increase read speed
+if [[ -z $gbk_file ]]; then
+    printf "\n\n\t There is not a gbk file to annotate tables \n\n"
+else
+    cp $gbk_file ${dircalled}
+    mygbk=`basename $gbk_file`
+    gbk_file="${dircalled}/${mygbk}"
+    echo "Genbank file being used: $gbk_file"
+fi
+
+
 # Remove selected files from comparison
 # Use file:  /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysis.txt
 
