@@ -794,12 +794,22 @@ tbNumberW='s/\..*//' #Remove all charaters at and beyond "."
 tbNumberOnly='s/.*\([0-9]\{2\}-[0-9,FM]\{4,6\}\).*/\1/' #Only tb Number, *laboratory specific*
 dropEXT='s/\(.*\)\..*/\1/' #Just drop the extention from the file
 
-NR_CPUS=50 # Computer cores to use when analyzing
+NR_CPUS=60 # Computer cores to use when analyzing
 LIMIT_CPUS=10
 
 Ncov=1 # Coverage below this value will be changed to -
 
 fulDir=$PWD # Current working directory, do not change.
+
+# Copy gbk locally to increase read speed
+if [[ -z $gbk_file ]]; then
+    printf "\n\n\t There is not a gbk file to annotate tables \n\n"
+else
+    cp $gbk_file ${dircalled}
+    mygbk=`basename $gbk_file`
+    gbk_file="${dircalled}/${mygbk}"
+    echo "Genbank file being used: $gbk_file"
+fi
 
 # Remove selected files from comparison
 # Use file:  /bioinfo11/TStuber/Results/mycobacterium/tbc/tbbov/script2/RemoveFromAnalysis.txt
@@ -886,7 +896,7 @@ echo "AConeCallPosition is running, started -->  `date`"
 echo "" >> section2
 
 for i in *.vcf; do
-(for pos in $positionList; do awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ "^"x"$" ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }' $i; done | grep "AC=1;A" | awk 'BEGIN {FS=";"} {print $1, $2}' >> section2) &
+(for pos in $positionList; do awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 == x ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }' $i; done | grep "AC=1;A" | awk 'BEGIN {FS=";"} {print $1, $2}' >> section2) &
     let count+=1
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
@@ -1478,6 +1488,10 @@ echo "`date` --> Sorted table map quality gathering for $d"
 
 cat $d.positions | parallel 'export positionnumber=$(echo {} | awk '"'"'{print $2}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); printf "$positionnumber\t$avemap\n" >> quality.txt' &> /dev/null
 
+wait
+
+
+
 function add_mapping_values_sorted () {
 
 # Create "here-document" to prevent a dependent file.
@@ -1531,7 +1545,7 @@ rm quality.txt
 rm $d.transposed_table.txt
 rm -r ./starting_files
 
-if [ $doing_allvcf == doing_allvcf ]; then
+if [ "$doing_allvcf" == "doing_allvcf" ]; then
     # Done doing its job, reset
     doing_allvcf="dadada"
 
@@ -1588,7 +1602,6 @@ else
 
         rm $d.positions
         rm $d.mapvalues.py
-        rm $d.header_positions
         rm $d.transposed_table.txt
     fi
     wait
@@ -2211,7 +2224,7 @@ fasta_table &
 wait
 echo "At line $LINENO, sleeping 5 second"; sleep 5s
 cd ${fulDir}
-$PWD
+
 cp ${DefiningSNPs} ./
 
 if [[ -z $gbk_file ]]; then
@@ -2264,7 +2277,7 @@ for d in $directories; do
     #echo "************* Orginizing Table: $d *****************"
     #echo "****************************************************"
 	alignTable & 
-
+wait
     pwd
 done
 
@@ -2289,6 +2302,7 @@ for d in $directories; do
     #echo "************* Orginizing Table: $d *****************"
     #echo "****************************************************"
     alignTable & 
+wait
 pwd
 done
 else
