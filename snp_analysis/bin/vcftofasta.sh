@@ -297,7 +297,7 @@ elif [[ $1 == suis1 ]]; then
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/suis1/script_dependents/Suis1_Defining_SNPs.txt"
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
-    FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
+    FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
     FilterDirectory="/bioinfo11/TStuber/Results/brucella/suis1/script_dependents/FilterFiles" #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/suis1/script_dependents/RemoveFromAnalysis.txt"
     QUAL=300 # Minimum quality for calling a SNP
@@ -1334,6 +1334,8 @@ awk '{print $0}' *.fas >> RAxMLfastaGroup.txt
 raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} ­b 123476 -m GTRCAT -p 12345 &> /dev/null && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf; nw_reroot RAxML_bestTree.${d} root > tableinput.${d}; nw_reroot RAxML_bestTree.${d} root > rooted_RAxML_bestTree.${d}; mv rooted_RAxML_bestTree.${d} RAxML_bestTree.${d} &> /dev/null
 wait
 
+sleep 200
+
 rm RAxML_parsimonyTree*
 for i in RAxML*Tree*; do mv $i ../${i}.tre; done
 
@@ -1439,7 +1441,8 @@ awk ' NR == 1 {print $0}' $d.sorted_table.txt | tr "\t" "\n" | sed "1d" | awk '{
 printf "reference_pos\tmap-quality\n" > quality.txt
 echo "`date` --> Sorted table map quality gathering for $d"
 
-cat $d.positions | parallel 'export positionnumber=$(echo {} | awk '"'"'{print $2}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); printf "$positionnumber\t$avemap\n" >> quality.txt' &> /dev/null
+cat $d.positions | parallel --jobs 10 'export positionnumber=$(echo {} | awk '"'"'{print $2}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); printf "$positionnumber\t$avemap\n" >> quality.txt' &> /dev/null
+sleep 5
 
 function add_mapping_values_sorted () {
 
@@ -1450,6 +1453,7 @@ cat >./$d.mapvalues.py <<EOL
 import pandas as pd
 import numpy as np
 from sys import argv
+import time
 
 # infile arg used to make compatible for both sorted and organized tables
 script, infile, inquality = argv
@@ -1461,19 +1465,30 @@ mytable = pd.read_csv(infile, sep='\t')
 mytable = mytable.set_index('reference_pos')
 mytable = mytable.transpose()
 
+time.sleep(5)
+
 # write to csv to import back with generic index again
 # seems like a hack that can be done better
 mytable.to_csv("$d.transposed_table.txt", sep="\t", index_label='reference_pos')
 
+time.sleep(120)
+
 # can't merge on index but this newly imported transpose is formated correctly
 mytable = pd.read_csv('$d.transposed_table.txt', sep='\t')
+
+time.sleep(5)
+
 mytable = mytable.merge(quality, on='reference_pos', how='inner')
+
+time.sleep(5)
 
 # set index to "reference_pos" so generic index does not transpose 
 mytable = mytable.set_index('reference_pos')
 mytable = mytable.transpose()
 # since "reference_pos" was set as index it needs to be explicitly written into csv
 mytable.to_csv("$d.finished_table.txt", sep="\t", index_label='reference_pos')
+
+time.sleep(60)
 
 EOL
 
@@ -1482,15 +1497,24 @@ chmod 755 ./$d.mapvalues.py
 }
 
 add_mapping_values_sorted
+
 ./$d.mapvalues.py $d.sorted_table.txt quality.txt
+sleep 5
+
+cp $d.finished_table.txt $d.quality-sorted_table.txt
 mv $d.finished_table.txt $d.sorted_table.txt
+sleep 5
 
 # Add map qualities to organized table
 echo "`date` --> Organized table map quality gathering for $d"
 ./$d.mapvalues.py $d.organized_table.txt quality.txt
-mv $d.finished_table.txt $d.organized_table.txt
+sleep 5
 
-rm quality.txt
+cp $d.finished_table.txt $d.quality-organized_table.txt
+mv $d.finished_table.txt $d.organized_table.txt
+sleep 5 
+
+#rm quality.txt
 rm $d.transposed_table.txt
 rm -r ./starting_files
 
@@ -1540,12 +1564,12 @@ EOL
 chmod 755 ./$d.annotate.py
 }
 
-if [ $doing_allvcf == doing_allvcf ]; then
+if [[ $doing_allvcf == "doing_allvcf" ]]; then
     # Run with all cpus if doing a single "all_vcf" 
     if [[ -z $gbk_file ]]; then
            printf "\n\n\t There is not a gbk file to annotate tables \n\n"
     else
-        printf "\nAnnotating...\n\n"
+        printf "\nAnnotating... $d\n\n"
         date
         annotate_table
         printf "reference_pos\tannotation\n" > $d.annotation_in
@@ -1582,31 +1606,33 @@ else
     if [[ -z $gbk_file ]]; then
            printf "\n\n\t There is not a gbk file to annotate tables \n\n"
     else
-        NR_CPUS=1
-        printf "\nAnnotating...\n\n"
+        printf "\nAnnotating... $d\n\n"
         date
         annotate_table
         printf "reference_pos\tannotation\n" > $d.annotation_in
         awk '{print $2}' $d.positions > $d.header_positions
         for l in `cat $d.header_positions`; do
-            (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
+            chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
             position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
             annotation=`./$d.annotate.py $position`
-            printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> $d.annotation_in) &
-        let count+=1
-        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+            printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> $d.annotation_in
         done
     fi
     wait
     sleep 2
 # Add annoations to tables
 ./$d.mapvalues.py $d.sorted_table.txt $d.annotation_in
+wait
+sleep 5
 # Rename output tables back to original names
 mv $d.finished_table.txt $d.sorted_table.txt
+sleep 5
 
 ./$d.mapvalues.py $d.organized_table.txt $d.annotation_in
+sleep 5
 # Rename output tables back to original names
 mv $d.finished_table.txt $d.organized_table.txt
+sleep 5
 
 rm $d.positions
 rm $d.mapvalues.py
@@ -2236,7 +2262,7 @@ fasta_table &
 wait
 echo "At line $LINENO, sleeping 5 second"; sleep 5s
 cd ${fulDir}
-$PWD
+
 cp ${DefiningSNPs} ./
 
 if [[ -z $gbk_file ]]; then
@@ -2248,30 +2274,7 @@ fi
 
 cp "$0" "$PWD"
 
-#echo "***************************************************"
-#echo "********** STARTING all_clades Alignment **********"
-#echo "***************************************************"
-cd ${fulDir}/all_clades
-
-workingdir=`basename $PWD`
-
-if [ $workingdir == all_clades ]
-then
-directories=`ls`
-for d in $directories; do
-    cd ${fulDir}/all_clades/${d}/fasta
-    #echo "****************************************************"
-    #echo "************* Orginizing Table: $d *****************"
-    #echo "****************************************************"
-	alignTable & 
-
-    pwd
-done
-
-else
-echo "*** $workingdir not found ***"
-fi
-#wait
+sleep 10
 
 #echo "***************************************************"
 #echo "********** STARTING all_groups Alignment **********"
@@ -2288,15 +2291,19 @@ for d in $directories; do
     #echo "****************************************************"
     #echo "************* Orginizing Table: $d *****************"
     #echo "****************************************************"
-    alignTable & 
-pwd
+	alignTable & 
+
+    pwd 
 done
+
 else
 echo "*** $workingdir not found ***"
 fi
 #wait
+sleep 300
+
 #echo "***************************************************"
-#echo "******** STARTING all_subgroups Alignment *********"
+#echo "********** STARTING all_subgroups Alignment **********"
 #echo "***************************************************"
 cd ${fulDir}/all_subgroups
 
@@ -2304,10 +2311,34 @@ workingdir=`basename $PWD`
 
 if [ $workingdir == all_subgroups ]
 then
+directories=`ls`
+for d in $directories; do
+    cd ${fulDir}/all_subgroups/${d}/fasta
+    #echo "****************************************************"
+    #echo "************* Orginizing Table: $d *****************"
+    #echo "****************************************************"
+    alignTable & 
+pwd
+done
+else
+echo "*** $workingdir not found ***"
+fi
+#wait
+sleep 600
+
+#echo "***************************************************"
+#echo "******** STARTING all_clades Alignment *********"
+#echo "***************************************************"
+cd ${fulDir}/all_clades
+
+workingdir=`basename $PWD`
+
+if [ $workingdir == all_clades ]
+then
 
 directories=`ls`
 for d in $directories; do
-    cd ${fulDir}/all_subgroups/$d/fasta
+    cd ${fulDir}/all_clades/$d/fasta
     #echo "****************************************************"
     #echo "************* Orginizing Table: $d *****************"
     #echo "****************************************************"
