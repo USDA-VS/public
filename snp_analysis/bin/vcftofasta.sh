@@ -1380,9 +1380,12 @@ awk '{print $0}' *.fas >> RAxMLfastaGroup.txt
 
 raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} ­b 123476 -m GTRCAT -p 12345 &> /dev/null && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf; nw_reroot RAxML_bestTree.${d} root > tableinput.${d}; nw_reroot RAxML_bestTree.${d} root > rooted_RAxML_bestTree.${d}; mv rooted_RAxML_bestTree.${d} RAxML_bestTree.${d} &> /dev/null
 wait
-
-sleep 60
-
+if [ "$doing_allvcf" == "doing_allvcf" ]; then
+    echo "RAxML done"
+else
+    # Give time for some RAxMLs to finish before morning on
+    sleep 60
+fi
 rm RAxML_parsimonyTree*
 for i in RAxML*Tree*; do mv $i ../${i}.tre; done
 
@@ -1488,8 +1491,18 @@ awk ' NR == 1 {print $0}' $d.sorted_table.txt | tr "\t" "\n" | sed "1d" | awk '{
 printf "reference_pos\tmap-quality\n" > quality.txt
 echo "`date` --> Sorted table map quality gathering for $d"
 
-cat $d.positions | parallel --jobs 10 'export positionnumber=$(echo {} | awk '"'"'{print $2}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); printf "$positionnumber\t$avemap\n" >> quality.txt' &> /dev/null
+if [ "$doing_allvcf" == "doing_allvcf" ]; then
+    # Done doing its job, reset, we don't want to run all thread in group tables
+    doing_allvcf="dadada"
+    # run all threads
+     echo "parallel running..."
+    cat $d.positions | parallel 'export positionnumber=$(echo {} | awk '"'"'{print $2}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); printf "$positionnumber\t$avemap\n" >> quality.txt' &> /dev/null
+else
+    echo "parallel running..."
+    cat $d.positions | parallel --jobs 10 'export positionnumber=$(echo {} | awk '"'"'{print $2}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); printf "$positionnumber\t$avemap\n" >> quality.txt' &> /dev/null
 sleep 120
+fi
+
 
 function add_mapping_values_sorted () {
 
@@ -1545,9 +1558,6 @@ rm quality.txt
 rm $d.transposed_table.txt
 rm -r ./starting_files
 
-echo "Going in for the annotation..."
-pause
-
 # When multiple tables are being done decrease cpus being used
 if [[ -z $gbk_file ]]; then
        printf "\n\n\t There is not a gbk file to annotate tables \n\n"
@@ -1568,9 +1578,6 @@ else
     rm $d.mapvalues.py
     rm $d.transposed_table.txt
 fi
-
-echo "annotation is done"
-pause
 
     wait
     sleep 2
@@ -2090,27 +2097,22 @@ awk '{print $1}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_pos"
 # Getting annoations
 awk '{print $1}' parsimony_filtered_total_alt | sed 's/$//' >> ${dircalled}/all_vcf-poslist.txt
 
-echo "look at: ${dircalled}/all_vcf-poslist.txt"
-pause
-
 # Get annotations for each position
 sort < ${dircalled}/all_vcf-poslist.txt | uniq > ${dircalled}/all_vcf-poslist.temp; mv ${dircalled}/all_vcf-poslist.temp ${dircalled}/all_vcf-poslist.txt
 
 printf "\nGetting annotation...\n\n"
 date
 annotate_table
-printf "reference_pos\tannotation\n" > ${dircalled}/all_vcf.annotation_in
+printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
 for l in `cat ${dircalled}/all_vcf-poslist.txt`; do
     (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
     position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
     annotation=`./annotate.py $position`
-    printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/all_vcf.annotation_in) &
+    printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
     let count+=1
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
 
-echo "look at: ${dircalled}/all_vcf.annotation_in"
-pause
 ###
 
 awk '{print $2}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt
@@ -2184,6 +2186,7 @@ rm *zerofilteredsnps_alt
 }
 
 if [ "$eflag" -o "$aflag" ]; then
+    doing_allvcf="doing_allvcf"    
     all_vcfs
 	d="all_vcfs"
     cd ./fasta
@@ -2227,27 +2230,6 @@ else
     cp /home/shared/aTable_Template.xlsx ./Table_Template.xlsx
 fi
 
-#####################################################
-# Get a single annotation file for all positions in all tables
-if [[ -z $gbk_file ]]; then
-    printf "\n\n\t There is not a gbk file to annotate tables \n\n"
-else
-    # sort and keep uniq
-    sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/each_vcf-poslist.temp; mv ${dircalled}/each_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
-
-    printf "\nAnnotating...\n\n"
-    date
-    annotate_table
-    printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
-    for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
-        (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
-        position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
-        annotation=`./annotate.py $position`
-        printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
-    let count+=1
-    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
-    done
-fi
 wait
 sleep 2
 #####################################################
