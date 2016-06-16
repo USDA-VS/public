@@ -1067,7 +1067,7 @@ startingdirectory=$(pwd)
 
 for d in $directories; do
 
-cd ${startingdirectory}/$d/
+(cd ${startingdirectory}/$d/
 dir=$(basename $PWD)
 echo "Directory:  $dir"
 
@@ -1368,9 +1368,9 @@ if [[ -z $gbk_file ]]; then
 else
     # Copy template for annotated tables
     cp /home/shared/aTable_Template.xlsx ./${d}-Table_Template.xlsx
-fi
+fi) &
 
-done
+done 
 }
 #****************************************************************
 function alignTable () {
@@ -2211,21 +2211,21 @@ fi
 #echo "***************************************************"
 # Change directory to all_groups
 cd ${fulDir}/all_groups
-fasta_table &
+fasta_table; wait #&
 
 #echo "***************************************************"
 #echo "**************** STARTING SUBGROUPS ***************"
 #echo "***************************************************"
 # Change directory to all_subgroups
 cd ${fulDir}/all_subgroups
-fasta_table &
+fasta_table; wait #&
 
 #echo "***************************************************"
 #echo "***************** STARTING CLADES *****************"
 #echo "***************************************************"
 # Change directory to all_clades
 cd ${fulDir}/all_clades
-fasta_table &
+fasta_table; wait #&
 wait
 echo "At line $LINENO, sleeping 5 second"; sleep 5s
 
