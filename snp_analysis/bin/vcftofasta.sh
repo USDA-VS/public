@@ -747,7 +747,7 @@ tbNumberOnly='s/.*\([0-9]\{2\}-[0-9,FM]\{4,6\}\).*/\1/' #Only tb Number, *labora
 dropEXT='s/\(.*\)\..*/\1/' #Just drop the extention from the file
 
 NR_CPUS=50 # Computer cores to use when analyzing
-LIMIT_CPUS=10
+LIMIT_CPUS=2
 
 Ncov=1 # Coverage below this value will be changed to -
 
@@ -1334,7 +1334,7 @@ awk '{print $0}' *.fas >> RAxMLfastaGroup.txt
 raxmlHPC-SSE3 -s RAxMLfastaGroup.txt -n ${d} ­b 123476 -m GTRCAT -p 12345 &> /dev/null && nw_reroot RAxML_bestTree.${d} root | nw_display -s -w 1000 -v 20 -b 'opacity:0' -i 'font-size:8' -l 'font-family:serif;font-style:italic' -d 'stroke-width:2;stroke:blue' - > ../${d}-tree.svg && inkscape -f ../${d}-tree.svg -A ../${d}-tree.pdf; nw_reroot RAxML_bestTree.${d} root > tableinput.${d}; nw_reroot RAxML_bestTree.${d} root > rooted_RAxML_bestTree.${d}; mv rooted_RAxML_bestTree.${d} RAxML_bestTree.${d} &> /dev/null
 wait
 
-sleep 200
+sleep 100
 
 rm RAxML_parsimonyTree*
 for i in RAxML*Tree*; do mv $i ../${i}.tre; done
@@ -1442,7 +1442,7 @@ printf "reference_pos\tmap-quality\n" > quality.txt
 echo "`date` --> Sorted table map quality gathering for $d"
 
 cat $d.positions | parallel --jobs 10 'export positionnumber=$(echo {} | awk '"'"'{print $2}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); printf "$positionnumber\t$avemap\n" >> quality.txt' &> /dev/null
-sleep 5
+sleep 120
 
 function add_mapping_values_sorted () {
 
@@ -1465,30 +1465,20 @@ mytable = pd.read_csv(infile, sep='\t')
 mytable = mytable.set_index('reference_pos')
 mytable = mytable.transpose()
 
-time.sleep(5)
-
 # write to csv to import back with generic index again
 # seems like a hack that can be done better
 mytable.to_csv("$d.transposed_table.txt", sep="\t", index_label='reference_pos')
 
-time.sleep(120)
-
 # can't merge on index but this newly imported transpose is formated correctly
 mytable = pd.read_csv('$d.transposed_table.txt', sep='\t')
 
-time.sleep(5)
-
 mytable = mytable.merge(quality, on='reference_pos', how='inner')
-
-time.sleep(5)
 
 # set index to "reference_pos" so generic index does not transpose 
 mytable = mytable.set_index('reference_pos')
 mytable = mytable.transpose()
 # since "reference_pos" was set as index it needs to be explicitly written into csv
 mytable.to_csv("$d.finished_table.txt", sep="\t", index_label='reference_pos')
-
-time.sleep(60)
 
 EOL
 
@@ -1497,22 +1487,16 @@ chmod 755 ./$d.mapvalues.py
 }
 
 add_mapping_values_sorted
-
+sleep 5
 ./$d.mapvalues.py $d.sorted_table.txt quality.txt
-sleep 5
 
-cp $d.finished_table.txt $d.quality-sorted_table.txt
 mv $d.finished_table.txt $d.sorted_table.txt
-sleep 5
 
 # Add map qualities to organized table
 echo "`date` --> Organized table map quality gathering for $d"
 ./$d.mapvalues.py $d.organized_table.txt quality.txt
-sleep 5
 
-cp $d.finished_table.txt $d.quality-organized_table.txt
 mv $d.finished_table.txt $d.organized_table.txt
-sleep 5 
 
 #rm quality.txt
 rm $d.transposed_table.txt
@@ -1598,7 +1582,7 @@ rm $d.positions
 rm $d.mapvalues.py
 rm $d.header_positions
 rm $d.annotate.py
-#rm $d.annotation_in
+rm $d.annotation_in
 rm $d.transposed_table.txt
 
 else
@@ -1611,34 +1595,32 @@ else
         annotate_table
         printf "reference_pos\tannotation\n" > $d.annotation_in
         awk '{print $2}' $d.positions > $d.header_positions
+        sleep 120
         for l in `cat $d.header_positions`; do
-            chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
+            (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
             position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
             annotation=`./$d.annotate.py $position`
-            printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> $d.annotation_in
+            printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> $d.annotation_in) &
+        let count+=1
+        [[ $((count%LIMIT_CPUS)) -eq 0 ]] && wait
         done
     fi
     wait
     sleep 2
 # Add annoations to tables
-./$d.mapvalues.py $d.sorted_table.txt $d.annotation_in
-wait
 sleep 5
+./$d.mapvalues.py $d.sorted_table.txt $d.annotation_in
 # Rename output tables back to original names
 mv $d.finished_table.txt $d.sorted_table.txt
-sleep 5
-
 ./$d.mapvalues.py $d.organized_table.txt $d.annotation_in
-sleep 5
 # Rename output tables back to original names
 mv $d.finished_table.txt $d.organized_table.txt
-sleep 5
 
 rm $d.positions
 rm $d.mapvalues.py
 rm $d.header_positions
 rm $d.annotate.py
-#rm $d.annotation_in
+rm $d.annotation_in
 rm $d.transposed_table.txt
 
 fi
@@ -2300,7 +2282,7 @@ else
 echo "*** $workingdir not found ***"
 fi
 #wait
-sleep 300
+sleep 900
 
 #echo "***************************************************"
 #echo "********** STARTING all_subgroups Alignment **********"
@@ -2324,7 +2306,7 @@ else
 echo "*** $workingdir not found ***"
 fi
 #wait
-sleep 600
+sleep 1400
 
 #echo "***************************************************"
 #echo "******** STARTING all_clades Alignment *********"
