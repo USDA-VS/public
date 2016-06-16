@@ -1796,7 +1796,7 @@ wait
 echo "chromCount:  $chromCount"
 
 if [ $FilterAllVCFs == yes ]; then
-echo "`date` --> Marking all VCFs and removing filtered regions"
+echo "`date` --> Marking VCFs and removing filtered regions"
 	# Label filter field for positions to be filtered in all VCFs
         if [ $((chromCount)) -eq 1 ]; then
         for i in *.vcf; do
@@ -2237,7 +2237,6 @@ if [ "$eflag" -o "$aflag" ]; then
 else
     # Get annotations for each position
     sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/each_vcf-poslist.temp; mv ${dircalled}/each_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
-pause
 
     printf "\nGetting annotation...\n\n"
     date
@@ -2251,7 +2250,6 @@ pause
         let count+=1
         [[ $((count%NR_CPUS)) -eq 0 ]] && wait
     done
-pause
 
 fi
 ###
@@ -2299,7 +2297,7 @@ else
 echo "*** $workingdir not found ***"
 fi
 #wait
-sleep 60 #900
+sleep 480 #60 #900
 
 #echo "***************************************************"
 #echo "********** STARTING all_subgroups Alignment **********"
@@ -2323,7 +2321,7 @@ else
 echo "*** $workingdir not found ***"
 fi
 #wait
-sleep 120 #1400
+sleep 420 #1000 #120 #1400
 
 #echo "***************************************************"
 #echo "******** STARTING all_clades Alignment *********"
