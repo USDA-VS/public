@@ -1500,7 +1500,7 @@ if [ "$doing_allvcf" == "doing_allvcf" ]; then
 else
     echo "parallel running..."
     cat $d.positions | parallel --jobs 10 'export positionnumber=$(echo {} | awk '"'"'{print $2}'"'"'); export front=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\1/'"'"'); export back=$(echo {} | awk '"'"'{print $2}'"'"' | sed '"'"'s/\(.*\)-\([0-9]*\)/\2/'"'"'); export avemap=$(awk -v f=$front -v b=$back '"'"'$6 != "." && $1 == f && $2 == b {print $8}'"'"' ./starting_files/*vcf | sed '"'"'s/.*MQ=\(.....\).*/\1/'"'"' | awk '"'"'{ sum += $1; n++ } END { if (n > 0) print sum / n; }'"'"' | sed '"'"'s/\..*//'"'"'); printf "$positionnumber\t$avemap\n" >> quality.txt' &> /dev/null
-sleep 120
+sleep 60
 fi
 
 
@@ -2262,7 +2262,7 @@ else
 echo "*** $workingdir not found ***"
 fi
 #wait
-sleep 900
+sleep 60 #900
 
 #echo "***************************************************"
 #echo "********** STARTING all_subgroups Alignment **********"
@@ -2286,7 +2286,7 @@ else
 echo "*** $workingdir not found ***"
 fi
 #wait
-sleep 1400
+sleep 120 #1400
 
 #echo "***************************************************"
 #echo "******** STARTING all_clades Alignment *********"
