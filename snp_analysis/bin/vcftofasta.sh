@@ -1281,6 +1281,15 @@ awk '{print $1}' parsimony_filtered_total_alt > parsimony_filtered_total_pos
 
 # Create table and fasta
 awk '{print $1}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_pos"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt
+
+# If e or a flag was called annotations are made in all_vcf function
+if [ "$eflag" -o "$aflag" ]; then
+    echo "${dircalled}/each_vcf-poslist.txt already complete, skipping"
+else
+    echo "Make position list for each table made"
+    awk '{print $1}' parsimony_filtered_total_alt | sed 's/$//' >> ${dircalled}/each_vcf-poslist.txt
+fi
+
 awk '{print $2}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt
 
 for i in *zerofilteredsnps_alt; do
@@ -2095,16 +2104,16 @@ awk '{print $1}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_pos"
 
 ###
 # Getting annoations
-awk '{print $1}' parsimony_filtered_total_alt | sed 's/$//' >> ${dircalled}/all_vcf-poslist.txt
+awk '{print $1}' parsimony_filtered_total_alt | sed 's/$//' >> ${dircalled}/each_vcf-poslist.txt
 
 # Get annotations for each position
-sort < ${dircalled}/all_vcf-poslist.txt | uniq > ${dircalled}/all_vcf-poslist.temp; mv ${dircalled}/all_vcf-poslist.temp ${dircalled}/all_vcf-poslist.txt
+sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/all_vcf-poslist.temp; mv ${dircalled}/all_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
 
 printf "\nGetting annotation...\n\n"
 date
 annotate_table
 printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
-for l in `cat ${dircalled}/all_vcf-poslist.txt`; do
+for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
     (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
     position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
     annotation=`./annotate.py $position`
@@ -2219,6 +2228,34 @@ cd ${fulDir}/all_clades
 fasta_table &
 wait
 echo "At line $LINENO, sleeping 5 second"; sleep 5s
+
+###
+
+# If e or a flag was called annotations are made in all_vcf function
+if [ "$eflag" -o "$aflag" ]; then
+    echo "${dircalled}/each_vcf-poslist.txt already complete, skipping"
+else
+    # Get annotations for each position
+    sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/each_vcf-poslist.temp; mv ${dircalled}/each_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
+pause
+
+    printf "\nGetting annotation...\n\n"
+    date
+    annotate_table
+    printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
+    for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
+        (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
+        position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
+        annotation=`./annotate.py $position`
+        printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
+        let count+=1
+        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+    done
+pause
+
+fi
+###
+
 cd ${fulDir}
 
 cp ${DefiningSNPs} ./
