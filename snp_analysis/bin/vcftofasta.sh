@@ -1067,7 +1067,7 @@ startingdirectory=$(pwd)
 
 for d in $directories; do
 
-(cd ${startingdirectory}/$d/
+cd ${startingdirectory}/$d/
 dir=$(basename $PWD)
 echo "Directory:  $dir"
 
@@ -1368,7 +1368,7 @@ if [[ -z $gbk_file ]]; then
 else
     # Copy template for annotated tables
     cp /home/shared/aTable_Template.xlsx ./${d}-Table_Template.xlsx
-fi) &
+fi
 
 done 
 }
@@ -2112,6 +2112,7 @@ sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/all_vcf-poslist.t
 printf "\nGetting annotation...\n\n"
 date
 annotate_table
+TOP_CPUS=60
 printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
 for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
     (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
@@ -2119,7 +2120,7 @@ for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
     annotation=`./annotate.py $position`
     printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
     let count+=1
-    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+    [[ $((count%TOP_CPUS)) -eq 0 ]] && wait
 done
 
 ###
@@ -2211,21 +2212,21 @@ fi
 #echo "***************************************************"
 # Change directory to all_groups
 cd ${fulDir}/all_groups
-fasta_table; wait #&
+fasta_table &
 
 #echo "***************************************************"
 #echo "**************** STARTING SUBGROUPS ***************"
 #echo "***************************************************"
 # Change directory to all_subgroups
 cd ${fulDir}/all_subgroups
-fasta_table; wait #&
+fasta_table &
 
 #echo "***************************************************"
 #echo "***************** STARTING CLADES *****************"
 #echo "***************************************************"
 # Change directory to all_clades
 cd ${fulDir}/all_clades
-fasta_table; wait #&
+fasta_table &
 wait
 echo "At line $LINENO, sleeping 5 second"; sleep 5s
 
@@ -2241,6 +2242,7 @@ else
     printf "\nGetting annotation...\n\n"
     date
     annotate_table
+    TOP_CPUS=60
     printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
     for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
         (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
@@ -2248,7 +2250,7 @@ else
         annotation=`./annotate.py $position`
         printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
         let count+=1
-        [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+        [[ $((count%TOP_CPUS)) -eq 0 ]] && wait
     done
 
 fi
@@ -2297,7 +2299,12 @@ else
 echo "*** $workingdir not found ***"
 fi
 #wait
-sleep 480 #60 #900
+
+if [[ $1 == bovis ]]; then 
+    date
+    echo "sleeping for 480 seconds..."
+    sleep 480 #60 #900
+fi
 
 #echo "***************************************************"
 #echo "********** STARTING all_subgroups Alignment **********"
@@ -2321,7 +2328,12 @@ else
 echo "*** $workingdir not found ***"
 fi
 #wait
-sleep 420 #1000 #120 #1400
+
+if [[ $1 == bovis ]]; then 
+    date
+    echo "sleeping for 420 seconds..."
+    sleep 420 #1000 #120 #1400
+fi
 
 #echo "***************************************************"
 #echo "******** STARTING all_clades Alignment *********"
@@ -2348,6 +2360,7 @@ fi
 wait
 pwd
 cd ${fulDir}
+
 
 column section1 > csection1
 sort -nr < section4 > ssection4
