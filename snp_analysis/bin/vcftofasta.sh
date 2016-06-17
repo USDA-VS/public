@@ -1566,6 +1566,7 @@ mv $d.finished_table.txt $d.organized_table.txt
 rm quality.txt
 rm $d.transposed_table.txt
 rm -r ./starting_files
+rm root
 
 # When multiple tables are being done decrease cpus being used
 if [[ -z $gbk_file ]]; then
@@ -1623,6 +1624,9 @@ wait
 wait
 #Test for match coverage file
 #checkMatchingCoverageFile
+
+vcfcount=`ls *vcf | wc -l`
+printf "\n $vcfcount vcf files\n\n"
 
 #copy the original vcfs to /starting_files
 mkdir starting_files
@@ -2106,23 +2110,25 @@ awk '{print $1}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_pos"
 # Getting annoations
 awk '{print $1}' parsimony_filtered_total_alt | sed 's/$//' >> ${dircalled}/each_vcf-poslist.txt
 
-# Get annotations for each position
-sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/all_vcf-poslist.temp; mv ${dircalled}/all_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
-
-printf "\nGetting annotation...\n\n"
-date
-annotate_table
-TOP_CPUS=60
-printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
-for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
-    (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
-    position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
-    annotation=`./annotate.py $position`
-    printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
-    let count+=1
-    [[ $((count%TOP_CPUS)) -eq 0 ]] && wait
-done
-
+if [[ -z $gbk_file ]]; then
+    echo "No gbk file"
+else
+    # Get annotations for each position
+    sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/all_vcf-poslist.temp; mv ${dircalled}/all_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
+    printf "\nGetting annotation...\n\n"
+    date
+    annotate_table
+    TOP_CPUS=60
+    printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
+    for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
+        (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
+        position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
+        annotation=`./annotate.py $position`
+        printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
+        let count+=1
+        [[ $((count%TOP_CPUS)) -eq 0 ]] && wait
+    done
+fi
 ###
 
 awk '{print $2}' parsimony_filtered_total_alt | awk 'BEGIN{print "reference_call"}1' | tr '\n' '\t' | sed 's/$//' | awk '{print $0}' >> ${d}.table.txt
@@ -2202,7 +2208,8 @@ if [ "$eflag" -o "$aflag" ]; then
     cd ./fasta
     alignTable
 else
-	echo "Tree not ran for all_vcfs"
+	echo "not ran" > all_vcfs/not_ran
+    echo "Tree not ran for all_vcfs"
 fi
 
 ##################### End: All vcf folder #####################
@@ -2236,24 +2243,27 @@ echo "At line $LINENO, sleeping 5 second"; sleep 5s
 if [ "$eflag" -o "$aflag" ]; then
     echo "${dircalled}/each_vcf-poslist.txt already complete, skipping"
 else
-    # Get annotations for each position
-    sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/each_vcf-poslist.temp; mv ${dircalled}/each_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
-
-    printf "\nGetting annotation...\n\n"
-    date
-    annotate_table
-    TOP_CPUS=60
-    printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
-    for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
-        (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
-        position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
-        annotation=`./annotate.py $position`
-        printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
-        let count+=1
-        [[ $((count%TOP_CPUS)) -eq 0 ]] && wait
-    done
-
+    if [[ -z $gbk_file ]]; then
+        echo "No gbk file"
+    else
+        # Get annotations for each position
+        sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/each_vcf-poslist.temp; mv ${dircalled}/each_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
+        printf "\nGetting annotation...\n\n"
+        date
+        annotate_table
+        TOP_CPUS=60
+        printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
+        for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
+            (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
+            position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
+            annotation=`./annotate.py $position`
+            printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
+            let count+=1
+            [[ $((count%TOP_CPUS)) -eq 0 ]] && wait
+        done
+    fi
 fi
+rm annotate.py
 ###
 
 cd ${fulDir}
@@ -2273,6 +2283,7 @@ sleep 2
 
 cp "$0" "$PWD"
 
+echo "sleeping for 10 seconds before starting table sorting"
 sleep 10
 
 #echo "***************************************************"
@@ -2300,10 +2311,18 @@ echo "*** $workingdir not found ***"
 fi
 #wait
 
-if [[ $1 == bovis ]]; then 
+if [[ $vcfcount -le 200 ]]; then 
+    date
+    echo "sleeping for 10 seconds..."
+    sleep 10
+elif [[ $vcfcount -le 1000 ]]; then
+    date
+    echo "sleeping for 120 seconds..."
+    sleep 120
+else
     date
     echo "sleeping for 480 seconds..."
-    sleep 480 #60 #900
+    sleep 480
 fi
 
 #echo "***************************************************"
@@ -2329,11 +2348,19 @@ echo "*** $workingdir not found ***"
 fi
 #wait
 
-if [[ $1 == bovis ]]; then 
+if [[ $vcfcount -le 200 ]]; then
     date
-    echo "sleeping for 420 seconds..."
-    sleep 420 #1000 #120 #1400
-fi
+    echo "sleeping for 10 seconds..."
+    sleep 10
+elif [[ $vcfcount -le 1000 ]]; then
+    date
+    echo "sleeping for 120 seconds..."
+    sleep 120
+else
+    date
+    echo "sleeping for 480 seconds..."
+    sleep 420
+fi  
 
 #echo "***************************************************"
 #echo "******** STARTING all_clades Alignment *********"
@@ -2360,7 +2387,6 @@ fi
 wait
 pwd
 cd ${fulDir}
-
 
 column section1 > csection1
 sort -nr < section4 > ssection4
@@ -2441,6 +2467,14 @@ rm sectiontime
 rm ssection4
 rm csection1
 rm -r all_vcfs/starting_files
+find . -wholename "*/*/fasta/*.fas" -exec rm {} \;
+rm all_vcfs/*vcf
+rm $gbk_file
+rm emailAC1counts.txt
+rm each_annotation_in
+rm each_vcf-poslist.txt
+rm chroms
+
 printf "\n\tZipping starting files\n"
 zip -rq starting_files.zip starting_files && rm -r starting_files
 #rm -r ${FilterDirectory}
