@@ -799,7 +799,7 @@ LIMIT_CPUS=2
 
 Ncov=1 # Coverage below this value will be changed to -
 
-fulDir=$PWD # Current working directory, do not change.
+fulDir=`pwd` # Current working directory, do not change.
 
 # Copy gbk locally to ssd to increase read speed
 if [[ -z $gbk_file ]]; then
