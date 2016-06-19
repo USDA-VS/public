@@ -86,11 +86,27 @@ INTERPRETATION OF RESULTS
 - Group, subgroup and clade clusters only show informative SNPs for the isolates within that cluster
 - SNPs observed in a single isolate are less informative than SNPs seen in multiple isolates and therefore established in a population
 
-EXAMPLES
-========
+CITING
+======
+Investigation of the cause of geographic disparities in IDEXX ELISA sensitivity in serum samples from Mycobacterium bovis-infected cattle.
+Trost B, Stuber T, Surujballi O, Nelson J, Robbe-Austerman S, Smith NH, Desautels L, Tikoo SK, Griebel P.
+Sci Rep. 2016 Mar 7;6:22763. doi: 10.1038/srep22763.
+PMID: 26949166
 
-TEST DATA
-=========
+Descriptive Epidemiology and Whole Genome Sequencing Analysis for an Outbreak of Bovine Tuberculosis in Beef Cattle and White-Tailed Deer in Northwestern Minnesota.
+Glaser L, Carstensen M, Shaw S, Robbe-Austerman S, Wunschmann A, Grear D, Stuber T, Thomsen B.
+PLoS One. 2016 Jan 19;11(1):e0145735. doi: 10.1371/journal.pone.0145735. eCollection 2016.
+PMID: 26785113
+
+Identification of Source of Brucella suis Infection in Human by Using Whole-Genome Sequencing, United States and Tonga.
+Quance C, Robbe-Austerman S, Stuber T, Brignole T, DeBess EE, Boyd L, LeaMaster B, Tiller R, Draper J, Humphrey S, Erdman MM.
+Emerg Infect Dis. 2016 Jan;22(1):79-82. doi: 10.3201/eid2201.150843.
+PMID: 26689610
+
+Anatomical distribution of Mycobacterium bovis genotypes in experimentally infected white-tailed deer.
+Thacker TC, Palmer MV, Robbe-Austerman S, Stuber TP, Waters WR.
+Vet Microbiol. 2015 Oct 22;180(1-2):75-81. doi: 10.1016/j.vetmic.2015.07.006. Epub 2015 Jul 26.
+PMID: 26243696
 
 CONTACT
 =======
