@@ -86,7 +86,7 @@ INTERPRETATION OF RESULTS
 - Group, subgroup and clade clusters only show informative SNPs for the isolates within that cluster
 - SNPs observed in a single isolate are less informative than SNPs seen in multiple isolates and therefore established in a population
 
-CITING
+CITATIONS
 ======
 Investigation of the cause of geographic disparities in IDEXX ELISA sensitivity in serum samples from Mycobacterium bovis-infected cattle.
 Trost B, Stuber T, Surujballi O, Nelson J, Robbe-Austerman S, Smith NH, Desautels L, Tikoo SK, Griebel P.
