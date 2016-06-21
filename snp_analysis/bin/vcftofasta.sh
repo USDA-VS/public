@@ -2326,9 +2326,7 @@ else
             done
         fi
     fi
-rm annotate*.py
 fi
-
 ###
 
 cd ${fulDir}
