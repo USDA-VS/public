@@ -2274,16 +2274,16 @@ wait
 echo "At line $LINENO, sleeping 5 second"; sleep 5s
 
 ###
-
-# If e or a flag was called annotations are made in all_vcf function
-if [ "$eflag" -o "$aflag" ]; then
-    echo "${dircalled}/each_vcf-poslist.txt already complete, skipping"
+if [[ -z $gbk_file ]]; then
+    echo "No gbk file"
 else
-    if [[ -z $gbk_file ]]; then
-        echo "No gbk file"
+    # If e or a flag was called annotations are made in all_vcf function
+    if [ "$eflag" -o "$aflag" ]; then
+        echo "${dircalled}/each_vcf-poslist.txt already complete, skipping"
     else
+        if [ $((chromCount)) -eq 1 ]; then
         # Get annotations for each position
-        sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/each_vcf-poslist.temp; mv ${dircalled}/each_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
+        sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/all_vcf-poslist.temp; mv ${dircalled}/all_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
         printf "\nGetting annotation...\n\n"
         date
         annotate_table
@@ -2297,9 +2297,38 @@ else
             let count+=1
             [[ $((count%TOP_CPUS)) -eq 0 ]] && wait
         done
+        else
+            # Get annotations for each position
+            sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/all_vcf-poslist.temp; mv ${dircalled}/all_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
+            printf "\nGetting annotation...\n\n"
+            date
+            TOP_CPUS=60
+            printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
+            for i in `cat ${dircalled}/gbk_files`; do
+                # Get an annotating file specific for each gbk being used
+                name=`basename ${i}`
+                gbk_file=${i}
+                echo "name: $name"
+                echo "gbk_file: $gbk_file"
+                annotate_table
+                mv annotate.py annotate-${name%.gbk}.py
+            done
+
+            for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
+                (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
+                # "nc_number" must match "${name%.gbk}"
+                nc_number=`echo $chromosome | sed 's/.*\(NC_[0-9]\{6\}\).*/\1/'`
+                position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
+                annotation=`./annotate-${nc_number}.py $position`
+                printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
+                let count+=1
+                [[ $((count%TOP_CPUS)) -eq 0 ]] && wait
+            done
+        fi
     fi
+rm annotate*.py
 fi
-rm annotate.py
+
 ###
 
 cd ${fulDir}
