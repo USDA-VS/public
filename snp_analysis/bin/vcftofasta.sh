@@ -339,7 +339,7 @@ elif [[ $1 == mel ]]; then
 
 elif [[ $1 == suis1 ]]; then
 
-    getbrucname
+   # getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # When more than one chromosome
     # Genbank files must have "NC" file names that match NC numbers in VCF chrom identification in column 1 of vcf
@@ -2141,29 +2141,27 @@ else
         sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/all_vcf-poslist.temp; mv ${dircalled}/all_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
         printf "\nGetting annotation...\n\n"
         date
-        for i in `cat ${dircalled}/$gbk_files`; do
+        TOP_CPUS=60
+        printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
+        for i in `cat ${dircalled}/gbk_files`; do
             # Get an annotating file specific for each gbk being used
             name=`basename ${i}`
             gbk_file=${i}
+            echo "name: $name"
+            echo "gbk_file: $gbk_file"
             annotate_table
             mv annotate.py annotate-${name%.gbk}.py
-            pause
-
         done
-        pause
 
         for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
-            chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
-            # Then "nc_number" must match "${name%.gbk}"
+            (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
+            # "nc_number" must match "${name%.gbk}"
             nc_number=`echo $chromosome | sed 's/.*\(NC_[0-9]\{6\}\).*/\1/'`
             position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
             annotation=`./annotate-${nc_number}.py $position`
-            printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in
-            pause
-
-#) &
-#           let count+=1
-#           [[ $((count%TOP_CPUS)) -eq 0 ]] && wait
+            printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
+            let count+=1
+            [[ $((count%TOP_CPUS)) -eq 0 ]] && wait
         done
     fi
 fi
@@ -2507,7 +2505,7 @@ rm csection1
 rm -r all_vcfs/starting_files
 find . -wholename "*/*/fasta/*.fas" -exec rm {} \;
 rm all_vcfs/*vcf
-rm $gbk_file
+#rm $gbk_file
 rm emailAC1counts.txt
 rm each_annotation_in
 rm each_vcf-poslist.txt
