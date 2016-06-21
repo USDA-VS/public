@@ -289,7 +289,7 @@ for feature in record.features:
             myout = "No annotated product"
     
 print (myout)
-    
+ 
 EOL
 
 chmod 755 ./annotate.py
@@ -303,6 +303,13 @@ if [[ $1 == ab1 ]]; then
 
     getbrucname    
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    # When more than one chromosome
+    # Genbank files must have "NC" file names that match NC numbers in VCF chrom identification in column 1 of vcf
+    # Example: File name: NC_017250.gbk and "gi|384222553|ref|NC_017250.1|" listed in vcf
+    gbk_file="/home/shared/brucella/abortus1/script_dependents/NC_006932.gbk"
+    gbk_file1="/home/shared/brucella/abortus1/script_dependents/NC_006933.gbk"
+    echo "$gbk_file" > gbk_files
+    echo "$gbk_file1" >> gbk_files
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/abortus1/script_dependents/Abortus1_Defining_SNPs.txt"
     #coverageFiles="/bioinfo11/TStuber/Results/brucella/Abortus1/coverageFiles"
@@ -339,7 +346,7 @@ elif [[ $1 == mel ]]; then
 
 elif [[ $1 == suis1 ]]; then
 
-   # getbrucname
+    getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # When more than one chromosome
     # Genbank files must have "NC" file names that match NC numbers in VCF chrom identification in column 1 of vcf
@@ -426,6 +433,13 @@ elif [[ $1 == canis ]]; then
     
     getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    # When more than one chromosome
+    # Genbank files must have "NC" file names that match NC numbers in VCF chrom identification in column 1 of vcf
+    # Example: File name: NC_017250.gbk and "gi|384222553|ref|NC_017250.1|" listed in vcf
+    gbk_file="/home/shared/brucella/canis/script_dependents/NC_010103.gbk"
+    gbk_file1="/home/shared/brucella/canis/script_dependents/NC_010104.gbk"
+    echo "$gbk_file" > gbk_files
+    echo "$gbk_file1" >> gbk_files    
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/canis/script_dependents/Canis_Defining_SNPs.txt"
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
@@ -468,6 +482,14 @@ elif [[ $1 == ceti2 ]]; then
 
     getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    # When more than one chromosome
+    # Genbank files must have "NC" file names that match NC numbers in VCF chrom identification in column 1 of vcf
+    # Example: File name: NC_017250.gbk and "gi|384222553|ref|NC_017250.1|" listed in vcf
+    gbk_file="/home/shared/brucella/ceti2/script_dependents/NC_022905.gbk"
+    gbk_file1="/home/shared/brucella/ceti2/script_dependents/NC_022906.gbk"
+    echo "$gbk_file" > gbk_files
+    echo "$gbk_file1" >> gbk_files
+    # This file tells the script how to cluster VCFs
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/ceti2/script_dependents/Ceti2_Defining_SNPs.txt"
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
@@ -2152,7 +2174,6 @@ else
             annotate_table
             mv annotate.py annotate-${name%.gbk}.py
         done
-
         for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
             (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
             # "nc_number" must match "${name%.gbk}"
@@ -2328,6 +2349,8 @@ else
     fi
 fi
 ###
+wait
+rm annotate-*.py 
 
 cd ${fulDir}
 
@@ -2534,8 +2557,8 @@ find . -wholename "*/*/fasta/*.fas" -exec rm {} \;
 rm all_vcfs/*vcf
 #rm $gbk_file
 rm emailAC1counts.txt
-rm each_annotation_in
-rm each_vcf-poslist.txt
+#rm each_annotation_in
+#rm each_vcf-poslist.txt
 rm chroms
 
 printf "\n\tZipping starting files\n"
