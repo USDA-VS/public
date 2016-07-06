@@ -385,10 +385,11 @@ echo "Moving forward from spoligoSpacerFinder.sh"
 ###################################################################
 
 elif [ $1 == para ]; then
-   cp /home/shared/mycobacterium/mott/paratb/NC_002944.fasta ./
-   hqs="/home/shared/mycobacterium/mott/paratb/HQ-NC002944.vcf"
-   bioinfo="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/newFiles"
-   #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
+    cp /home/shared/mycobacterium/mott/paratb/NC_002944.fasta ./
+    hqs="/home/shared/mycobacterium/mott/paratb/HQ-NC002944.vcf"
+    bioinfo="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/newFiles"
+    gff_file="/home/shared/mycobacterium/mott/paratb/NC_002944.gff"   
+    #sharedSAN="/home/shared/mycobacterium/bovis/newFiles"
 
 elif [ $1 == past ]; then
    cp /home/shared/pasteurella/NZ_CM001581.fasta ./
