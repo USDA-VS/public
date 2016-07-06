@@ -480,6 +480,7 @@ elif [[ $1 == ceti1 ]]; then
 
 elif [[ $1 == ceti2 ]]; then
 
+    #test
     getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # When more than one chromosome
