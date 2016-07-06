@@ -289,7 +289,7 @@ for feature in record.features:
             myout = "No annotated product"
     
 print (myout)
-    
+ 
 EOL
 
 chmod 755 ./annotate.py
@@ -303,6 +303,13 @@ if [[ $1 == ab1 ]]; then
 
     getbrucname    
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    # When more than one chromosome
+    # Genbank files must have "NC" file names that match NC numbers in VCF chrom identification in column 1 of vcf
+    # Example: File name: NC_017250.gbk and "gi|384222553|ref|NC_017250.1|" listed in vcf
+    gbk_file="/home/shared/brucella/abortus1/script_dependents/NC_006932.gbk"
+    gbk_file1="/home/shared/brucella/abortus1/script_dependents/NC_006933.gbk"
+    echo "$gbk_file" > gbk_files
+    echo "$gbk_file1" >> gbk_files
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/abortus1/script_dependents/Abortus1_Defining_SNPs.txt"
     #coverageFiles="/bioinfo11/TStuber/Results/brucella/Abortus1/coverageFiles"
@@ -341,6 +348,13 @@ elif [[ $1 == suis1 ]]; then
 
     getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    # When more than one chromosome
+    # Genbank files must have "NC" file names that match NC numbers in VCF chrom identification in column 1 of vcf
+    # Example: File name: NC_017250.gbk and "gi|384222553|ref|NC_017250.1|" listed in vcf
+    gbk_file="/home/shared/brucella/suis1/script_dependents/NC_017250.gbk"
+    gbk_file1="/home/shared/brucella/suis1/script_dependents/NC_017251.gbk"
+    echo "$gbk_file" > gbk_files
+    echo "$gbk_file1" >> gbk_files
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/suis1/script_dependents/Suis1_Defining_SNPs.txt"
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
@@ -419,6 +433,13 @@ elif [[ $1 == canis ]]; then
     
     getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    # When more than one chromosome
+    # Genbank files must have "NC" file names that match NC numbers in VCF chrom identification in column 1 of vcf
+    # Example: File name: NC_017250.gbk and "gi|384222553|ref|NC_017250.1|" listed in vcf
+    gbk_file="/home/shared/brucella/canis/script_dependents/NC_010103.gbk"
+    gbk_file1="/home/shared/brucella/canis/script_dependents/NC_010104.gbk"
+    echo "$gbk_file" > gbk_files
+    echo "$gbk_file1" >> gbk_files    
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/canis/script_dependents/Canis_Defining_SNPs.txt"
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
@@ -461,6 +482,14 @@ elif [[ $1 == ceti2 ]]; then
 
     getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
+    # When more than one chromosome
+    # Genbank files must have "NC" file names that match NC numbers in VCF chrom identification in column 1 of vcf
+    # Example: File name: NC_017250.gbk and "gi|384222553|ref|NC_017250.1|" listed in vcf
+    gbk_file="/home/shared/brucella/ceti2/script_dependents/NC_022905.gbk"
+    gbk_file1="/home/shared/brucella/ceti2/script_dependents/NC_022906.gbk"
+    echo "$gbk_file" > gbk_files
+    echo "$gbk_file1" >> gbk_files
+    # This file tells the script how to cluster VCFs
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/ceti2/script_dependents/Ceti2_Defining_SNPs.txt"
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
@@ -2114,21 +2143,49 @@ awk '{print $1}' parsimony_filtered_total_alt | sed 's/$//' >> ${dircalled}/each
 if [[ -z $gbk_file ]]; then
     echo "No gbk file"
 else
-    # Get annotations for each position
-    sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/all_vcf-poslist.temp; mv ${dircalled}/all_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
-    printf "\nGetting annotation...\n\n"
-    date
-    annotate_table
-    TOP_CPUS=60
-    printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
-    for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
-        (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
-        position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
-        annotation=`./annotate.py $position`
-        printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
-        let count+=1
-        [[ $((count%TOP_CPUS)) -eq 0 ]] && wait
-    done
+    if [ $((chromCount)) -eq 1 ]; then
+        # Get annotations for each position
+        sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/all_vcf-poslist.temp; mv ${dircalled}/all_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
+        printf "\nGetting annotation...\n\n"
+        date
+        annotate_table
+        TOP_CPUS=60
+        printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
+        for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
+            (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
+            position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
+            annotation=`./annotate.py $position`
+            printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
+            let count+=1
+            [[ $((count%TOP_CPUS)) -eq 0 ]] && wait
+        done
+    else
+        # Get annotations for each position
+        sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/all_vcf-poslist.temp; mv ${dircalled}/all_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
+        printf "\nGetting annotation...\n\n"
+        date
+        TOP_CPUS=60
+        printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
+        for i in `cat ${dircalled}/gbk_files`; do
+            # Get an annotating file specific for each gbk being used
+            name=`basename ${i}`
+            gbk_file=${i}
+            echo "name: $name"
+            echo "gbk_file: $gbk_file"
+            annotate_table
+            mv annotate.py annotate-${name%.gbk}.py
+        done
+        for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
+            (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
+            # "nc_number" must match "${name%.gbk}"
+            nc_number=`echo $chromosome | sed 's/.*\(NC_[0-9]\{6\}\).*/\1/'`
+            position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
+            annotation=`./annotate-${nc_number}.py $position`
+            printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
+            let count+=1
+            [[ $((count%TOP_CPUS)) -eq 0 ]] && wait
+        done
+    fi
 fi
 ###
 
@@ -2239,16 +2296,16 @@ wait
 echo "At line $LINENO, sleeping 5 second"; sleep 5s
 
 ###
-
-# If e or a flag was called annotations are made in all_vcf function
-if [ "$eflag" -o "$aflag" ]; then
-    echo "${dircalled}/each_vcf-poslist.txt already complete, skipping"
+if [[ -z $gbk_file ]]; then
+    echo "No gbk file"
 else
-    if [[ -z $gbk_file ]]; then
-        echo "No gbk file"
+    # If e or a flag was called annotations are made in all_vcf function
+    if [ "$eflag" -o "$aflag" ]; then
+        echo "${dircalled}/each_vcf-poslist.txt already complete, skipping"
     else
+        if [ $((chromCount)) -eq 1 ]; then
         # Get annotations for each position
-        sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/each_vcf-poslist.temp; mv ${dircalled}/each_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
+        sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/all_vcf-poslist.temp; mv ${dircalled}/all_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
         printf "\nGetting annotation...\n\n"
         date
         annotate_table
@@ -2262,10 +2319,39 @@ else
             let count+=1
             [[ $((count%TOP_CPUS)) -eq 0 ]] && wait
         done
+        else
+            # Get annotations for each position
+            sort < ${dircalled}/each_vcf-poslist.txt | uniq > ${dircalled}/all_vcf-poslist.temp; mv ${dircalled}/all_vcf-poslist.temp ${dircalled}/each_vcf-poslist.txt
+            printf "\nGetting annotation...\n\n"
+            date
+            TOP_CPUS=60
+            printf "reference_pos\tannotation\n" > ${dircalled}/each_annotation_in
+            for i in `cat ${dircalled}/gbk_files`; do
+                # Get an annotating file specific for each gbk being used
+                name=`basename ${i}`
+                gbk_file=${i}
+                echo "name: $name"
+                echo "gbk_file: $gbk_file"
+                annotate_table
+                mv annotate.py annotate-${name%.gbk}.py
+            done
+
+            for l in `cat ${dircalled}/each_vcf-poslist.txt`; do
+                (chromosome=`echo ${l} | sed 's/\(.*\)-\(.*\)/\1/'`
+                # "nc_number" must match "${name%.gbk}"
+                nc_number=`echo $chromosome | sed 's/.*\(NC_[0-9]\{6\}\).*/\1/'`
+                position=`echo ${l} | sed 's/\(.*\)-\(.*\)/\2/'`
+                annotation=`./annotate-${nc_number}.py $position`
+                printf "%s-%s\t%s\n" "$chromosome" "$position" "$annotation" >> ${dircalled}/each_annotation_in) &
+                let count+=1
+                [[ $((count%TOP_CPUS)) -eq 0 ]] && wait
+            done
+        fi
     fi
 fi
-rm annotate.py
 ###
+wait
+rm annotate-*.py 
 
 cd ${fulDir}
 
@@ -2470,10 +2556,10 @@ rm csection1
 rm -r all_vcfs/starting_files
 find . -wholename "*/*/fasta/*.fas" -exec rm {} \;
 rm all_vcfs/*vcf
-rm $gbk_file
+#rm $gbk_file
 rm emailAC1counts.txt
-rm each_annotation_in
-rm each_vcf-poslist.txt
+#rm each_annotation_in
+#rm each_vcf-poslist.txt
 rm chroms
 
 printf "\n\tZipping starting files\n"
