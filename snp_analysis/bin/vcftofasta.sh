@@ -708,6 +708,7 @@ elif [[ $1 == tb6 ]]; then
 
 elif [[ $1 == para ]]; then
     genotypingcodes="/bioinfo11/TStuber/Results/mycobacterium/mac/tags.txt"
+    gbk_file="/home/shared/mycobacterium/mott/paratb/NC_002944.gbk"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/DefiningSNPsGroupDesignations.txt"
     FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
