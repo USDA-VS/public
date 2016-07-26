@@ -253,6 +253,52 @@ if [ -f *R2* ]; then
     revFile=`ls | grep _R2`
     revReads="$root/$revFile"
     echo "Reverse Reads:  $revReads"
+
+    echo "*** Trimming"
+    #######################
+    #                     #
+    #      Trimming       #
+    #                     #
+    #######################
+    
+    forReads=`ls | grep _R1`
+    echo "Forward Reads to be trimmed: $forReads"
+    
+    revReads=`ls | grep _R2`
+    echo "Reverse Reads to be trimmed:: $revReads"
+    
+    #Trim the reads with bbmap tool kit (bbduk plugin)
+    #about twice as fast as trimmomatic
+    
+    strain=$(echo $revReads | sed 's/_.*//' | sed 's/\..*//')
+    echo -e "Quality trimming sample "$strain""
+    
+        bbduk.sh -Xmx80g \
+        in1="$forReads" \
+        in2="$revReads" \
+        ref="/usr/local/bin/bbmap/resources/nextera_flu.fa.gz" \
+        ktrim=r k=23 mink=11 hdist=1 \
+        qtrim=lr trimq=5 \
+        minlen=36 \
+        out1=trimmed_reads/${strain}_Trimmed_R1.fastq.gz \
+        out2=trimmed_reads/${strain}_Trimmed_R2.fastq.gz \
+        stats=trim_stats.txt \
+        qchist=qc_by_base.txt \
+        threads=auto \
+        showspeed=f
+    
+    mv -v trimmed_reads/${strain}_Trimmed_R1.fastq.gz ./
+    mv -v trimmed_reads/${strain}_Trimmed_R2.fastq.gz ./
+    rm -r trimmed_reads
+    rm "$forReads"
+    rm "$revReads"
+    
+    forReads=`ls | grep _R1`
+    echo "Forward Reads to be used after trimmed: $forReads"
+    
+    revReads=`ls | grep _R2`
+    echo "Reverse Reads to be used after trimmed:: $revReads"
+
 else
     echo "Just a single read present"
     export sampleType="single"
