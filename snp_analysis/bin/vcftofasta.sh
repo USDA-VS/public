@@ -443,7 +443,7 @@ elif [[ $1 == canis ]]; then
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/brucella/canis/script_dependents/Canis_Defining_SNPs.txt"
     coverageFiles="/bioinfo11/TStuber/Results/brucella/coverageFiles"
-    FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
+    FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
     FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
     FilterDirectory="/bioinfo11/TStuber/Results/brucella/canis/script_dependents/FilterFiles" #Files containing positions to filter
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/brucella/canis/script_dependents/RemoveFromAnalysis.txt"
@@ -453,8 +453,7 @@ elif [[ $1 == canis ]]; then
     bioinfoVCF="/bioinfo11/TStuber/Results/brucella/canis/vcfs"
     echo "vcftofasta.sh ran as B. canis"
     echo "Script vcftofasta.sh ran using B. canis variables" > section5
-    email_list=
-"tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
+    email_list="tod.p.stuber@usda.gov Christine.R.Quance@usda.gov Suelee.Robbe-Austerman@aphis.usda.gov"
 
 
 elif [[ $1 == ceti1 ]]; then
@@ -480,7 +479,6 @@ elif [[ $1 == ceti1 ]]; then
 
 elif [[ $1 == ceti2 ]]; then
 
-    #test
     getbrucname
     genotypingcodes="/bioinfo11/TStuber/Results/brucella/bruc_tags.txt"
     # When more than one chromosome
@@ -741,8 +739,8 @@ elif [[ $1 == para ]]; then
     gbk_file="/home/shared/mycobacterium/mott/paratb/NC_002944.gbk"
     # This file tells the script how to cluster VCFs
     DefiningSNPs="/bioinfo11/TStuber/Results/mycobacterium/mac/para_cattle-bison/DefiningSNPsGroupDesignations.txt"
-    FilterAllVCFs=yes #(yes or no), Do you want to filter all VCFs?
-    FilterGroups=yes #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
+    FilterAllVCFs=no #(yes or no), Do you want to filter all VCFs?
+    FilterGroups=no #(yes or no), Do you want to filter VCFs withing their groups, subgroups, and clades
     RemoveFromAnalysis="/bioinfo11/TStuber/Results/mycobacterium/vcfs/RemoveFromAnalysis.txt"
     QUAL=150 # Minimum quality for calling a SNP
     export lowEnd=1

@@ -30,6 +30,8 @@ igvtools='/usr/local/bin/IGVTools/igvtools.jar'
 BRUC_MLST=`which Bruc_MLST.sh`
 SPOLIGOSPACERFINDER=`which spoligoSpacerFinder.sh`
 
+alias pause='read -p "$LINENO Enter"'
+
 echo "current directory"
 pwd
 startingdir=`pwd`
@@ -43,6 +45,9 @@ cd bwamem-gatk/
 
 # Make alias links in BWA-GATK directory to zip files
 ls ../zips/*.fastq* | while read file; do ln -s $file; done
+
+
+
 
 if [ $1 == ab1 ]; then
     cp /home/shared/brucella/abortus1/script_dependents/NC_00693c.fasta ./

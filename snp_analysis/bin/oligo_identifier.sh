@@ -216,7 +216,7 @@ if [[ $check > 0 ]]; then
         if [ $i == 11101111 ] || [ $i == 11101101 ]
         then
         catch="TB1"
-	`processZips.sh TB1 $catch | tee tee_processZips_out.txt` &
+	`processZips.sh $catch | tee tee_processZips_out.txt` &
         echo "TB1" >> tee_tb_oligo_identifier_out2.txt
 	echo "$tbbinary" >> tee_tb_oligo_identifier_out2.txt
 	echo "$tbcounts" >> tee_tb_oligo_identifier_out2.txt
@@ -224,7 +224,7 @@ if [[ $check > 0 ]]; then
         elif [ $i == 01100111 ]
         then
         catch="TB2"
-        `processZips.sh TB2 $catch | tee tee_processZips_out.txt` &
+        `processZips.sh mungi $catch | tee tee_processZips_out.txt` &
         echo "TB2" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbbinary" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbcounts" >> tee_tb_oligo_identifier_out2.txt 
@@ -232,7 +232,7 @@ if [[ $check > 0 ]]; then
         elif [ $i == 01101011 ] || [ $i == 11101011 ]
         then
         catch="TB3"
-        `processZips.sh TB3 $catch | tee tee_processZips_out.txt` &
+        `processZips.sh $catch | tee tee_processZips_out.txt` &
         echo "TB3" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbbinary" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbcounts" >> tee_tb_oligo_identifier_out2.txt
@@ -240,7 +240,7 @@ if [[ $check > 0 ]]; then
         elif [ $i == 01101111 ]
         then
         catch="TB4a"
-        `processZips.sh TB4a $catch | tee tee_processZips_out.txt` &
+        `processZips.sh $catch | tee tee_processZips_out.txt` &
         echo "TB4a" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbbinary" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbcounts" >> tee_tb_oligo_identifier_out2.txt
@@ -249,7 +249,7 @@ if [[ $check > 0 ]]; then
         elif [ $i == 01101101 ] || [ $i == 11101101 ] || [ $i == 01101111 ]
         then
         catch="TB4b"
-        `processZips.sh TB4b $catch | tee tee_processZips_out.txt` &
+        `processZips.sh $catch | tee tee_processZips_out.txt` &
         echo "TB4b" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbbinary" >> tee_tb_oligo_identifier_out2.txt
         "$tbcounts" >> tee_tb_oligo_identifier_out2.txt
@@ -257,7 +257,7 @@ if [[ $check > 0 ]]; then
         elif [ $i == 11111111 ]
         then
         catch="TB5"
-        `processZips.sh TB5 $catch | tee tee_processZips_out.txt` &
+        `processZips.sh $catch | tee tee_processZips_out.txt` &
         echo "TB5" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbbinary" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbcounts" >> tee_tb_oligo_identifier_out2.txt
@@ -265,7 +265,7 @@ if [[ $check > 0 ]]; then
         elif [ $i == 11001111 ]
         then
         catch="TB6"
-        `processZips.sh TB6 $catch | tee tee_processZips_out.txt` &
+        `processZips.sh $catch | tee tee_processZips_out.txt` &
         echo "TB6" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbbinary" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbcounts" >> tee_tb_oligo_identifier_out2.txt
@@ -273,7 +273,7 @@ if [[ $check > 0 ]]; then
         elif [ $i == 10101110 ]
         then
         catch="TB7"
-        `processZips.sh TBBOV $catch | tee tee_processZips_out.txt` &
+        `processZips.sh $catch | tee tee_processZips_out.txt` &
         echo "TB7 are as TBBOV" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbbinary" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbcounts" >> tee_tb_oligo_identifier_out2.txt
@@ -281,7 +281,7 @@ if [[ $check > 0 ]]; then
         elif [ $i == 11001110 ] || [ $i == 11011110 ] || [ $i == 11001100 ]
         then
         catch="TBBOV"
-        `processZips.sh TBBOV $catch | tee tee_processZips_out.txt` &
+        `processZips.sh $catch | tee tee_processZips_out.txt` &
         echo "TBBOV" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbbinary" >> tee_tb_oligo_identifier_out2.txt
         echo "$tbcounts" >> tee_tb_oligo_identifier_out2.txt
@@ -321,7 +321,7 @@ fi
 allbinary=`echo ${brucbinary} ${tbbinary} ${parabinary} | grep -c "1"`
 if [[ $allbinary == 0  ]]; then 
 	echo "${n} NEEDS SPECIAL ATTENTION!!!" >> /scratch/report/dailyReport.txt
-	echo "PLEASE GIVE TOD SPECIAL INSTRUCTIONS FOR ${n}.  This sample was NOT identified as Brucella, TB complex or avium complex.  If you know something about this isolate please send me an email.  CC all on email.  Thanks!" | mutt -s "${n} NEEDS SPECIAL ATTENTION!!!" -- Doris.M.Bravo@aphis.usda.gov john.b.fevold@aphis.usda.gov Patrick.M.Camp@aphis.usda.gov David.T.Farrell@aphis.usda.gov tod.p.stuber@usda.gov suelee.robbe-austerman@aphis.usda.gov 
+	echo "PLEASE GIVE TOD SPECIAL INSTRUCTIONS FOR ${n}.  This sample was NOT identified as Brucella, TB complex or avium complex.  If you know something about this isolate please send me an email.  CC all on email.  Thanks!" | mutt -s "${n} NEEDS SPECIAL ATTENTION!!!" -- "tod.p.stuber@usda.gov suelee.robbe-austerman@aphis.usda.gov" #Doris.M.Bravo@aphis.usda.gov john.b.fevold@aphis.usda.gov Patrick.M.Camp@aphis.usda.gov David.T.Farrell@aphis.usda.gov" 
 fi
 
 echo "Sample ${n}, ${tagname}, Oligo counts: Bruc ${bruccounts} TB ${tbcounts} MAC ${paracounts}, Binary: Bruc ${brucbinary} TB ${tbbinary} MAC ${parabinary}, ID:  ${catch}"
