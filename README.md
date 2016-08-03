@@ -1,13 +1,13 @@
 # public repository
-Scripts shared with the public
+This repo has moved to https://github.com/USDA-VS
 
 ***
 
 #secd
-Scripts used for virus identification
+https://github.com/USDA-VS/reference_guided_assembly
 
 #snp_anaylsis
-Scripts used in SNP pipeline.  Mainly for Mycobacterium tuberculosis complex and Brucella sp.  Script 1, processZips.sh, aligns raw reads, outputs VCF files and collects metrics.  Script 2, vcftofasta.sh, outputs SNP tables and phylogentic trees from VCF files.
+https://github.com/USDA-VS/snp_analysis
 
 #share
-Script 1 and 2 found in snp_analysis, but simplified and portable.
+https://github.com/USDA-VS/snp_analysis/tree/master/portable_scripts
